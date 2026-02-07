@@ -1,0 +1,74 @@
+/**
+ * Authentication Constants
+ */
+
+// Supabase Configuration
+export const SUPABASE_CONFIG = {
+  URL: 'https://smxwhvdmucvctxzudtxg.supabase.co',
+  ANON_KEY: 'sb_publishable_dx12AseRaC9psRnR-3xdNQ_EnhUasCr',
+} as const;
+
+// Storage Keys
+export const STORAGE_KEYS = {
+  AUTH_TOKEN: 'medical-platform-auth-token',
+  USER_SESSION: 'medical-platform-session',
+  USER_PROFILE: 'medical-platform-profile',
+  REFRESH_TOKEN: 'medical-platform-refresh-token',
+} as const;
+
+// Token Configuration
+export const TOKEN_CONFIG = {
+  // Refresh token 5 minutes before expiry
+  REFRESH_THRESHOLD_SECONDS: 300,
+  // Token cache duration (1 hour)
+  CACHE_DURATION_MS: 3600000,
+} as const;
+
+// Auth Routes
+export const AUTH_ROUTES = {
+  LOGIN: '/login',
+  REGISTER: '/register',
+  FORGOT_PASSWORD: '/forgot-password',
+  RESET_PASSWORD: '/reset-password',
+  PROFILE: '/profile',
+} as const;
+
+// Error Messages
+export const AUTH_ERROR_MESSAGES = {
+  INVALID_CREDENTIALS: 'Invalid email or password',
+  USER_NOT_FOUND: 'User not found',
+  EMAIL_ALREADY_EXISTS: 'Email already registered',
+  WEAK_PASSWORD: 'Password must be at least 8 characters',
+  NETWORK_ERROR: 'Network error. Please try again',
+  SESSION_EXPIRED: 'Session expired. Please login again',
+  UNAUTHORIZED: 'Unauthorized access',
+  UNKNOWN_ERROR: 'An unexpected error occurred',
+} as const;
+
+// Password Validation
+export const PASSWORD_RULES = {
+  MIN_LENGTH: 8,
+  MAX_LENGTH: 128,
+  REQUIRE_UPPERCASE: false,
+  REQUIRE_LOWERCASE: false,
+  REQUIRE_NUMBER: false,
+  REQUIRE_SPECIAL: false,
+} as const;
+
+// Rate Limiting (client-side)
+export const RATE_LIMITS = {
+  // Max login attempts in time window
+  MAX_LOGIN_ATTEMPTS: 5,
+  // Time window in milliseconds (15 minutes)
+  LOGIN_WINDOW_MS: 900000,
+  // Debounce delay for auth checks
+  AUTH_CHECK_DEBOUNCE_MS: 500,
+} as const;
+
+// Session Configuration
+export const SESSION_CONFIG = {
+  // Check session validity every 5 minutes
+  CHECK_INTERVAL_MS: 300000,
+  // Session timeout warning (5 minutes before expiry)
+  TIMEOUT_WARNING_MS: 300000,
+} as const;
