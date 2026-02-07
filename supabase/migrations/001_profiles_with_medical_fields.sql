@@ -1,9 +1,9 @@
 -- ============================================================
 -- Supabase Migration: Medical Platform - User Profiles
--- Version: 1.0
+-- Version: 1.1
 -- Date: 2026-02-07
--- Description: Complete user profile schema with medical information,
---              emergency contacts, and insurance details
+-- Description: Complete user profile schema with medical information
+--              and emergency contacts
 -- ============================================================
 
 -- Begin transaction for atomic execution
@@ -32,15 +32,10 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   chronic_conditions TEXT CHECK (length(chronic_conditions) <= 1000),
   height_cm NUMERIC(5, 1) CHECK (height_cm >= 30 AND height_cm <= 300),
   weight_kg NUMERIC(5, 1) CHECK (weight_kg >= 1 AND weight_kg <= 500),
-  medical_notes TEXT CHECK (length(medical_notes) <= 5000),
   
   -- Emergency contact
   emergency_contact_name VARCHAR(100) CHECK (length(trim(emergency_contact_name)) >= 2),
   emergency_contact_phone VARCHAR(20) CHECK (emergency_contact_phone ~ '^\+[1-9][0-9]{1,3}[0-9]{7,12}$'),
-  
-  -- Insurance information
-  insurance_provider VARCHAR(100),
-  insurance_policy_number VARCHAR(50),
   
   -- Profile metadata
   avatar_url TEXT CHECK (avatar_url ~ '^https?://'),
@@ -93,6 +88,9 @@ CREATE TRIGGER update_profiles_updated_at
 
 -- 4. Enable Row Level Security (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- Enable Realtime for profile deletion monitoring
+ALTER TABLE public.profiles REPLICA IDENTITY FULL;
 
 -- 5. RLS Policies for user privacy and data access control
 -- Policy 1: Users can view only their own profile
@@ -193,7 +191,6 @@ SELECT
   COUNT(*) FILTER (WHERE is_profile_complete = true) as complete_profiles,
   COUNT(*) FILTER (WHERE blood_type IS NOT NULL) as profiles_with_blood_type,
   COUNT(*) FILTER (WHERE emergency_contact_phone IS NOT NULL) as profiles_with_emergency_contact,
-  COUNT(*) FILTER (WHERE insurance_provider IS NOT NULL) as profiles_with_insurance,
   AVG(EXTRACT(YEAR FROM age(date_of_birth))) as avg_age,
   COUNT(*) FILTER (WHERE gender = 'male') as male_count,
   COUNT(*) FILTER (WHERE gender = 'female') as female_count

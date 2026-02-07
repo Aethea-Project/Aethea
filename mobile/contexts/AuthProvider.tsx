@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { AuthContext, defaultAuthState } from '@shared/auth/auth-context';
 import { authService } from '../services/auth';
-import type { AuthState, SignUpCredentials } from '@shared/auth/auth-types';
+import type { AuthState, SignUpCredentials, ProfileUpdateRequest } from '@shared/auth/auth-types';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -209,6 +209,49 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
+  // Update profile handler
+  const updateProfile = useCallback(
+    async (updates: ProfileUpdateRequest): Promise<{ success: boolean; message?: string }> => {
+      const userId = authState.user?.id;
+      if (!userId) {
+        return { success: false, message: 'User not authenticated' };
+      }
+
+      try {
+        const response = await authService.updateProfile(userId, updates);
+
+        if (response.error) {
+          return { success: false, message: response.error.message };
+        }
+
+        if (response.data) {
+          setAuthState((prev) => ({ ...prev, profile: response.data }));
+        }
+
+        return { success: true, message: 'Profile updated successfully' };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Profile update failed';
+        return { success: false, message };
+      }
+    },
+    [authState.user?.id]
+  );
+
+  // Refresh profile handler (re-fetch from DB)
+  const refreshProfile = useCallback(async () => {
+    const userId = authState.user?.id;
+    if (!userId) return;
+
+    try {
+      const profileResponse = await authService.getUserProfile(userId);
+      if (profileResponse.data) {
+        setAuthState((prev) => ({ ...prev, profile: profileResponse.data }));
+      }
+    } catch (error) {
+      console.error('Failed to refresh profile:', error);
+    }
+  }, [authState.user?.id]);
+
   // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo(
     () => ({
@@ -218,8 +261,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       signOut,
       resetPassword,
       updatePassword,
+      updateProfile,
+      refreshProfile,
     }),
-    [authState, signIn, signUp, signOut, resetPassword, updatePassword]
+    [authState, signIn, signUp, signOut, resetPassword, updatePassword, updateProfile, refreshProfile]
   );
 
   return (

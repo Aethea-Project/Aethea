@@ -8,12 +8,11 @@
  *  1. Personal Information  (from registration: name, email, DOB, gender, phone)
  *  2. Medical Information   (blood type, allergies, chronic conditions, height, weight, notes)
  *  3. Emergency Contact     (name, phone)
- *  4. Insurance             (provider, policy number)
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@shared/auth/useAuth';
-import { GENDER_OPTIONS, BLOOD_TYPE_OPTIONS } from '@shared/auth/auth-types';
+import { GENDER_OPTIONS, BLOOD_TYPE_OPTIONS, ALLERGY_OPTIONS, CHRONIC_CONDITION_OPTIONS } from '@shared/auth/auth-types';
 import type { ProfileUpdateRequest, UserProfile, BloodType, Gender } from '@shared/auth/auth-types';
 import './Profile.css';
 
@@ -182,42 +181,40 @@ const ProfilePage: React.FC = () => {
             <div className="profile-field full-width">
               <label>Allergies</label>
               {isEditing ? (
-                <textarea
-                  value={form.allergies ?? ''}
-                  onChange={(e) => handleChange('allergies', e.target.value)}
-                  placeholder="e.g. Penicillin, Peanuts"
+                <ChipSelect
+                  options={ALLERGY_OPTIONS}
+                  selected={parseCommaSeparated(form.allergies)}
+                  onChange={(items) => handleChange('allergies', items.join(', '))}
                 />
               ) : (
                 <span className={`field-value ${!form.allergies ? 'empty' : ''}`}>
-                  {form.allergies || 'Not specified'}
+                  {form.allergies ? (
+                    <span className="chip-display">
+                      {parseCommaSeparated(form.allergies).map((a) => (
+                        <span key={a} className="chip chip-readonly">{a}</span>
+                      ))}
+                    </span>
+                  ) : 'Not specified'}
                 </span>
               )}
             </div>
             <div className="profile-field full-width">
               <label>Chronic Conditions</label>
               {isEditing ? (
-                <textarea
-                  value={form.chronicConditions ?? ''}
-                  onChange={(e) => handleChange('chronicConditions', e.target.value)}
-                  placeholder="e.g. Diabetes, Hypertension"
+                <ChipSelect
+                  options={CHRONIC_CONDITION_OPTIONS}
+                  selected={parseCommaSeparated(form.chronicConditions)}
+                  onChange={(items) => handleChange('chronicConditions', items.join(', '))}
                 />
               ) : (
                 <span className={`field-value ${!form.chronicConditions ? 'empty' : ''}`}>
-                  {form.chronicConditions || 'Not specified'}
-                </span>
-              )}
-            </div>
-            <div className="profile-field full-width">
-              <label>Medical Notes</label>
-              {isEditing ? (
-                <textarea
-                  value={form.medicalNotes ?? ''}
-                  onChange={(e) => handleChange('medicalNotes', e.target.value)}
-                  placeholder="Any additional medical notes"
-                />
-              ) : (
-                <span className={`field-value ${!form.medicalNotes ? 'empty' : ''}`}>
-                  {form.medicalNotes || 'Not specified'}
+                  {form.chronicConditions ? (
+                    <span className="chip-display">
+                      {parseCommaSeparated(form.chronicConditions).map((c) => (
+                        <span key={c} className="chip chip-readonly">{c}</span>
+                      ))}
+                    </span>
+                  ) : 'Not specified'}
                 </span>
               )}
             </div>
@@ -246,27 +243,6 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* ── Section 4: Insurance ─────────────────── */}
-        <div className="profile-card">
-          <h2>🛡️ Insurance</h2>
-          <div className="profile-grid">
-            <Field
-              label="Insurance Provider"
-              value={form.insuranceProvider}
-              editing={isEditing}
-              onChange={(v) => handleChange('insuranceProvider', v)}
-              placeholder="e.g. Bupa, Tawuniya"
-            />
-            <Field
-              label="Policy Number"
-              value={form.insurancePolicyNumber}
-              editing={isEditing}
-              onChange={(v) => handleChange('insurancePolicyNumber', v)}
-              placeholder="Policy / member ID"
-            />
-          </div>
-        </div>
-
         {/* ── Action buttons (edit mode) ──────────── */}
         {isEditing && (
           <div className="profile-actions">
@@ -286,6 +262,49 @@ const ProfilePage: React.FC = () => {
 // ──────────────────────────────────────────────
 // Sub-components for DRY field rendering
 // ──────────────────────────────────────────────
+
+/** Parse comma-separated string into array of trimmed non-empty strings */
+function parseCommaSeparated(value: string | undefined | null): string[] {
+  if (!value) return [];
+  return value.split(',').map((s) => s.trim()).filter(Boolean);
+}
+
+interface ChipSelectProps {
+  options: string[];
+  selected: string[];
+  onChange: (selected: string[]) => void;
+}
+
+/** Multi-select chip/tag picker */
+const ChipSelect: React.FC<ChipSelectProps> = ({ options, selected, onChange }) => {
+  const toggle = (item: string) => {
+    if (selected.includes(item)) {
+      onChange(selected.filter((s) => s !== item));
+    } else {
+      onChange([...selected, item]);
+    }
+  };
+
+  return (
+    <div className="chip-select">
+      {options.map((opt) => {
+        const isActive = selected.includes(opt);
+        return (
+          <button
+            key={opt}
+            type="button"
+            className={`chip ${isActive ? 'chip-active' : ''}`}
+            onClick={() => toggle(opt)}
+            aria-pressed={isActive}
+          >
+            {isActive && <span className="chip-check">✓</span>}
+            {opt}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
 
 interface FieldProps {
   label: string;
@@ -394,9 +413,6 @@ function profileToForm(p: UserProfile): ProfileUpdateRequest {
     weightKg: p.weightKg ?? undefined,
     emergencyContactName: p.emergencyContactName ?? undefined,
     emergencyContactPhone: p.emergencyContactPhone ?? undefined,
-    insuranceProvider: p.insuranceProvider ?? undefined,
-    insurancePolicyNumber: p.insurancePolicyNumber ?? undefined,
-    medicalNotes: p.medicalNotes ?? undefined,
   };
 }
 

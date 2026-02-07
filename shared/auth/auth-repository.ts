@@ -16,6 +16,33 @@ import {
 } from './auth-types';
 import { parseAuthError } from './auth-utils';
 
+/**
+ * Map a Supabase profiles row (snake_case) to the app's UserProfile (camelCase).
+ * Single source of truth — avoids duplicating the mapping in every method.
+ */
+function mapRowToUserProfile(row: Record<string, any>): UserProfile {
+  return {
+    id: row.id,
+    email: row.email,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    fullName: row.full_name,
+    gender: row.gender as any,
+    phone: row.phone,
+    dateOfBirth: row.date_of_birth,
+    bloodType: row.blood_type as any,
+    allergies: row.allergies,
+    chronicConditions: row.chronic_conditions,
+    heightCm: row.height_cm,
+    weightKg: row.weight_kg,
+    emergencyContactName: row.emergency_contact_name,
+    emergencyContactPhone: row.emergency_contact_phone,
+    avatarUrl: row.avatar_url,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 export class AuthRepository {
   constructor(private supabase: SupabaseClient<Database>) {}
 
@@ -144,8 +171,14 @@ export class AuthRepository {
    */
   async resetPassword(request: PasswordResetRequest): Promise<AuthResponse<void>> {
     try {
+      // Build redirect URL safely for any environment (web / mobile / server)
+      const origin =
+        typeof window !== 'undefined' && window.location?.origin
+          ? window.location.origin
+          : 'https://app.aethea.com'; // fallback for non-browser environments
+
       const { error } = await this.supabase.auth.resetPasswordForEmail(request.email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${origin}/reset-password`,
       });
 
       if (error) {
@@ -209,30 +242,8 @@ export class AuthRepository {
         return { data: null, error: parseAuthError(error) };
       }
 
-      // Map database row to UserProfile
-      const profile: UserProfile = {
-        id: data.id,
-        email: data.email,
-        firstName: data.first_name,
-        lastName: data.last_name,
-        fullName: data.full_name,
-        gender: data.gender as any,
-        phone: data.phone,
-        dateOfBirth: data.date_of_birth,
-        bloodType: data.blood_type as any,
-        allergies: data.allergies,
-        chronicConditions: data.chronic_conditions,
-        heightCm: data.height_cm,
-        weightKg: data.weight_kg,
-        emergencyContactName: data.emergency_contact_name,
-        emergencyContactPhone: data.emergency_contact_phone,
-        insuranceProvider: data.insurance_provider,
-        insurancePolicyNumber: data.insurance_policy_number,
-        medicalNotes: data.medical_notes,
-        avatarUrl: data.avatar_url,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at,
-      };
+      // Map database row to UserProfile using shared helper
+      const profile = mapRowToUserProfile(data);
 
       return { data: profile, error: null };
     } catch (error) {
@@ -263,9 +274,6 @@ export class AuthRepository {
           weight_kg: updates.weightKg,
           emergency_contact_name: updates.emergencyContactName,
           emergency_contact_phone: updates.emergencyContactPhone,
-          insurance_provider: updates.insuranceProvider,
-          insurance_policy_number: updates.insurancePolicyNumber,
-          medical_notes: updates.medicalNotes,
           avatar_url: updates.avatarUrl,
           updated_at: new Date().toISOString(),
         })
@@ -277,29 +285,7 @@ export class AuthRepository {
         return { data: null, error: parseAuthError(error) };
       }
 
-      const profile: UserProfile = {
-        id: data.id,
-        email: data.email,
-        firstName: data.first_name,
-        lastName: data.last_name,
-        fullName: data.full_name,
-        gender: data.gender as any,
-        phone: data.phone,
-        dateOfBirth: data.date_of_birth,
-        bloodType: data.blood_type as any,
-        allergies: data.allergies,
-        chronicConditions: data.chronic_conditions,
-        heightCm: data.height_cm,
-        weightKg: data.weight_kg,
-        emergencyContactName: data.emergency_contact_name,
-        emergencyContactPhone: data.emergency_contact_phone,
-        insuranceProvider: data.insurance_provider,
-        insurancePolicyNumber: data.insurance_policy_number,
-        medicalNotes: data.medical_notes,
-        avatarUrl: data.avatar_url,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at,
-      };
+      const profile = mapRowToUserProfile(data);
 
       return { data: profile, error: null };
     } catch (error) {

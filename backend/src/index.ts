@@ -22,8 +22,14 @@ app.use(cors({
   origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:5173', 'http://localhost:19006'],
   credentials: true,
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+// Attach unique request ID for traceability
+app.use((req, _res, next) => {
+  (req as any).requestId = crypto.randomUUID?.() ?? Date.now().toString(36);
+  next();
+});
 
 // Initialize Supabase authentication
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -114,10 +120,18 @@ app.get('/api/reservations', authMiddleware, (req, res) => {
 });
 
 // Error handling middleware
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Error:', err);
+app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  const requestId = (req as any).requestId;
+  console.error(`[${requestId}] Error:`, err);
+
+  // Handle JSON parse errors
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ error: 'Invalid JSON in request body' });
+  }
+
   res.status(500).json({
     error: 'Internal server error',
+    requestId,
     message: process.env.NODE_ENV === 'development' ? err.message : undefined,
   });
 });

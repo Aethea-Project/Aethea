@@ -270,6 +270,53 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [authState.user?.id]);
 
+  // Monitor profile deletion for auto-logout
+  useEffect(() => {
+    const userId = authState.user?.id;
+    if (!userId || !authState.session) return;
+
+    const supabase = authService.getSupabaseClient();
+
+    // Real-time subscription for immediate profile deletion detection
+    const subscription = supabase
+      .channel(`profile-${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${userId}`,
+        },
+        async () => {
+          console.warn('Profile deleted, logging out immediately...');
+          await signOut();
+        }
+      )
+      .subscribe();
+
+    // Fallback: Check profile every 30 seconds (in case realtime fails)
+    const intervalId = setInterval(async () => {
+      try {
+        const response = await authService.getUserProfile(userId);
+        
+        // If profile not found or error, logout user
+        if (response.error || !response.data) {
+          console.warn('Profile deleted or inaccessible, logging out...');
+          await signOut();
+        }
+      } catch (error) {
+        console.error('Profile check failed:', error);
+        // Don't logout on network errors, only on missing profile
+      }
+    }, 30000); // Check every 30 seconds
+
+    return () => {
+      subscription.unsubscribe();
+      clearInterval(intervalId);
+    };
+  }, [authState.user?.id, authState.session, signOut]);
+
   // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo(
     () => ({

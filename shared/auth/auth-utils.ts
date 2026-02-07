@@ -47,6 +47,22 @@ export const validatePassword = (password: string): { valid: boolean; error?: st
     };
   }
 
+  // Check for lowercase letter
+  if (PASSWORD_RULES.REQUIRE_LOWERCASE && !/[a-z]/.test(password)) {
+    return {
+      valid: false,
+      error: 'Password must contain at least one lowercase letter',
+    };
+  }
+
+  // Check for number
+  if (PASSWORD_RULES.REQUIRE_NUMBER && !/[0-9]/.test(password)) {
+    return {
+      valid: false,
+      error: 'Password must contain at least one number',
+    };
+  }
+
   return { valid: true };
 };
 
@@ -279,17 +295,30 @@ class RateLimiter {
 export const rateLimiter = new RateLimiter();
 
 /**
- * Sanitize user input
+ * Sanitize user input — strip HTML tags and dangerous characters
  */
 export const sanitizeInput = (input: string): string => {
-  return input.trim().replace(/[<>]/g, '');
+  return input
+    .trim()
+    .replace(/[<>"'`;()]/g, '') // strip potential XSS chars
+    .replace(/javascript:/gi, '') // strip JS protocol
+    .replace(/on\w+=/gi, '');     // strip event handlers
 };
 
 /**
- * Generate random string for state/nonce
+ * Generate cryptographically secure random string for state/nonce
  */
 export const generateRandomString = (length: number = 32): string => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  // Use crypto API when available for better randomness
+  if (typeof globalThis.crypto?.getRandomValues === 'function') {
+    const array = new Uint32Array(length);
+    globalThis.crypto.getRandomValues(array);
+    return Array.from(array, (v) => chars[v % chars.length]).join('');
+  }
+
+  // Fallback for environments without crypto
   let result = '';
   for (let i = 0; i < length; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));

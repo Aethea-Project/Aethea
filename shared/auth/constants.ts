@@ -2,11 +2,30 @@
  * Authentication Constants
  */
 
-// Supabase Configuration
-export const SUPABASE_CONFIG = {
-  URL: 'https://xyrxukukaqdsaflydral.supabase.co',
-  ANON_KEY: 'sb_publishable_dx12AseRaC9psRnR-3xdNQ_EnhUasCr',
-} as const;
+// Supabase Configuration — loaded from environment variables (NEVER hardcode secrets)
+export const getSupabaseConfig = () => {
+  const url =
+    (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_SUPABASE_URL) ||
+    (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_URL) ||
+    (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SUPABASE_URL) ||
+    '';
+
+  const anonKey =
+    (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_SUPABASE_ANON_KEY) ||
+    (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_ANON_KEY) ||
+    (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SUPABASE_ANON_KEY) ||
+    '';
+
+  if (!url || !anonKey) {
+    console.warn(
+      '⚠️  Supabase credentials not found in environment variables.\n' +
+      '   Web: set VITE_SUPABASE_URL & VITE_SUPABASE_ANON_KEY in .env\n' +
+      '   Mobile: set EXPO_PUBLIC_SUPABASE_URL & EXPO_PUBLIC_SUPABASE_ANON_KEY in .env'
+    );
+  }
+
+  return { url, anonKey } as const;
+};
 
 // Cloudflare Turnstile CAPTCHA
 export const TURNSTILE_CONFIG = {
@@ -56,13 +75,13 @@ export const AUTH_ERROR_MESSAGES = {
   CAPTCHA_REQUIRED: 'Please complete the CAPTCHA verification',
 } as const;
 
-// Password Validation
+// Password Validation (medical-grade security)
 export const PASSWORD_RULES = {
   MIN_LENGTH: 8,
   MAX_LENGTH: 128,
   REQUIRE_UPPERCASE: true,
-  REQUIRE_LOWERCASE: false,
-  REQUIRE_NUMBER: false,
+  REQUIRE_LOWERCASE: true,
+  REQUIRE_NUMBER: true,
   REQUIRE_SPECIAL: true,
 } as const;
 

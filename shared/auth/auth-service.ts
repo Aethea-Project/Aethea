@@ -39,6 +39,13 @@ export class AuthService {
   }
 
   /**
+   * Get Supabase client for advanced operations
+   */
+  getSupabaseClient(): SupabaseClient<Database> {
+    return this.supabase;
+  }
+
+  /**
    * Initialize auth state listener (Observer Pattern)
    */
   private initializeAuthListener(): void {
@@ -341,15 +348,6 @@ export class AuthService {
         : undefined,
       emergencyContactPhone: updates.emergencyContactPhone
         ? sanitizeInput(updates.emergencyContactPhone)
-        : undefined,
-      insuranceProvider: updates.insuranceProvider
-        ? sanitizeInput(updates.insuranceProvider)
-        : undefined,
-      insurancePolicyNumber: updates.insurancePolicyNumber
-        ? sanitizeInput(updates.insurancePolicyNumber)
-        : undefined,
-      medicalNotes: updates.medicalNotes
-        ? sanitizeInput(updates.medicalNotes)
         : undefined,
       avatarUrl: updates.avatarUrl,
     };

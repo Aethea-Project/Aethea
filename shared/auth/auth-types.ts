@@ -40,9 +40,6 @@ export type Database = {
           weight_kg: number | null;
           emergency_contact_name: string | null;
           emergency_contact_phone: string | null;
-          insurance_provider: string | null;
-          insurance_policy_number: string | null;
-          medical_notes: string | null;
           avatar_url: string | null;
           created_at: string;
           updated_at: string;
@@ -71,28 +68,25 @@ export interface UserProfile {
   weightKg: number | null;
   emergencyContactName: string | null;
   emergencyContactPhone: string | null;
-  insuranceProvider: string | null;
-  insurancePolicyNumber: string | null;
-  medicalNotes: string | null;
   avatarUrl: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
-// Auth state
+// Auth state (immutable — always replace via setState, never mutate)
 export interface AuthState {
-  user: SupabaseUser | null;
-  session: Session | null;
-  profile: UserProfile | null;
-  loading: boolean;
-  error: AuthError | null;
+  readonly user: SupabaseUser | null;
+  readonly session: Session | null;
+  readonly profile: UserProfile | null;
+  readonly loading: boolean;
+  readonly error: AuthError | null;
 }
 
 // Auth error
 export interface AuthError {
-  message: string;
-  code?: string;
-  status?: number;
+  readonly message: string;
+  readonly code?: string;
+  readonly status?: number;
 }
 
 // Gender options
@@ -103,6 +97,52 @@ export const GENDER_OPTIONS: { value: Gender; label: string }[] = [
   { value: 'female', label: 'Female' },
   { value: 'other', label: 'Other' },
   { value: 'prefer_not_to_say', label: 'Prefer not to say' },
+];
+
+// Common allergy options for medical profiles
+export const ALLERGY_OPTIONS: string[] = [
+  'Penicillin',
+  'Sulfa Drugs',
+  'Aspirin',
+  'Ibuprofen',
+  'Latex',
+  'Peanuts',
+  'Tree Nuts',
+  'Shellfish',
+  'Fish',
+  'Eggs',
+  'Milk / Dairy',
+  'Wheat / Gluten',
+  'Soy',
+  'Bee Stings',
+  'Dust Mites',
+  'Pollen',
+  'Pet Dander',
+  'Mold',
+];
+
+// Common chronic condition options for medical profiles
+export const CHRONIC_CONDITION_OPTIONS: string[] = [
+  'Diabetes Type 1',
+  'Diabetes Type 2',
+  'Hypertension',
+  'Asthma',
+  'Heart Disease',
+  'Chronic Kidney Disease',
+  'COPD',
+  'Arthritis',
+  'Thyroid Disorder',
+  'Epilepsy',
+  'Anemia',
+  'Sickle Cell Disease',
+  'Depression',
+  'Anxiety Disorder',
+  'Migraine',
+  'Osteoporosis',
+  'Cancer',
+  'Hepatitis',
+  'HIV/AIDS',
+  'Lupus',
 ];
 
 // Sign up credentials
@@ -150,9 +190,6 @@ export interface ProfileUpdateRequest {
   weightKg?: number;
   emergencyContactName?: string;
   emergencyContactPhone?: string;
-  insuranceProvider?: string;
-  insurancePolicyNumber?: string;
-  medicalNotes?: string;
   avatarUrl?: string;
 }
 
@@ -170,8 +207,8 @@ export interface AuthChangeEvent {
   session: Session | null;
 }
 
-// Auth response
-export interface AuthResponse<T = any> {
-  data: T | null;
-  error: AuthError | null;
+// Auth response (generic result wrapper — similar to Rust's Result<T, E>)
+export interface AuthResponse<T = unknown> {
+  readonly data: T | null;
+  readonly error: AuthError | null;
 }

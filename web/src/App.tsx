@@ -3,6 +3,7 @@
  */
 
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
 import { AuthProvider } from './contexts/AuthProvider';
 import { LoginForm } from './components/LoginForm';
 import { RegisterForm } from './components/RegisterForm';
@@ -10,6 +11,7 @@ import { useAuth } from '@shared/auth/useAuth';
 import LabResultsPage from './pages/LabResults';
 import ScansPage from './pages/Scans';
 import ProfilePage from './pages/Profile';
+import './components/Header.css';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -28,7 +30,25 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Dashboard with Navigation
 const Dashboard = () => {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const displayName = profile?.firstName && profile?.lastName
+    ? `${profile.firstName} ${profile.lastName}`
+    : profile?.firstName || user?.email?.split('@')[0] || 'User';
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-background)' }}>
@@ -54,20 +74,58 @@ const Dashboard = () => {
           <Link to="/scans" style={{ color: 'var(--color-text-primary)', textDecoration: 'none', fontWeight: '500' }}>
             Medical Scans
           </Link>
-          <Link to="/profile" style={{ color: 'var(--color-text-primary)', textDecoration: 'none', fontWeight: '500' }}>
-            My Profile
-          </Link>
-          <button onClick={signOut} style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: 'var(--color-error-500)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '0.375rem',
-            fontWeight: '600',
-            cursor: 'pointer'
-          }}>
-            Logout
-          </button>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginLeft: 'auto', position: 'relative' }} ref={dropdownRef}>
+            <button 
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="header-profile-link"
+              style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '0.5rem', backgroundColor: 'var(--color-primary-50)', border: '1px solid var(--color-primary-200)', transition: 'all 200ms ease' }}>
+                <span className="header-profile-avatar">
+                  {displayName.charAt(0).toUpperCase()}
+                </span>
+                <span className="header-profile-name">
+                  {displayName}
+                </span>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ transition: 'transform 200ms ease', transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                  <path d="M4 6L8 10L12 6" stroke="var(--color-primary-700)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </button>
+            
+            {isDropdownOpen && (
+              <div className="header-dropdown">
+                <Link 
+                  to="/profile" 
+                  className="header-dropdown-item"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>My Profile</span>
+                </Link>
+                <button 
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    signOut();
+                  }}
+                  className="header-dropdown-item"
+                  style={{ width: '100%', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', padding: 0 }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.625rem 1rem', color: 'var(--color-error-600)' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <polyline points="16 17 21 12 16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <span>Logout</span>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
 

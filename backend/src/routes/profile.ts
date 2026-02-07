@@ -101,9 +101,6 @@ export const createProfileRouter = (supabaseUrl: string, supabaseServiceKey: str
       if (body.weightKg !== undefined) updatePayload.weight_kg = body.weightKg;
       if (body.emergencyContactName !== undefined) updatePayload.emergency_contact_name = body.emergencyContactName;
       if (body.emergencyContactPhone !== undefined) updatePayload.emergency_contact_phone = body.emergencyContactPhone;
-      if (body.insuranceProvider !== undefined) updatePayload.insurance_provider = body.insuranceProvider;
-      if (body.insurancePolicyNumber !== undefined) updatePayload.insurance_policy_number = body.insurancePolicyNumber;
-      if (body.medicalNotes !== undefined) updatePayload.medical_notes = body.medicalNotes;
       if (body.avatarUrl !== undefined) updatePayload.avatar_url = body.avatarUrl;
 
       const { data, error } = await supabase
@@ -151,9 +148,6 @@ function mapRowToProfile(row: any) {
     weightKg: row.weight_kg,
     emergencyContactName: row.emergency_contact_name,
     emergencyContactPhone: row.emergency_contact_phone,
-    insuranceProvider: row.insurance_provider,
-    insurancePolicyNumber: row.insurance_policy_number,
-    medicalNotes: row.medical_notes,
     avatarUrl: row.avatar_url,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
