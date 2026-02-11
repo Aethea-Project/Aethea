@@ -1,0 +1,489 @@
+/* Recovery Assistant — Organic Healing Theme */
+
+.recovery-assistant-page {
+  animation: pageIn 0.4s ease-out;
+}
+
+/* Header */
+.recovery-assistant-page .page-header {
+  background: linear-gradient(135deg, #0c4a6e, #0284c7);
+  border-radius: 2rem;
+  padding: 2.5rem 3rem;
+  color: white;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.recovery-assistant-page .page-header::after {
+  content: '';
+  position: absolute;
+  right: -30px;
+  top: -30px;
+  width: 200px;
+  height: 200px;
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  background: rgba(255,255,255,0.08);
+}
+.recovery-assistant-page .header-content { position: relative; z-index: 1; }
+.recovery-assistant-page .header-content h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+}
+.recovery-assistant-page .header-content p {
+  font-size: 0.95rem;
+  opacity: 0.85;
+  margin: 0;
+}
+
+/* Progress Banner */
+.progress-banner {
+  background: white;
+  border-radius: 1.25rem;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+  border: 1px solid #f1f5f9;
+}
+.progress-banner .banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.progress-info h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+.progress-info p {
+  font-size: 0.9375rem;
+  color: #475569;
+  margin: 0.25rem 0 0;
+}
+.progress-stats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.progress-circle {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+.progress-circle svg { width: 100%; height: 100%; }
+.progress-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.progress-value {
+  font-family: 'Fraunces', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+.progress-label {
+  display: flex;
+  flex-direction: column;
+}
+.progress-label strong { font-size: 0.9rem; color: #0f172a; }
+.progress-label span { font-size: 0.8125rem; color: #475569; }
+
+/* Layout */
+.recovery-assistant-page .content-container {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2rem;
+}
+
+/* Sidebar */
+.recovery-assistant-page .sidebar {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0;
+  background: transparent;
+  backdrop-filter: none;
+  border-right: none;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tips-card {
+  background: white;
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+  border: 1px solid #f1f5f9;
+}
+.tips-card h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 1rem;
+}
+.tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.tip-item {
+  font-size: 0.82rem;
+  color: #475569;
+  line-height: 1.5;
+  padding: 0.75rem;
+  background: #f0f9ff;
+  border-radius: 0.65rem;
+  border-left: 3px solid #0284c7;
+}
+
+.emergency-card {
+  background: #fef2f2;
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  border: 1px solid #fecaca;
+}
+.emergency-card h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #991b1b;
+  margin: 0 0 0.75rem;
+}
+.emergency-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.emergency-card li {
+  font-size: 0.8rem;
+  color: #7f1d1d;
+  padding: 0.3rem 0;
+  padding-left: 1rem;
+  position: relative;
+}
+.emergency-card li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #ef4444;
+  font-weight: bold;
+}
+
+/* Main Content */
+.recovery-assistant-page .main-content {
+  padding: 0;
+  max-width: none;
+  min-width: 0;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+.section-header h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+.reset-btn {
+  padding: 0.55rem 1.25rem;
+  border-radius: 0.65rem;
+  border: 2px solid #e2e8f0;
+  background: white;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+.reset-btn:hover { border-color: #0284c7; color: #0284c7; }
+
+/* Exercise Cards */
+.exercises-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+.exercise-card {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+  border: 1px solid #f1f5f9;
+  transition: all 0.3s ease;
+}
+.exercise-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+.exercise-card.completed {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.exercise-header {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+.exercise-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 1rem;
+  background: #f0f9ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+.exercise-info { flex: 1; min-width: 0; }
+.exercise-info h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.35rem;
+}
+.exercise-meta {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+.type-badge, .difficulty-badge {
+  padding: 0.2rem 0.6rem;
+  border-radius: 2rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.type-badge.mobility { background: #dbeafe; color: #1e40af; }
+.type-badge.strength { background: #fecaca; color: #991b1b; }
+.type-badge.stretching { background: #dcfce7; color: #166534; }
+.type-badge.breathing { background: #e0e7ff; color: #3730a3; }
+.difficulty-badge.beginner { background: #dcfce7; color: #166534; }
+.difficulty-badge.intermediate { background: #fef9c3; color: #854d0e; }
+.difficulty-badge.advanced { background: #fecaca; color: #991b1b; }
+
+.complete-checkbox {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #e2e8f0;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: #16a34a;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.exercise-card.completed .complete-checkbox {
+  background: #16a34a;
+  border-color: #16a34a;
+  color: white;
+}
+
+.exercise-specs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+.exercise-preview strong {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.exercise-preview p {
+  font-size: 0.85rem;
+  color: #475569;
+  margin: 0.15rem 0 0;
+}
+
+.exercise-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+}
+.view-details-btn, .watch-video-btn {
+  flex: 1;
+  padding: 0.65rem;
+  border-radius: 0.65rem;
+  border: none;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.view-details-btn {
+  background: #f0f9ff;
+  color: #0369a1;
+}
+.view-details-btn:hover { background: #e0f2fe; }
+.watch-video-btn {
+  background: #f1f5f9;
+  color: #475569;
+}
+.watch-video-btn:hover { background: #e2e8f0; }
+
+/* Modal */
+.recovery-assistant-page .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+.recovery-assistant-page .modal-content {
+  background: white;
+  border-radius: 2rem;
+  padding: 2.5rem;
+  max-width: 560px;
+  width: 92%;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  animation: slideUp 0.3s ease;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+}
+
+.recovery-assistant-page .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+.recovery-assistant-page .modal-header h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+.recovery-assistant-page .close-modal-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: #f1f5f9;
+  cursor: pointer;
+  font-size: 1.4rem;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+}
+
+.exercise-detail-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 1.5rem;
+  background: #f0f9ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  margin: 0 auto 1.25rem;
+}
+
+.detail-meta {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+.spec-badge {
+  padding: 0.3rem 0.7rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.recovery-assistant-page .detail-section {
+  margin-bottom: 1.25rem;
+}
+.recovery-assistant-page .detail-section h3 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.5rem;
+}
+.recovery-assistant-page .detail-section ol,
+.recovery-assistant-page .detail-section ul {
+  padding-left: 1.25rem;
+  margin: 0;
+}
+.recovery-assistant-page .detail-section li {
+  padding: 0.3rem 0;
+  font-size: 0.875rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.recovery-assistant-page .detail-section.warnings {
+  background: #fffbeb;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  border-left: 3px solid #f59e0b;
+}
+.recovery-assistant-page .detail-section.warnings li { color: #92400e; }
+
+.watch-full-video-btn {
+  width: 100%;
+  padding: 0.85rem;
+  border-radius: 0.75rem;
+  border: none;
+  background: linear-gradient(135deg, #0284c7, #0ea5e9);
+  color: white;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 12px rgba(2,132,199,0.25);
+  transition: all 0.2s ease;
+}
+.watch-full-video-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(2,132,199,0.35);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .recovery-assistant-page .content-container {
+    grid-template-columns: 1fr;
+  }
+  .recovery-assistant-page .page-header {
+    padding: 2rem;
+    border-radius: 1.5rem;
+  }
+  .progress-banner .banner-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}

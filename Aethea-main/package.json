@@ -1,0 +1,28 @@
+{
+  "name": "aethea-medical-platform",
+  "version": "1.0.0",
+  "description": "Aethea Medical Platform - X-ray scans, blood tests, and reservations system",
+  "private": true,
+  "workspaces": [
+    "web",
+    "shared"
+  ],
+  "scripts": {
+    "setup": "npm install --legacy-peer-deps && npm run install:shared",
+    "install:web": "cd web && npm install --legacy-peer-deps",
+    "install:shared": "cd shared && npm install --legacy-peer-deps",
+    "dev": "cd web && npm run dev",
+    "build": "cd web && npm run build",
+    "clean": "npm run clean:web && npm run clean:shared",
+    "clean:web": "cd web && rm -rf node_modules dist .vite",
+    "clean:shared": "cd shared && rm -rf node_modules dist",
+    "lint": "cd web && npm run lint"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

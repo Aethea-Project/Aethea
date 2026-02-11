@@ -1,0 +1,583 @@
+/* Doctor Finder — Organic Healing Theme */
+
+.doctor-finder-page {
+  animation: pageIn 0.4s ease-out;
+}
+
+/* Header */
+.doctor-finder-page .page-header {
+  background: linear-gradient(135deg, #064e3b, #059669);
+  border-radius: 2rem;
+  padding: 2.5rem 3rem;
+  color: white;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.doctor-finder-page .page-header::after {
+  content: '';
+  position: absolute;
+  right: -30px;
+  top: -30px;
+  width: 200px;
+  height: 200px;
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  background: rgba(255,255,255,0.08);
+}
+.doctor-finder-page .header-content { position: relative; z-index: 1; }
+.doctor-finder-page .header-content h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+}
+.doctor-finder-page .header-content p {
+  font-size: 0.95rem;
+  opacity: 0.85;
+  margin: 0;
+}
+
+/* Layout */
+.content-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2rem;
+}
+
+/* Sidebar */
+.doctor-finder-page .sidebar {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0;
+  background: transparent;
+  backdrop-filter: none;
+  border-right: none;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 0 1.25rem;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+}
+.search-box:focus-within { border-color: #059669; box-shadow: 0 0 0 4px rgba(5,150,105,0.1); }
+.search-box .search-icon { font-size: 1.1rem; margin-right: 0.5rem; }
+.search-box input {
+  width: 100%;
+  /* Touch target */
+  padding: 0.85rem 0.5rem;
+  min-height: 44px;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  font-family: 'Sora', sans-serif;
+  background: transparent;
+}
+
+.doctor-finder-page .filter-section {
+  background: white;
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+  border: 1px solid #f1f5f9;
+}
+.doctor-finder-page .filter-section h3 {
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #475569;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+}
+
+.specialty-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.specialty-btn {
+  padding: 0.55rem 0.85rem;
+  border: none;
+  background: transparent;
+  border-radius: 0.5rem;
+  text-align: left;
+  cursor: pointer;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.85rem;
+  color: #475569;
+  transition: all 0.2s ease;
+}
+.specialty-btn:hover { background: #f8fafc; color: #059669; }
+.specialty-btn.active {
+  background: #ecfdf5;
+  color: #059669;
+  font-weight: 600;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.4rem 0;
+  font-size: 0.85rem;
+  color: #475569;
+  cursor: pointer;
+}
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #059669;
+  border-radius: 4px;
+}
+
+/* Main Content */
+.doctor-finder-page .main-content {
+  padding: 0;
+  max-width: none;
+  min-width: 0;
+}
+
+.map-container {
+  background: white;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+  border: 1px solid #f1f5f9;
+}
+.map-placeholder {
+  height: 200px;
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #059669;
+}
+.map-icon { font-size: 2.5rem; }
+.map-placeholder p { font-weight: 600; margin: 0.5rem 0 0; }
+.map-placeholder small { color: #64748b; }
+
+/* Doctor Cards */
+.doctors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+.doctor-card {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 1.75rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+  border: 1px solid #f1f5f9;
+  transition: all 0.3s ease;
+}
+.doctor-card:hover {
+  box-shadow: 0 12px 32px rgba(0,0,0,0.06);
+  transform: translateY(-3px);
+}
+
+.doctor-card-header {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.doctor-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 1rem;
+  background: #ecfdf5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  flex-shrink: 0;
+}
+.doctor-info { min-width: 0; }
+.doctor-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.doctor-name-row h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+.verified-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #059669;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+.doctor-specialty {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0.15rem 0 0.35rem;
+}
+.doctor-rating { display: flex; align-items: center; gap: 0.5rem; }
+.stars { font-size: 0.85rem; font-weight: 600; color: #0f172a; }
+.review-count { font-size: 0.8rem; color: #94a3b8; }
+
+.doctor-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 0.75rem;
+}
+.doctor-details .detail-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #475569;
+  padding: 0;
+  border: none;
+}
+.detail-icon { width: 20px; text-align: center; }
+
+.doctor-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+.view-profile-btn, .book-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  border: none;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.view-profile-btn {
+  background: #f1f5f9;
+  color: #475569;
+}
+.view-profile-btn:hover { background: #e2e8f0; }
+.book-btn {
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: white;
+  box-shadow: 0 4px 12px rgba(5,150,105,0.2);
+}
+.book-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(5,150,105,0.3);
+}
+
+/* Modals */
+.doctor-finder-page .modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+.doctor-finder-page .modal-content {
+  background: white;
+  border-radius: 2rem;
+  padding: 2.5rem;
+  max-width: 520px;
+  width: 92%;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  animation: slideUp 0.3s ease;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+}
+
+.doctor-finder-page .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+.doctor-finder-page .modal-header h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+.close-modal-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: #f1f5f9;
+  cursor: pointer;
+  font-size: 1.4rem;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+.close-modal-btn:hover { background: #e2e8f0; color: #0f172a; }
+
+/* Booking Modal */
+.booking-doctor-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: #ecfdf5;
+  border-radius: 1rem;
+  margin-bottom: 1.5rem;
+}
+.booking-avatar {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+.booking-doctor-info h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  color: #0f172a;
+}
+.booking-doctor-info p {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0.1rem 0 0;
+}
+.booking-location {
+  font-size: 0.8rem !important;
+  color: #94a3b8 !important;
+}
+
+.booking-section {
+  margin-bottom: 1.5rem;
+}
+.booking-section h3 {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+}
+
+.date-picker {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.date-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  border: 2px solid #e2e8f0;
+  background: white;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.82rem;
+  cursor: pointer;
+  color: #475569;
+  transition: all 0.2s ease;
+}
+.date-btn:hover { border-color: #059669; }
+.date-btn.active {
+  background: #ecfdf5;
+  border-color: #059669;
+  color: #059669;
+  font-weight: 600;
+}
+
+.time-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.5rem;
+}
+.time-slot-btn {
+  padding: 0.65rem;
+  border-radius: 0.75rem;
+  border: 2px solid #e2e8f0;
+  background: white;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: center;
+  color: #475569;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.time-slot-btn:hover { border-color: #059669; }
+.time-slot-btn.selected {
+  background: #059669;
+  border-color: #059669;
+  color: white;
+}
+
+.booking-summary {
+  padding: 1rem 1.25rem;
+  background: #f8fafc;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #475569;
+}
+.fee-amount {
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 1.1rem;
+}
+
+.confirm-booking-btn {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: none;
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: white;
+  font-family: 'Sora', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(5,150,105,0.25);
+}
+.confirm-booking-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(5,150,105,0.35);
+}
+.confirm-booking-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Profile Modal */
+.profile-modal { max-width: 500px !important; }
+.profile-header {
+  display: flex;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+.profile-avatar {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  background: #ecfdf5;
+  border-radius: 1.25rem;
+  flex-shrink: 0;
+}
+.profile-header h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+.profile-specialty {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0.15rem 0 0.35rem;
+}
+.profile-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.profile-section {
+  margin-bottom: 1.25rem;
+}
+.profile-section h3 {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+.profile-section p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #334155;
+  margin: 0;
+}
+
+.language-badges {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.language-badge {
+  padding: 0.35rem 0.75rem;
+  border-radius: 2rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.fee-large {
+  font-family: 'Fraunces', serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #059669;
+}
+
+.book-appointment-btn {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: none;
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: white;
+  font-family: 'Sora', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 12px rgba(5,150,105,0.25);
+  transition: all 0.2s ease;
+}
+.book-appointment-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(5,150,105,0.35);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .content-layout {
+    grid-template-columns: 1fr;
+  }
+  .doctor-finder-page .page-header {
+    padding: 2rem;
+    border-radius: 1.5rem;
+  }
+}

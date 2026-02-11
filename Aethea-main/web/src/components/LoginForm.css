@@ -1,0 +1,316 @@
+/**
+ * Login Form — Aethea Design System
+ * ──────────────────────────────────
+ * Research-backed accessible form design:
+ * - NNGroup: labels above fields, single column, inline errors
+ * - W3C WAI 2.5.8: 48 px min touch targets (exceeds 44 px rule)
+ * - NNGroup Senior Users: ≥ 16 px text, 4.5 : 1 contrast, forgiving inputs
+ * - Gestalt Law of Proximity: tight label-to-field, generous between-groups
+ * Uses Aethea CSS custom properties from App.css — teal palette, Sora/Fraunces fonts
+ */
+
+/* ── Page wrapper ─────────────────────────── */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: var(--space-lg, 1.5rem);
+  background: var(--color-bg-app, #f8fafb);
+  font-family: 'Sora', sans-serif;
+}
+
+/* ── Card ─────────────────────────────────── */
+.login-form {
+  width: 100%;
+  max-width: 440px;
+  background: var(--color-bg-surface, #ffffff);
+  padding: 2.5rem 2rem;
+  border-radius: 1rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 8px 24px rgba(15, 118, 110, 0.06);
+}
+
+/* ── Header ───────────────────────────────── */
+.form-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Brand mark — visual anchor matching landing nav icon */
+.form-brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.form-brand-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(175deg, var(--teal-800, #115E59), var(--teal-600, #0D9488));
+  border-radius: 0.75rem;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-family: 'Fraunces', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  box-shadow: 0 3px 12px rgba(15, 118, 110, 0.25);
+}
+
+.form-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text-main, #0f172a);
+  margin: 0 0 0.35rem;
+  letter-spacing: -0.02em;
+}
+
+.form-subtitle {
+  font-size: 1rem;
+  color: var(--color-text-muted, #475569);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── Error banner ─────────────────────────── */
+.error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: #fef2f2;
+  border-left: 4px solid #dc2626;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  color: #991b1b;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+/* ── Form groups ──────────────────────────── */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+/* Labels always visible above field — NNGroup recommendation */
+.form-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-main, #0f172a);
+  margin-bottom: 0.4rem;
+}
+
+/* ── Inputs ───────────────────────────────── */
+.form-input {
+  width: 100%;
+  height: 3rem;                  /* 48 px — exceeds WCAG 44 px touch target */
+  padding: 0.625rem 0.875rem;
+  font-family: 'Sora', sans-serif;
+  font-size: 1rem;               /* 16 px — prevents iOS zoom, readable for all ages */
+  color: var(--color-text-main, #0f172a);
+  background: var(--color-bg-surface, #ffffff);
+  border: 1.5px solid #cbd5e1;
+  border-radius: 0.625rem;
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast, 150ms) ease,
+              box-shadow var(--transition-fast, 150ms) ease;
+}
+
+.form-input::placeholder {
+  color: #94a3b8;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--teal-600, #0D9488);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+}
+
+.form-input:disabled {
+  background: #f1f5f9;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.form-input[aria-invalid="true"] {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+}
+
+/* ── Toggle password ──────────────────────── */
+.toggle-password {
+  background: none;
+  border: none;
+  color: var(--teal-700, #0F766E);
+  font-family: 'Sora', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  transition: background var(--transition-fast, 150ms) ease;
+  min-height: 2rem;
+  min-width: 2rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.toggle-password:hover:not(:disabled) {
+  background: var(--teal-50, #F0FDFA);
+}
+
+.toggle-password:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Forgot password ──────────────────────── */
+.forgot-password {
+  text-align: right;
+  margin-bottom: 1.5rem;
+}
+
+.forgot-password-link {
+  color: var(--teal-700, #0F766E);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 0.25rem 0;
+  border-radius: 0.25rem;
+  transition: color var(--transition-fast, 150ms) ease;
+}
+
+.forgot-password-link:hover {
+  color: var(--teal-800, #115E59);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.forgot-password-link:focus-visible {
+  outline: 2px solid var(--teal-500, #14B8A6);
+  outline-offset: 2px;
+}
+
+/* ── CAPTCHA container ────────────────────── */
+.captcha-container {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ── Submit button ────────────────────────── */
+.submit-button {
+  width: 100%;
+  height: 3rem;                  /* 48 px touch target */
+  background: var(--teal-700, #0F766E);
+  color: #ffffff;
+  font-family: 'Sora', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.625rem;
+  cursor: pointer;
+  transition: background var(--transition-base, 200ms) ease,
+              box-shadow var(--transition-base, 200ms) ease,
+              transform var(--transition-fast, 150ms) ease;
+  margin-bottom: 1rem;
+  letter-spacing: 0.01em;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: var(--teal-800, #115E59);
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.25);
+  transform: translateY(-1px);
+}
+
+.submit-button:active:not(:disabled) {
+  background: var(--teal-900, #134E4A);
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.submit-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.submit-button:focus-visible {
+  outline: 2px solid var(--teal-500, #14B8A6);
+  outline-offset: 2px;
+}
+
+/* ── Footer link ──────────────────────────── */
+.signup-link {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--color-text-muted, #475569);
+}
+
+.link {
+  color: var(--teal-700, #0F766E);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--transition-fast, 150ms) ease;
+}
+
+.link:hover {
+  color: var(--teal-800, #115E59);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--teal-500, #14B8A6);
+  outline-offset: 2px;
+}
+
+/* ── Mobile — NNGroup: larger targets on small screens ── */
+@media (max-width: 768px) {
+  .login-form {
+    padding: 2rem 1.25rem;
+  }
+
+  .form-title {
+    font-size: 1.5rem;
+  }
+
+  .form-subtitle {
+    font-size: 0.9rem;
+  }
+
+  /* 16 px already set — prevents zoom on iOS Safari */
+  .form-input { font-size: 1rem; }
+
+  .submit-button,
+  .form-input {
+    min-height: 3rem;  /* 48 px */
+  }
+}
+
+/* ── Touch-device safety layer (WCAG 2.5.8) ── */
+@media (pointer: coarse) {
+  .submit-button,
+  .form-input,
+  .toggle-password,
+  .forgot-password-link {
+    min-height: 2.75rem; /* 44 px */
+    min-width: 2.75rem;
+  }
+
+  .toggle-password {
+    padding: 0.5rem;
+  }
+}
