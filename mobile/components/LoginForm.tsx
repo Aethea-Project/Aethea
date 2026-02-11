@@ -3,7 +3,7 @@
  * Professional medical app design with accessibility
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,10 @@ import {
   StatusBar,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { WebView } from 'react-native-webview';
+import { useRouter } from 'expo-router';
 import { useAuth } from '@shared/auth/useAuth';
+import { TURNSTILE_CONFIG } from '@shared/auth/constants';
 
 // Design tokens - medical blue theme
 const colors = {
@@ -39,11 +42,64 @@ const colors = {
 export const LoginForm: React.FC = () => {
   const { signIn, loading, error } = useAuth();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+
+  // Captcha state
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const webViewRef = useRef<WebView>(null);
+
+  /** Handle WebView CAPTCHA messages */
+  const handleWebViewMessage = (event: any) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+      if (data.type === 'turnstile-token') {
+        setCaptchaToken(data.token);
+      } else if (data.type === 'turnstile-error' || data.type === 'turnstile-expired') {
+        setCaptchaToken(null);
+      }
+    } catch {
+      // Ignore parse errors
+    }
+  };
+
+  /** Turnstile HTML for WebView */
+  const turnstileHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>body { margin: 0; padding: 8px; display: flex; justify-content: center; background: transparent; }</style>
+</head>
+<body>
+  <div id="turnstile-container"></div>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+  <script>
+    const checkAndRender = setInterval(() => {
+      if (window.turnstile) {
+        clearInterval(checkAndRender);
+        window.turnstile.render('#turnstile-container', {
+          sitekey: '${TURNSTILE_CONFIG.SITE_KEY}',
+          callback: function(token) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'turnstile-token', token: token }));
+          },
+          'expired-callback': function() {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'turnstile-expired' }));
+          },
+          'error-callback': function() {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'turnstile-error' }));
+          }
+        });
+      }
+    }, 100);
+  </script>
+</body>
+</html>
+  `;
 
   const handleSubmit = async () => {
     // Basic validation
@@ -66,10 +122,17 @@ export const LoginForm: React.FC = () => {
 
     setLocalError(null);
 
+    if (!captchaToken) {
+      setLocalError('Please complete the CAPTCHA verification');
+      return;
+    }
+
     try {
-      await signIn(email, password);
+      await signIn(email, password, captchaToken);
+      setCaptchaToken(null);
     } catch (err) {
       setLocalError(err instanceof Error ? err.message : 'Login failed');
+      setCaptchaToken(null);
     }
   };
 
@@ -189,6 +252,20 @@ export const LoginForm: React.FC = () => {
             <Text style={styles.forgotPasswordText}>Forgot password?</Text>
           </TouchableOpacity>
 
+          {/* Turnstile CAPTCHA via WebView */}
+          <View style={styles.captchaContainer}>
+            <WebView
+              ref={webViewRef}
+              source={{ html: turnstileHtml }}
+              style={styles.captchaWebView}
+              scrollEnabled={false}
+              onMessage={handleWebViewMessage}
+              javaScriptEnabled
+              originWhitelist={['*']}
+            />
+            {captchaToken && <Text style={styles.captchaSuccess}>✓ Verified</Text>}
+          </View>
+
           {/* Sign In Button */}
           <TouchableOpacity
             style={[styles.button, loading && styles.buttonDisabled]}
@@ -224,7 +301,7 @@ export const LoginForm: React.FC = () => {
           {/* Sign Up Link */}
           <View style={styles.signupContainer}>
             <Text style={styles.signupText}>Don't have an account? </Text>
-            <TouchableOpacity disabled={loading} accessibilityRole="link">
+            <TouchableOpacity disabled={loading} accessibilityRole="link" onPress={() => router.push('/(auth)/register')}>
               <Text style={styles.signupLink}>Sign up</Text>
             </TouchableOpacity>
           </View>
@@ -368,6 +445,21 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: 14,
     fontWeight: '600',
+  },
+  captchaContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  captchaWebView: {
+    width: 310,
+    height: 80,
+    backgroundColor: 'transparent',
+  },
+  captchaSuccess: {
+    fontSize: 13,
+    color: '#16A34A',
+    fontWeight: '600',
+    marginTop: 4,
   },
   button: {
     height: 52,

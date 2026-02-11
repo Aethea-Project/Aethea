@@ -3,9 +3,21 @@
  * Follows web.dev best practices for accessibility and UX
  */
 
-import React, { useState, FormEvent } from 'react';
+import React, { useState, useEffect, useRef, FormEvent } from 'react';
 import { useAuth } from '@shared/auth/useAuth';
+import { TURNSTILE_CONFIG } from '@shared/auth/constants';
 import './LoginForm.css';
+
+// Turnstile global type declaration
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: string | HTMLElement, options: Record<string, unknown>) => string;
+      reset: (widgetId: string) => void;
+      remove: (widgetId: string) => void;
+    };
+  }
+}
 
 export const LoginForm: React.FC = () => {
   const { signIn, loading, error } = useAuth();
@@ -13,6 +25,62 @@ export const LoginForm: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+
+  // Captcha state
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | null>(null);
+
+  /**
+   * Load Turnstile script and render widget
+   */
+  useEffect(() => {
+    if (document.getElementById('cf-turnstile-script')) {
+      // Script already loaded, just render widget
+      const renderWidget = () => {
+        if (window.turnstile && turnstileRef.current && !widgetIdRef.current) {
+          widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
+            sitekey: TURNSTILE_CONFIG.SITE_KEY,
+            callback: (token: string) => setCaptchaToken(token),
+            'expired-callback': () => setCaptchaToken(null),
+            'error-callback': () => setCaptchaToken(null),
+            theme: 'light',
+            size: 'normal',
+          });
+        }
+      };
+      setTimeout(renderWidget, 100);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.id = 'cf-turnstile-script';
+    script.src = `${TURNSTILE_CONFIG.SCRIPT_URL}?render=explicit`;
+    script.async = true;
+    script.defer = true;
+
+    script.onload = () => {
+      if (window.turnstile && turnstileRef.current) {
+        widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
+          sitekey: TURNSTILE_CONFIG.SITE_KEY,
+          callback: (token: string) => setCaptchaToken(token),
+          'expired-callback': () => setCaptchaToken(null),
+          'error-callback': () => setCaptchaToken(null),
+          theme: 'light',
+          size: 'normal',
+        });
+      }
+    };
+
+    document.head.appendChild(script);
+
+    return () => {
+      if (widgetIdRef.current && window.turnstile) {
+        window.turnstile.remove(widgetIdRef.current);
+        widgetIdRef.current = null;
+      }
+    };
+  }, []);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -37,10 +105,25 @@ export const LoginForm: React.FC = () => {
 
     setLocalError(null);
 
+    if (!captchaToken) {
+      setLocalError('Please complete the CAPTCHA verification');
+      return;
+    }
+
     try {
-      await signIn(email, password);
+      await signIn(email, password, captchaToken);
+      // Reset captcha after attempt
+      if (widgetIdRef.current && window.turnstile) {
+        window.turnstile.reset(widgetIdRef.current);
+      }
+      setCaptchaToken(null);
     } catch (err) {
       setLocalError(err instanceof Error ? err.message : 'Login failed');
+      // Reset captcha on failure
+      if (widgetIdRef.current && window.turnstile) {
+        window.turnstile.reset(widgetIdRef.current);
+      }
+      setCaptchaToken(null);
     }
   };
 
@@ -128,6 +211,11 @@ export const LoginForm: React.FC = () => {
           <a href="/forgot-password" className="forgot-password-link">
             Forgot password?
           </a>
+        </div>
+
+        {/* Cloudflare Turnstile CAPTCHA */}
+        <div className="captcha-container">
+          <div ref={turnstileRef} />
         </div>
 
         {/* Sign In Button */}
