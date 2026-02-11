@@ -1,37 +1,22 @@
 {
-  "name": "medical-platform",
+  "name": "aethea-medical-platform",
   "version": "1.0.0",
-  "description": "Medical Platform - X-ray scans, blood tests, and reservations system",
+  "description": "Aethea Medical Platform - X-ray scans, blood tests, and reservations system",
   "private": true,
   "workspaces": [
-    "mobile",
     "web",
-    "backend",
     "shared"
   ],
   "scripts": {
-    "setup": "npm run install:all && echo \"✅ Setup complete! Check INSTALLATION.md or QUICK_START.md for next steps.\"",
-    "install:all": "npm install --legacy-peer-deps && npm run install:backend && npm run install:web && npm run install:mobile && npm run install:shared",
-    "install:backend": "cd backend && npm install --legacy-peer-deps",
+    "setup": "npm install --legacy-peer-deps && npm run install:shared",
     "install:web": "cd web && npm install --legacy-peer-deps",
-    "install:mobile": "cd mobile && npm install --legacy-peer-deps && npx expo install --fix",
     "install:shared": "cd shared && npm install --legacy-peer-deps",
-    "dev:backend": "cd backend && npm run dev",
-    "dev:web": "cd web && npm run dev",
-    "dev:mobile": "cd mobile && npx expo start",
-    "start": "concurrently -n \"BACKEND,WEB\" -c \"blue,green\" \"npm run dev:backend\" \"npm run dev:web\"",
-    "start:all": "concurrently -n \"BACKEND,WEB,MOBILE\" -c \"blue,green,magenta\" \"npm run dev:backend\" \"npm run dev:web\" \"npm run dev:mobile\"",
-    "build:all": "npm run build:backend && npm run build:web",
-    "build:backend": "cd backend && npm run build",
-    "build:web": "cd web && npm run build",
-    "clean": "npm run clean:backend && npm run clean:web && npm run clean:mobile && npm run clean:shared",
-    "clean:backend": "cd backend && rm -rf node_modules dist",
+    "dev": "cd web && npm run dev",
+    "build": "cd web && npm run build",
+    "clean": "npm run clean:web && npm run clean:shared",
     "clean:web": "cd web && rm -rf node_modules dist .vite",
-    "clean:mobile": "cd mobile && rm -rf node_modules .expo",
     "clean:shared": "cd shared && rm -rf node_modules dist",
-    "lint": "npm run lint:backend && npm run lint:web",
-    "lint:backend": "cd backend && npm run lint",
-    "lint:web": "cd web && npm run lint"
+    "lint": "cd web && npm run lint"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

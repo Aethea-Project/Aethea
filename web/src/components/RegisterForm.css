@@ -1,67 +1,92 @@
-/* Registration Form Styles - Following web.dev best practices */
+/**
+ * Registration Form — Aethea Design System
+ * ──────────────────────────────────────────
+ * Research-backed accessible form design:
+ * - NNGroup: group related fields, single column priority, inline validation
+ * - W3C WAI: labels programmatically associated, fieldset grouping
+ * - NNGroup Senior Users: ≥ 16 px text, 48 px touch targets, high contrast
+ * - Gestalt Proximity: tight label→field, generous between-groups
+ * Uses Aethea CSS custom properties — teal palette, Sora/Fraunces fonts
+ */
 
+/* ── Page wrapper ─────────────────────────── */
 .register-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 20px;
-  background-color: #f5f5f5;
+  padding: var(--space-lg, 1.5rem);
+  background: var(--color-bg-app, #f8fafb);
+  font-family: 'Sora', sans-serif;
 }
 
+/* ── Card ─────────────────────────────────── */
 .register-form {
   width: 100%;
-  max-width: 520px;
-  background: #fff;
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 540px;
+  background: var(--color-bg-surface, #ffffff);
+  padding: 2.5rem 2rem;
+  border-radius: 1rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 8px 24px rgba(15, 118, 110, 0.06);
 }
 
-/* Header */
+/* ── Header ───────────────────────────────── */
 .register-form .form-header {
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 1.75rem;
 }
 
 .register-form .form-title {
-  font-size: 28px;
+  font-family: 'Fraunces', serif;
+  font-size: 1.75rem;
   font-weight: 700;
-  color: #333;
-  margin: 0 0 8px 0;
+  color: var(--color-text-main, #0f172a);
+  margin: 0 0 0.35rem;
+  letter-spacing: -0.02em;
 }
 
 .register-form .form-subtitle {
-  font-size: 16px;
-  color: #666;
+  font-size: 1rem;
+  color: var(--color-text-muted, #475569);
   margin: 0;
+  line-height: 1.5;
 }
 
-/* Banners */
+/* ── Banners — NNGroup: visible, specific, next-to-field ── */
 .error-banner {
-  background-color: #fee;
-  border-left: 4px solid #c00;
-  border-radius: 4px;
-  padding: 12px 16px;
-  margin-bottom: 20px;
-  color: #c00;
-  font-size: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: #fef2f2;
+  border-left: 4px solid #dc2626;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  color: #991b1b;
+  font-size: 0.9rem;
+  line-height: 1.45;
 }
 
 .success-banner {
-  background-color: #efffef;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: #f0fdf4;
   border-left: 4px solid #16a34a;
-  border-radius: 4px;
-  padding: 12px 16px;
-  margin-bottom: 20px;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
   color: #166534;
-  font-size: 14px;
+  font-size: 0.9rem;
+  line-height: 1.45;
 }
 
-/* Form Layout */
+/* ── Layout — NNGroup: related fields on same row (name pair, DOB+gender) ── */
 .form-row {
   display: flex;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .form-row .form-group {
@@ -69,176 +94,266 @@
 }
 
 .form-group {
-  margin-bottom: 18px;
+  margin-bottom: 1.15rem;
 }
 
-/* Labels */
+/* ── Labels — always visible above field ──── */
 .register-form .form-label {
   display: block;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: #333;
-  margin-bottom: 6px;
+  color: var(--color-text-main, #0f172a);
+  margin-bottom: 0.35rem;
 }
 
 .label-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 0.35rem;
 }
 
-/* Inputs */
+/* ── Inputs — 48 px height, 16 px font ───── */
 .register-form .form-input {
   width: 100%;
-  height: 46px;
-  padding: 10px 14px;
-  font-size: 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  height: 3rem;                  /* 48 px touch target */
+  padding: 0.625rem 0.875rem;
+  font-family: 'Sora', sans-serif;
+  font-size: 1rem;               /* 16 px — prevents iOS zoom */
+  color: var(--color-text-main, #0f172a);
+  background: var(--color-bg-surface, #ffffff);
+  border: 1.5px solid #cbd5e1;
+  border-radius: 0.625rem;
   box-sizing: border-box;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  background-color: #fff;
-  color: #333;
+  transition: border-color var(--transition-fast, 150ms) ease,
+              box-shadow var(--transition-fast, 150ms) ease;
+}
+
+.register-form .form-input::placeholder {
+  color: #94a3b8;
 }
 
 .register-form .form-input:focus {
   outline: none;
-  border-color: #007AFF;
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  border-color: var(--teal-600, #0D9488);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
 }
 
 .register-form .form-input:disabled {
-  background-color: #f5f5f5;
+  background: #f1f5f9;
   cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .register-form .form-input.input-error {
-  border-color: #c00;
-  box-shadow: 0 0 0 3px rgba(204, 0, 0, 0.06);
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
 }
 
-/* Select */
+/* ── Select dropdown ──────────────────────── */
 .form-select {
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 16px;
-  padding-right: 36px;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+  padding-right: 2.25rem;
   cursor: pointer;
 }
 
-/* Field errors & hints */
+/* ── Field feedback — NNGroup: inline, next to field ── */
 .field-error {
-  display: block;
-  font-size: 12px;
-  color: #c00;
-  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: #dc2626;
+  margin-top: 0.3rem;
   font-weight: 500;
+  line-height: 1.4;
 }
 
 .field-hint {
   display: block;
-  font-size: 12px;
-  color: #888;
-  margin-top: 4px;
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #64748b);
+  margin-top: 0.3rem;
+  line-height: 1.4;
 }
 
-/* Toggle Password */
+/* ── Password strength checklist (NNGroup: show rules upfront) ── */
+.password-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.password-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  font-weight: 500;
+  line-height: 1.4;
+  transition: color 200ms ease;
+}
+
+.password-checklist li.met {
+  color: #059669;
+}
+
+.password-checklist .check-icon {
+  font-size: 0.72rem;
+  width: 1rem;
+  text-align: center;
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.password-checklist li:not(.met) .check-icon {
+  color: #cbd5e1;
+}
+
+.password-checklist li.met .check-icon {
+  color: #059669;
+}
+
+/* ── Fixed country code display ──────────── */
+.country-code-fixed {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 600;
+  color: var(--color-text, #1e293b);
+  background: var(--teal-50, #F0FDFA);
+  cursor: default;
+  user-select: none;
+}
+
+/* ── Toggle password ──────────────────────── */
 .register-form .toggle-password {
   background: none;
   border: none;
-  color: #007AFF;
-  font-size: 13px;
-  font-weight: 500;
+  color: var(--teal-700, #0F766E);
+  font-family: 'Sora', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 0;
-  transition: opacity 0.2s;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  transition: background var(--transition-fast, 150ms) ease;
+  min-height: 2rem;
+  min-width: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.register-form .toggle-password svg {
+  pointer-events: none;
+  flex-shrink: 0;
 }
 
 .register-form .toggle-password:hover:not(:disabled) {
-  opacity: 0.8;
+  background: var(--teal-50, #F0FDFA);
 }
 
 .register-form .toggle-password:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
-/* CAPTCHA Container */
+/* ── CAPTCHA container ────────────────────── */
 .captcha-container {
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 0.4rem;
 }
 
-/* Submit Button */
+/* ── Submit button ────────────────────────── */
 .register-form .submit-button {
   width: 100%;
-  height: 50px;
-  background-color: #007AFF;
-  color: #fff;
-  font-size: 16px;
+  height: 3rem;                  /* 48 px */
+  background: var(--teal-700, #0F766E);
+  color: #ffffff;
+  font-family: 'Sora', sans-serif;
+  font-size: 1rem;
   font-weight: 600;
   border: none;
-  border-radius: 8px;
+  border-radius: 0.625rem;
   cursor: pointer;
-  transition: background-color 0.2s, opacity 0.2s;
-  margin-bottom: 16px;
+  transition: background var(--transition-base, 200ms) ease,
+              box-shadow var(--transition-base, 200ms) ease,
+              transform var(--transition-fast, 150ms) ease;
+  margin-bottom: 1rem;
+  letter-spacing: 0.01em;
 }
 
 .register-form .submit-button:hover:not(:disabled) {
-  background-color: #0051D5;
+  background: var(--teal-800, #115E59);
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.25);
+  transform: translateY(-1px);
 }
 
 .register-form .submit-button:active:not(:disabled) {
-  background-color: #003DA6;
+  background: var(--teal-900, #134E4A);
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 .register-form .submit-button:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
-.register-form .submit-button:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3);
+.register-form .submit-button:focus-visible {
+  outline: 2px solid var(--teal-500, #14B8A6);
+  outline-offset: 2px;
 }
 
-/* Sign In Link */
+/* ── Footer link ──────────────────────────── */
 .signin-link {
   text-align: center;
-  font-size: 14px;
-  color: #666;
+  font-size: 0.9rem;
+  color: var(--color-text-muted, #475569);
 }
 
 .register-form .link {
-  color: #007AFF;
+  color: var(--teal-700, #0F766E);
   font-weight: 600;
   text-decoration: none;
-  transition: opacity 0.2s;
+  transition: color var(--transition-fast, 150ms) ease;
 }
 
 .register-form .link:hover {
-  opacity: 0.8;
+  color: var(--teal-800, #115E59);
   text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
-/* Mobile optimizations */
+.register-form .link:focus-visible {
+  outline: 2px solid var(--teal-500, #14B8A6);
+  outline-offset: 2px;
+}
+
+/* ── Mobile — stack rows, enlarge targets ─── */
 @media (max-width: 768px) {
   .register-form {
-    padding: 28px 18px;
+    padding: 2rem 1.25rem;
   }
 
   .register-form .form-title {
-    font-size: 24px;
+    font-size: 1.5rem;
   }
 
   .register-form .form-subtitle {
-    font-size: 14px;
+    font-size: 0.9rem;
   }
 
   .form-row {
@@ -247,25 +362,25 @@
   }
 
   .register-form .form-input {
-    font-size: 16px; /* Prevents zoom on iOS */
+    font-size: 1rem;  /* 16 px prevents zoom on iOS */
   }
 
   .register-form .submit-button,
   .register-form .form-input {
-    min-height: 48px;
+    min-height: 3rem; /* 48 px */
   }
 }
 
-/* Touch target size - minimum 44x44px per WCAG */
+/* ── Touch-device safety (WCAG 2.5.8) ────── */
 @media (pointer: coarse) {
   .register-form .submit-button,
   .register-form .form-input,
   .register-form .toggle-password {
-    min-height: 44px;
-    min-width: 44px;
+    min-height: 2.75rem; /* 44 px */
+    min-width: 2.75rem;
   }
 
   .register-form .toggle-password {
-    padding: 8px;
+    padding: 0.5rem;
   }
 }

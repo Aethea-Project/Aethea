@@ -5,9 +5,9 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext, defaultAuthState } from '@shared/auth/auth-context';
+import { AuthContext, defaultAuthState } from '@core/auth/auth-context';
 import { authService } from '../services/auth';
-import type { AuthState, SignUpCredentials, ProfileUpdateRequest } from '@shared/auth/auth-types';
+import type { AuthState, SignUpCredentials, ProfileUpdateRequest } from '@core/auth/auth-types';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -78,10 +78,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       // Only navigate if user is logged in (don't redirect away from public pages)
       if (newState.user && newState.session) {
-        // Only redirect if not already on a protected page
+        // Only redirect if currently on an auth page
         const currentPath = window.location.pathname;
         if (currentPath === '/login' || currentPath === '/register') {
-          navigate('/dashboard');
+          navigate('/dashboard', { replace: true });
         }
       }
     });
@@ -104,6 +104,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           loading: false,
           error: response.error,
         }));
+      } else {
+        // Clear loading — session state will be updated by onAuthStateChange
+        setAuthState((prev) => ({ ...prev, loading: false }));
       }
       // State will be updated by onAuthStateChange
     } catch (error) {
@@ -168,6 +171,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           ...defaultAuthState,
           loading: false,
         });
+        navigate('/', { replace: true });
       }
     } catch (error) {
       setAuthState((prev) => ({

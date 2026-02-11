@@ -1,0 +1,620 @@
+/* ═══════════════════════════════════════════════
+   Profile Page — Aethea Medical Platform (Teal)
+   Research-driven design: USWDS, Carbon, NNGroup
+   ═══════════════════════════════════════════════ */
+
+.profile-page {
+  min-height: 100vh;
+  background: var(--color-bg-app, #f8fafb);
+  padding: var(--space-xl, 2rem) var(--space-md, 1rem);
+  font-family: 'Sora', sans-serif;
+}
+
+.profile-container {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* ── Identity Header (Avatar + Name) ─────── */
+
+.profile-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md, 1rem);
+  margin-bottom: var(--space-lg, 1.5rem);
+  flex-wrap: wrap;
+}
+
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal-600, #0d9488), var(--teal-800, #115e59));
+  color: #fff;
+  font-family: 'Sora', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.18);
+}
+
+.profile-identity-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-identity-info h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-text-main, #0f172a);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.profile-email {
+  font-size: 0.9rem;
+  color: var(--color-text-muted, #475569);
+  margin: 0.125rem 0 0;
+}
+
+.profile-member-since {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 0.125rem 0 0;
+}
+
+/* ── Cards ────────────────────────────────── */
+
+.profile-card {
+  background: var(--color-bg-surface, #ffffff);
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: var(--space-lg, 1.5rem);
+  margin-bottom: var(--space-md, 1rem);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 16px rgba(15, 118, 110, 0.04);
+}
+
+.profile-card h2 {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--teal-800, #115e59);
+  margin: 0 0 var(--space-md, 1rem);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profile-card h2 svg {
+  color: var(--teal-600, #0d9488);
+  flex-shrink: 0;
+}
+
+/* ── Grid: 2-column, responsive ──────────── */
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-md, 1rem);
+}
+
+/* ── Field ────────────────────────────────── */
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.profile-field.full-width {
+  grid-column: 1 / -1;
+}
+
+.profile-field.has-error input,
+.profile-field.has-error select {
+  border-color: #ef4444;
+}
+
+.profile-field.has-error input:focus,
+.profile-field.has-error select:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.profile-field label {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #475569);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.field-value {
+  font-size: 0.95rem;
+  color: var(--color-text-main, #0f172a);
+  min-height: 1.5rem;
+  padding: 0.5rem 0;
+}
+
+.field-value.empty {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.field-value-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding: 0.5rem 0;
+}
+
+.field-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.field-hint {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.field-error {
+  font-size: 0.78rem;
+  color: #dc2626;
+  margin-top: 0.125rem;
+}
+
+/* ── Inputs & Selects ────────────────────── */
+
+.profile-field input,
+.profile-field select {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.95rem;
+  padding: 0.625rem 0.75rem;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: var(--color-text-main, #0f172a);
+  transition:
+    border-color var(--transition-fast, 150ms) ease,
+    box-shadow var(--transition-fast, 150ms) ease;
+  min-height: 2.75rem; /* 44px WCAG touch target */
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.profile-field input:focus,
+.profile-field select:focus {
+  outline: none;
+  border-color: var(--teal-600, #0d9488);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+/* ── Buttons ─────────────────────────────── */
+
+.btn {
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  border: none;
+  min-height: 2.75rem;
+  padding: 0.625rem 1.5rem;
+  transition:
+    background var(--transition-fast, 150ms) ease,
+    box-shadow var(--transition-fast, 150ms) ease,
+    transform var(--transition-fast, 150ms) ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--teal-700, #0f766e);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--teal-800, #115e59);
+  box-shadow: 0 2px 8px rgba(15, 118, 110, 0.2);
+  transform: translateY(-1px);
+}
+.btn-primary:active:not(:disabled) {
+  background: var(--teal-900, #134e4a);
+  transform: translateY(0);
+}
+.btn-primary:focus-visible {
+  outline: 2px solid var(--teal-500, #14b8a6);
+  outline-offset: 2px;
+}
+
+.btn-secondary {
+  background: #e2e8f0;
+  color: #334155;
+}
+.btn-secondary:hover:not(:disabled) {
+  background: #cbd5e1;
+}
+
+.btn-edit {
+  background: var(--teal-50, #f0fdfa);
+  border: 1.5px solid var(--teal-200, #99f6e4);
+  color: var(--teal-700, #0f766e);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.btn-edit:hover:not(:disabled) {
+  background: var(--teal-100, #ccfbf1);
+  border-color: var(--teal-400, #2dd4bf);
+}
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Account actions ─────────────────────── */
+
+.profile-card-account {
+  background: #fafbfc;
+}
+
+.profile-account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.btn-account-action {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: var(--color-text-main, #0f172a);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  transition: all var(--transition-fast, 150ms) ease;
+}
+
+.btn-account-action:hover {
+  border-color: var(--teal-300, #5eead4);
+  background: var(--teal-50, #f0fdfa);
+  color: var(--teal-700, #0f766e);
+}
+
+.btn-account-action svg {
+  color: var(--color-text-muted, #475569);
+}
+
+.btn-account-action:hover svg {
+  color: var(--teal-600, #0d9488);
+}
+
+/* ── Actions row ─────────────────────────── */
+
+.profile-actions {
+  display: flex;
+  gap: var(--space-sm, 0.75rem);
+  justify-content: flex-end;
+  margin-top: var(--space-md, 1rem);
+}
+
+/* ── Toast feedback (success / error) ─────── */
+
+.profile-toast {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: var(--space-md, 1rem);
+  font-size: 0.9375rem;
+  font-family: 'Sora', sans-serif;
+  line-height: 1.45;
+}
+
+.profile-toast-success {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.profile-toast-error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+/* ── Skeleton Loading ────────────────────── */
+
+.profile-skeleton-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: var(--space-lg, 1.5rem);
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 0.5rem;
+}
+
+.skeleton-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.skeleton-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.skeleton-name {
+  height: 1.5rem;
+  width: 45%;
+}
+
+.skeleton-meta {
+  height: 0.875rem;
+  width: 30%;
+}
+
+.skeleton-section-title {
+  height: 1.125rem;
+  width: 35%;
+  margin-bottom: var(--space-sm, 0.75rem);
+}
+
+.skeleton-field {
+  height: 3rem;
+  width: 100%;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Modal (Password Change) ─────────────── */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 0.875rem;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.modal-header h3 {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-main, #0f172a);
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  padding: 0.375rem;
+  cursor: pointer;
+  color: #94a3b8;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  transition: color 150ms;
+}
+
+.modal-close:hover {
+  color: #475569;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.modal-field label {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-muted, #475569);
+}
+
+.modal-field input {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.9375rem;
+  padding: 0.625rem 0.75rem;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: var(--color-text-main, #0f172a);
+  min-height: 2.75rem;
+  transition: border-color 150ms, box-shadow 150ms;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.modal-field input:focus {
+  outline: none;
+  border-color: var(--teal-600, #0d9488);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+.modal-footer {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 1rem 1.5rem 1.25rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+/* ── Responsive ──────────────────────────── */
+
+@media (max-width: 640px) {
+  .profile-page {
+    padding: 1rem;
+  }
+
+  .profile-identity {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .profile-identity-info h1 {
+    font-size: 1.35rem;
+  }
+
+  .profile-identity .btn-edit {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .modal-content {
+    max-width: 100%;
+  }
+}
+
+/* ── Chip / Tag select ───────────────────── */
+
+.chip-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.chip {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  border: 1.5px solid #cbd5e1;
+  background: var(--color-bg-surface, #ffffff);
+  color: #475569;
+  cursor: pointer;
+  transition: all var(--transition-fast, 150ms) ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  user-select: none;
+  min-height: 2.25rem;
+}
+
+.chip:hover {
+  border-color: var(--teal-400, #2dd4bf);
+  background: var(--teal-50, #f0fdfa);
+}
+
+.chip-active {
+  background: var(--teal-100, #ccfbf1);
+  border-color: var(--teal-500, #14b8a6);
+  color: var(--teal-800, #115e59);
+  font-weight: 600;
+}
+
+.chip-active:hover {
+  background: var(--teal-200, #99f6e4);
+}
+
+.chip-readonly {
+  cursor: default;
+  background: var(--teal-50, #f0fdfa);
+  border: 1px solid var(--teal-200, #99f6e4);
+  color: var(--teal-700, #0f766e);
+  padding: 0.3rem 0.7rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.chip-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip-check {
+  font-size: 0.75rem;
+  font-weight: 700;
+}

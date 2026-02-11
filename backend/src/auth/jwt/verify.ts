@@ -5,7 +5,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-interface JWTPayload {
+export interface JWTPayload {
   sub: string;
   email?: string;
   role?: string;

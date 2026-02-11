@@ -8,11 +8,37 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@shared': path.resolve(__dirname, '../shared'),
+      '@core': path.resolve(__dirname, '../core'),
     },
   },
   server: {
     port: 5173,
     open: true,
+  },
+  build: {
+    // Performance: Target modern browsers for smaller bundles
+    target: 'es2020',
+    // Code splitting: Separate vendor chunks for better caching
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          'router': ['react-router-dom'],
+          'supabase': ['@supabase/supabase-js'],
+        },
+      },
+    },
+    // Enable minification with terser for smaller bundles
+    minify: 'esbuild',
+    // Generate source maps for debugging (hidden from users)
+    sourcemap: false,
+    // CSS code splitting — each lazy route gets its own CSS
+    cssCodeSplit: true,
+    // Increase chunk size warning limit (pages are lazy loaded)
+    chunkSizeWarningLimit: 600,
+  },
+  // CSS optimization
+  css: {
+    devSourcemap: true,
   },
 });

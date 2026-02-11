@@ -5,10 +5,10 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@shared/auth/useAuth';
-import { GENDER_OPTIONS, type Gender } from '@shared/auth/auth-types';
-import { TURNSTILE_CONFIG } from '@shared/auth/constants';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '@core/auth/useAuth';
+import { GENDER_OPTIONS, type Gender } from '@core/auth/auth-types';
+import { TURNSTILE_CONFIG } from '@core/auth/constants';
 import {
   isValidEmail,
   validatePassword,
@@ -16,8 +16,7 @@ import {
   isValidName,
   isValidDateOfBirth,
   doPasswordsMatch,
-  COUNTRY_PHONE_RULES,
-} from '@shared/auth/auth-utils';
+} from '@core/auth/auth-utils';
 import './RegisterForm.css';
 
 // Turnstile global type declaration
@@ -53,7 +52,7 @@ export const RegisterForm: React.FC = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [countryCode, setCountryCode] = useState('+966'); // Default Saudi Arabia
+  const [countryCode] = useState('+20'); // Egypt only
   const [phone, setPhone] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [gender, setGender] = useState<Gender | ''>('');
@@ -76,17 +75,8 @@ export const RegisterForm: React.FC = () => {
    * Load Turnstile script and render widget (explicit mode for SPA)
    */
   useEffect(() => {
-    // Avoid duplicate script loading
-    if (document.getElementById('cf-turnstile-script')) return;
-
-    const script = document.createElement('script');
-    script.id = 'cf-turnstile-script';
-    script.src = `${TURNSTILE_CONFIG.SCRIPT_URL}?render=explicit`;
-    script.async = true;
-    script.defer = true;
-
-    script.onload = () => {
-      if (window.turnstile && turnstileRef.current) {
+    const renderWidget = () => {
+      if (window.turnstile && turnstileRef.current && !widgetIdRef.current) {
         widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
           sitekey: TURNSTILE_CONFIG.SITE_KEY,
           callback: (token: string) => {
@@ -98,6 +88,22 @@ export const RegisterForm: React.FC = () => {
           theme: 'light',
         });
       }
+    };
+
+    // If the script is already loaded (e.g. user came from LoginForm), render immediately
+    if (document.getElementById('cf-turnstile-script')) {
+      setTimeout(renderWidget, 100);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.id = 'cf-turnstile-script';
+    script.src = `${TURNSTILE_CONFIG.SCRIPT_URL}?render=explicit`;
+    script.async = true;
+    script.defer = true;
+
+    script.onload = () => {
+      renderWidget();
     };
 
     document.head.appendChild(script);
@@ -256,8 +262,11 @@ export const RegisterForm: React.FC = () => {
       <form className="register-form" onSubmit={handleSubmit} noValidate>
         {/* Header */}
         <div className="form-header">
+          <Link to="/" className="form-brand" aria-label="Back to home">
+            <div className="form-brand-icon">A</div>
+          </Link>
           <h1 className="form-title">Create Account</h1>
-          <p className="form-subtitle">Join Aethea Medical Platform</p>
+          <p className="form-subtitle">Join Aethea — your health, simplified</p>
         </div>
 
         {/* Global Error */}
@@ -349,30 +358,13 @@ export const RegisterForm: React.FC = () => {
 
         {/* Phone */}
         <div className="form-row">
-          <div className="form-group" style={{ flex: '0 0 140px' }}>
-            <label htmlFor="countryCode" className="form-label">
+          <div className="form-group" style={{ flex: '0 0 120px' }}>
+            <label className="form-label">
               Country Code
             </label>
-            <select
-              id="countryCode"
-              name="countryCode"
-              className={`form-input ${fieldErrors.countryCode ? 'input-error' : ''}`}
-              value={countryCode}
-              onChange={(e) => { setCountryCode(e.target.value); clearFieldError('countryCode'); }}
-              required
-              disabled={loading}
-              aria-invalid={!!fieldErrors.countryCode}
-              aria-describedby={fieldErrors.countryCode ? 'countryCode-error' : undefined}
-            >
-              {Object.entries(COUNTRY_PHONE_RULES).map(([country, rule]) => (
-                <option key={rule.code} value={rule.code}>
-                  {rule.code} ({country})
-                </option>
-              ))}
-            </select>
-            {fieldErrors.countryCode && (
-              <span id="countryCode-error" className="field-error">{fieldErrors.countryCode}</span>
-            )}
+            <div className="form-input country-code-fixed" aria-label="Country code: Egypt +20">
+              🇪🇬 +20
+            </div>
           </div>
 
           <div className="form-group" style={{ flex: '1' }}>
@@ -386,7 +378,7 @@ export const RegisterForm: React.FC = () => {
               className={`form-input ${fieldErrors.phone ? 'input-error' : ''}`}
               value={phone}
               onChange={(e) => { setPhone(e.target.value); clearFieldError('phone'); }}
-              placeholder="5XX XXX XXXX"
+              placeholder="10XXXXXXXX"
               autoComplete="tel"
               required
               disabled={loading}
@@ -464,7 +456,11 @@ export const RegisterForm: React.FC = () => {
               disabled={loading}
               aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
-              {showPassword ? 'Hide' : 'Show'}
+              {showPassword ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              )}
             </button>
           </div>
           <input
@@ -481,9 +477,28 @@ export const RegisterForm: React.FC = () => {
             aria-invalid={!!fieldErrors.password}
             aria-describedby={fieldErrors.password ? 'password-error' : 'password-hint'}
           />
-          <span id="password-hint" className="field-hint">
-            Minimum 8 characters
-          </span>
+          <ul className="password-checklist" id="password-hint" aria-label="Password requirements">
+            <li className={password.length >= 8 ? 'met' : ''}>
+              <span className="check-icon" aria-hidden="true">{password.length >= 8 ? '✓' : '✗'}</span>
+              At least 8 characters
+            </li>
+            <li className={/[A-Z]/.test(password) ? 'met' : ''}>
+              <span className="check-icon" aria-hidden="true">{/[A-Z]/.test(password) ? '✓' : '✗'}</span>
+              One uppercase letter
+            </li>
+            <li className={/[a-z]/.test(password) ? 'met' : ''}>
+              <span className="check-icon" aria-hidden="true">{/[a-z]/.test(password) ? '✓' : '✗'}</span>
+              One lowercase letter
+            </li>
+            <li className={/\d/.test(password) ? 'met' : ''}>
+              <span className="check-icon" aria-hidden="true">{/\d/.test(password) ? '✓' : '✗'}</span>
+              One number
+            </li>
+            <li className={/[^a-zA-Z0-9]/.test(password) ? 'met' : ''}>
+              <span className="check-icon" aria-hidden="true">{/[^a-zA-Z0-9]/.test(password) ? '✓' : '✗'}</span>
+              One special character
+            </li>
+          </ul>
           {fieldErrors.password && (
             <span id="password-error" className="field-error">{fieldErrors.password}</span>
           )}
@@ -502,7 +517,11 @@ export const RegisterForm: React.FC = () => {
               disabled={loading}
               aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
             >
-              {showConfirmPassword ? 'Hide' : 'Show'}
+              {showConfirmPassword ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              )}
             </button>
           </div>
           <input
@@ -545,9 +564,9 @@ export const RegisterForm: React.FC = () => {
         {/* Sign In Link */}
         <div className="signin-link">
           Already have an account?{' '}
-          <a href="/login" className="link">
+          <Link to="/login" className="link">
             Sign in
-          </a>
+          </Link>
         </div>
       </form>
     </div>

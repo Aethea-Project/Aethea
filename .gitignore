@@ -30,10 +30,6 @@ yarn-error.log*
 # Local env files
 .env*.local
 
-# Expo
-.expo/
-.expo-shared/
-
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts

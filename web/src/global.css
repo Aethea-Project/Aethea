@@ -1,0 +1,80 @@
+/* Aethea — Global Reset & Accessibility Foundation */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  /* Base 16px min — research: elderly need ≥16px body text */
+  font-size: clamp(16px, 1vw + 14px, 18px);
+  /* Prevent layout shift on scrollbar appearance */
+  scrollbar-gutter: stable;
+}
+
+/* ---- Accessibility: Reduced Motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---- Accessibility: Focus Visible ---- */
+:focus-visible {
+  outline: 3px solid #2DD4BF;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ---- Accessibility: Skip to Main Content ---- */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 9999;
+  padding: 1rem 1.5rem;
+  background: #0D9488;
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  border-radius: 0 0 0.5rem 0;
+}
+.skip-to-content:focus {
+  left: 0;
+}
+
+/* ---- Scrollbar (wider for elderly = easier to grab) ---- */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: rgba(13,148,136,0.25); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(13,148,136,0.45); }
+
+/* ---- Selection Color ---- */
+::selection {
+  background: rgba(20, 184, 166, 0.2);
+  color: inherit;
+}
+
+/* ---- High Contrast Mode Support ---- */
+@media (forced-colors: active) {
+  * {
+    border-color: currentColor !important;
+  }
+}
+

@@ -3,8 +3,8 @@
  * React web specific auth implementation
  */
 
-import { initializeSupabase } from '@shared/auth/supabase-client';
-import { AuthService } from '@shared/auth/auth-service';
+import { initializeSupabase } from '@core/auth/supabase-client';
+import { AuthService } from '@core/auth/auth-service';
 
 // Initialize Supabase for web (uses localStorage by default)
 const supabase = initializeSupabase({
