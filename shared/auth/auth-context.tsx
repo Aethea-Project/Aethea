@@ -4,15 +4,17 @@
  */
 
 import { createContext } from 'react';
-import { AuthState } from './auth-types';
+import { AuthState, SignUpCredentials, ProfileUpdateRequest, UserProfile } from './auth-types';
 
 // Context value interface
 export interface AuthContextValue extends AuthState {
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName?: string) => Promise<void>;
+  signIn: (email: string, password: string, captchaToken?: string) => Promise<void>;
+  signUp: (credentials: SignUpCredentials) => Promise<{ success: boolean; message?: string }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
+  updateProfile: (updates: ProfileUpdateRequest) => Promise<{ success: boolean; message?: string }>;
+  refreshProfile: () => Promise<void>;
 }
 
 // Create context with default null value

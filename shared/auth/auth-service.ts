@@ -20,11 +20,14 @@ import {
   isValidEmail,
   validatePassword,
   isValidPhone,
+  isValidName,
+  isValidDateOfBirth,
+  isValidGender,
   sanitizeInput,
   rateLimiter,
 } from './auth-utils';
 import { shouldRefreshToken, clearTokenCache } from './token-manager';
-import { RATE_LIMITS } from './constants';
+import { RATE_LIMITS, AUTH_ERROR_MESSAGES } from './constants';
 
 export class AuthService {
   private repository: AuthRepository;
@@ -33,6 +36,13 @@ export class AuthService {
   constructor(private supabase: SupabaseClient<Database>) {
     this.repository = new AuthRepository(supabase);
     this.initializeAuthListener();
+  }
+
+  /**
+   * Get Supabase client for advanced operations
+   */
+  getSupabaseClient(): SupabaseClient<Database> {
+    return this.supabase;
   }
 
   /**
@@ -81,6 +91,24 @@ export class AuthService {
    * Sign up new user with validation
    */
   async signUp(credentials: SignUpCredentials): Promise<AuthResponse<User>> {
+    // Validate first name
+    const firstNameValidation = isValidName(credentials.firstName);
+    if (!firstNameValidation.valid) {
+      return {
+        data: null,
+        error: { message: `First name: ${firstNameValidation.error}` },
+      };
+    }
+
+    // Validate last name
+    const lastNameValidation = isValidName(credentials.lastName);
+    if (!lastNameValidation.valid) {
+      return {
+        data: null,
+        error: { message: `Last name: ${lastNameValidation.error}` },
+      };
+    }
+
     // Validate email
     if (!isValidEmail(credentials.email)) {
       return {
@@ -98,11 +126,29 @@ export class AuthService {
       };
     }
 
-    // Validate phone if provided
-    if (credentials.phone && !isValidPhone(credentials.phone)) {
+    // Validate date of birth
+    const dobValidation = isValidDateOfBirth(credentials.dateOfBirth);
+    if (!dobValidation.valid) {
       return {
         data: null,
-        error: { message: 'Invalid phone number format' },
+        error: { message: dobValidation.error || AUTH_ERROR_MESSAGES.INVALID_DOB },
+      };
+    }
+
+    // Validate gender
+    if (!isValidGender(credentials.gender)) {
+      return {
+        data: null,
+        error: { message: AUTH_ERROR_MESSAGES.INVALID_GENDER },
+      };
+    }
+
+    // Validate phone
+    const phoneValidation = isValidPhone(credentials.countryCode, credentials.phone);
+    if (!phoneValidation.valid) {
+      return {
+        data: null,
+        error: { message: phoneValidation.error || AUTH_ERROR_MESSAGES.INVALID_PHONE },
       };
     }
 
@@ -110,8 +156,13 @@ export class AuthService {
     const sanitized: SignUpCredentials = {
       email: sanitizeInput(credentials.email.toLowerCase()),
       password: credentials.password,
-      fullName: credentials.fullName ? sanitizeInput(credentials.fullName) : undefined,
-      phone: credentials.phone ? sanitizeInput(credentials.phone) : undefined,
+      firstName: sanitizeInput(credentials.firstName),
+      lastName: sanitizeInput(credentials.lastName),
+      dateOfBirth: credentials.dateOfBirth,
+      gender: credentials.gender,
+      countryCode: credentials.countryCode,
+      phone: sanitizeInput(credentials.phone),
+      captchaToken: credentials.captchaToken,
     };
 
     return this.repository.signUp(sanitized);
@@ -149,6 +200,7 @@ export class AuthService {
     const sanitized: SignInCredentials = {
       email: sanitizeInput(credentials.email.toLowerCase()),
       password: credentials.password,
+      captchaToken: credentials.captchaToken,
     };
 
     const response = await this.repository.signIn(sanitized);
@@ -235,23 +287,67 @@ export class AuthService {
     userId: string,
     updates: ProfileUpdateRequest
   ): Promise<AuthResponse<UserProfile>> {
-    // Validate phone if provided
-    if (updates.phone && !isValidPhone(updates.phone)) {
-      return {
-        data: null,
-        error: { message: 'Invalid phone number format' },
-      };
+    // Validate firstName if provided
+    if (updates.firstName) {
+      const firstNameValidation = isValidName(updates.firstName);
+      if (!firstNameValidation.valid) {
+        return {
+          data: null,
+          error: { message: `First name: ${firstNameValidation.error}` },
+        };
+      }
+    }
+
+    // Validate lastName if provided
+    if (updates.lastName) {
+      const lastNameValidation = isValidName(updates.lastName);
+      if (!lastNameValidation.valid) {
+        return {
+          data: null,
+          error: { message: `Last name: ${lastNameValidation.error}` },
+        };
+      }
+    }
+
+    // Validate height if provided (must be reasonable: 30–300 cm)
+    if (updates.heightCm !== undefined) {
+      if (updates.heightCm < 30 || updates.heightCm > 300) {
+        return {
+          data: null,
+          error: { message: 'Height must be between 30 and 300 cm' },
+        };
+      }
+    }
+
+    // Validate weight if provided (must be reasonable: 1–500 kg)
+    if (updates.weightKg !== undefined) {
+      if (updates.weightKg < 1 || updates.weightKg > 500) {
+        return {
+          data: null,
+          error: { message: 'Weight must be between 1 and 500 kg' },
+        };
+      }
     }
 
     // Sanitize inputs
     const sanitized: ProfileUpdateRequest = {
-      fullName: updates.fullName ? sanitizeInput(updates.fullName) : undefined,
+      firstName: updates.firstName ? sanitizeInput(updates.firstName) : undefined,
+      lastName: updates.lastName ? sanitizeInput(updates.lastName) : undefined,
+      gender: updates.gender,
       phone: updates.phone ? sanitizeInput(updates.phone) : undefined,
       dateOfBirth: updates.dateOfBirth,
       bloodType: updates.bloodType,
       allergies: updates.allergies ? sanitizeInput(updates.allergies) : undefined,
       chronicConditions: updates.chronicConditions
         ? sanitizeInput(updates.chronicConditions)
+        : undefined,
+      heightCm: updates.heightCm,
+      weightKg: updates.weightKg,
+      emergencyContactName: updates.emergencyContactName
+        ? sanitizeInput(updates.emergencyContactName)
+        : undefined,
+      emergencyContactPhone: updates.emergencyContactPhone
+        ? sanitizeInput(updates.emergencyContactPhone)
         : undefined,
       avatarUrl: updates.avatarUrl,
     };

@@ -1,0 +1,104 @@
+/* Header Component Styles */
+
+.header-profile-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  backgroundColor: var(--color-primary-50);
+  border: 1px solid var(--color-primary-200);
+  transition: all 200ms ease;
+}
+
+.header-profile-link:hover {
+  background-color: var(--color-primary-100);
+  border-color: var(--color-primary-300);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-profile-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--color-primary-500);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 200ms ease;
+}
+
+.header-profile-link:hover .header-profile-avatar {
+  background-color: var(--color-primary-600);
+  transform: scale(1.05);
+}
+
+.header-profile-name {
+  color: var(--color-primary-700);
+  font-weight: 600;
+  transition: color 200ms ease;
+}
+
+.header-profile-link:hover .header-profile-name {
+  color: var(--color-primary-800);
+}
+
+/* Dropdown Menu Styles */
+.header-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  z-index: 1000;
+  overflow: hidden;
+  animation: dropdownSlideIn 200ms ease;
+}
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  text-decoration: none;
+  color: var(--color-text-primary);
+  transition: background-color 150ms ease;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9375rem;
+}
+
+.header-dropdown-item:hover {
+  background-color: var(--color-primary-50);
+}
+
+.header-dropdown-item:last-child:hover {
+  background-color: var(--color-error-50);
+}
+
+.header-dropdown-item svg {
+  flex-shrink: 0;
+}
+
+.header-dropdown-item:not(:last-child) {
+  border-bottom: 1px solid var(--color-neutral-100);
+}
