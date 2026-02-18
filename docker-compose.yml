@@ -1,0 +1,233 @@
+# =============================================
+# Aethea Medical Platform — Docker Compose
+# One command to start everything:
+#   docker compose up              (dev — default)
+#   docker compose --profile prod up  (production)
+#   docker compose --profile tools up  (dev + admin UIs)
+# =============================================
+
+services:
+  # ============ DATA STORES ============
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: aethea-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-aethea_local}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - aethea-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: aethea-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
+    networks:
+      - aethea-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============ APPLICATION SERVICES ============
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: aethea-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-3001}:3001"
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-aethea_local}
+      REDIS_URL: redis://redis:6379
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/prisma:/app/prisma
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - aethea-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      target: development
+    container_name: aethea-web
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-5173}:5173"
+    env_file:
+      - ./web/.env
+    volumes:
+      - ./web/src:/app/src
+      - ./web/index.html:/app/index.html
+      - ./core:/core
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - aethea-network
+
+  # ============ INFRASTRUCTURE ============
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: aethea-tunnel
+    restart: unless-stopped
+    command: tunnel --config /etc/cloudflared/config.yml run
+    volumes:
+      - ./cloudflared/config.yml:/etc/cloudflared/config.yml:ro
+      - ${CLOUDFLARED_CREDENTIALS_DIR:-~/.cloudflared}:/etc/cloudflared/creds:ro
+    environment:
+      TUNNEL_ORIGIN_CERT: /etc/cloudflared/creds/cert.pem
+    networks:
+      - aethea-network
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  # ============ PRODUCTION SERVICES ============
+
+  backend-prod:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: aethea-backend-prod
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-3001}:3001"
+    env_file:
+      - ./backend/.env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-aethea_local}
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - aethea-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
+    profiles:
+      - prod
+
+  web-prod:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      target: production
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+        VITE_API_URL: ${VITE_API_URL:-https://api.aethea.me}
+        VITE_TURNSTILE_SITE_KEY: ${VITE_TURNSTILE_SITE_KEY}
+    container_name: aethea-web-prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend-prod:
+        condition: service_started
+    networks:
+      - aethea-network
+    profiles:
+      - prod
+
+  # ============ DEV TOOLS (optional) ============
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: aethea-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@aethea.me}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - aethea-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - tools
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: aethea-redisinsight
+    restart: unless-stopped
+    ports:
+      - "5540:5540"
+    networks:
+      - aethea-network
+    depends_on:
+      redis:
+        condition: service_healthy
+    profiles:
+      - tools
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: aethea-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+    networks:
+      - aethea-network
+    profiles:
+      - tools
+
+# ============ VOLUMES ============
+volumes:
+  postgres_data:
+  redis_data:
+  pgadmin_data:
+
+# ============ NETWORKS ============
+networks:
+  aethea-network:
+    name: aethea-network
+    driver: bridge

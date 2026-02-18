@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { FeatureHeader } from '../../components/FeatureHeader';
+import { imageAssets } from '../../constants/imageAssets';
 import './styles.css';
 
 /**
@@ -167,12 +169,13 @@ export default function MedicineGuidePage() {
   return (
     <div className="medicine-guide-page">
       {/* Header */}
-      <div className="page-header">
-        <div className="header-content">
-          <h1>💊 Medicine Guidance</h1>
-          <p>Search for medicines and check their safety based on your health profile</p>
-        </div>
-      </div>
+      <FeatureHeader
+        title="Medicine Guidance"
+        subtitle="Search for medicines and check their safety based on your health profile"
+        variant="med"
+        imageSrc={imageAssets.headers.medicine}
+        imageAlt="Pharmacy and medication"
+      />
 
       {/* Patient Conditions Banner */}
       <div className="conditions-banner">

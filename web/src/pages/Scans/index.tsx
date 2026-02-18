@@ -3,30 +3,56 @@
  * Grid view for medical scans with filters, zoom modal, and comparison features
  */
 
-import { useState } from 'react';
-import { mockScans } from '@core/data/mockData';
+import { useEffect, useMemo, useState } from 'react';
 import { MedicalScan, ScanType, ScanStatus } from '@core/types/medical';
+import { medicalApi } from '../../services/medicalApi';
+import { FeatureHeader } from '../../components/FeatureHeader';
+import { imageAssets } from '../../constants/imageAssets';
 import './styles.css';
 
 const ScansPage = () => {
+  const [scans, setScans] = useState<MedicalScan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedScan, setSelectedScan] = useState<MedicalScan | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [filterType, setFilterType] = useState<ScanType | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<ScanStatus | 'all'>('all');
   const [sortBy, setSortBy] = useState<'date' | 'priority' | 'type'>('date');
 
-  // Filter and sort scans
-  const filteredScans = mockScans
-    .filter(scan => filterType === 'all' || scan.type === filterType)
-    .filter(scan => filterStatus === 'all' || scan.status === filterStatus)
-    .sort((a, b) => {
-      if (sortBy === 'date') return new Date(b.scanDate).getTime() - new Date(a.scanDate).getTime();
-      if (sortBy === 'priority') {
-        const priorityOrder = { emergency: 3, urgent: 2, routine: 1 };
-        return priorityOrder[b.priority] - priorityOrder[a.priority];
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const data = await medicalApi.fetchScans();
+        if (!active) return;
+        // Ensure images array exists to keep UI stable
+        setScans(data.map((scan) => ({ ...scan, images: scan.images ?? [] })) as MedicalScan[]);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load scans');
+      } finally {
+        if (active) setLoading(false);
       }
-      return a.type.localeCompare(b.type);
-    });
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const filteredScans = useMemo(() => {
+    return scans
+      .filter((scan) => filterType === 'all' || scan.type === filterType)
+      .filter((scan) => filterStatus === 'all' || scan.status === filterStatus)
+      .sort((a, b) => {
+        if (sortBy === 'date') return new Date(b.date).getTime() - new Date(a.date).getTime();
+        if (sortBy === 'priority') {
+          const priorityOrder = { emergency: 3, urgent: 2, routine: 1 } as const;
+          return priorityOrder[b.priority] - priorityOrder[a.priority];
+        }
+        return a.type.localeCompare(b.type);
+      });
+  }, [scans, filterType, filterStatus, sortBy]);
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -54,15 +80,24 @@ const ScansPage = () => {
     setSelectedScan(null);
   };
 
+  if (loading) {
+    return <div className="scans-page"><p className="loading">Loading scans…</p></div>;
+  }
+
+  if (error) {
+    return <div className="scans-page"><p className="error">Failed to load scans: {error}</p></div>;
+  }
+
   return (
     <div className="scans-page">
       {/* Header */}
-      <div className="scans-header">
-        <div>
-          <h1 className="scans-title">Medical Scans</h1>
-          <p className="scans-subtitle">View and manage your medical imaging results</p>
-        </div>
-      </div>
+      <FeatureHeader
+        title="Medical Scans"
+        subtitle="View and manage your medical imaging results"
+        variant="scan"
+        imageSrc={imageAssets.headers.scan}
+        imageAlt="MRI and CT scan equipment"
+      />
 
       {/* Main Content */}
       <div className="scans-content">
@@ -71,15 +106,15 @@ const ScansPage = () => {
           {/* Stats Cards */}
           <div className="stats-grid">
             <div className="stat-card">
-              <div className="stat-value">{mockScans.length}</div>
+              <div className="stat-value">{scans.length}</div>
               <div className="stat-label">Total Scans</div>
             </div>
             <div className="stat-card">
-              <div className="stat-value">{mockScans.filter(s => s.status === 'completed').length}</div>
+              <div className="stat-value">{scans.filter(s => s.status === 'completed').length}</div>
               <div className="stat-label">Completed</div>
             </div>
             <div className="stat-card">
-              <div className="stat-value">{mockScans.filter(s => s.priority === 'urgent' || s.priority === 'emergency').length}</div>
+              <div className="stat-value">{scans.filter(s => s.priority === 'urgent' || s.priority === 'emergency').length}</div>
               <div className="stat-label">High Priority</div>
             </div>
           </div>
@@ -94,7 +129,7 @@ const ScansPage = () => {
               <select 
                 className="filter-select"
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as 'date' | 'priority' | 'type')}
               >
                 <option value="date">Most Recent</option>
                 <option value="priority">Priority</option>
@@ -119,8 +154,8 @@ const ScansPage = () => {
                   X-Ray
                 </button>
                 <button
-                  className={`filter-button ${filterType === 'CT' ? 'active' : ''}`}
-                  onClick={() => setFilterType('CT')}
+                  className={`filter-button ${filterType === 'CT Scan' ? 'active' : ''}`}
+                  onClick={() => setFilterType('CT Scan')}
                 >
                   CT Scan
                 </button>
@@ -175,7 +210,7 @@ const ScansPage = () => {
                     <div key={image.id} className="scan-image-wrapper">
                       <img
                         src={image.url}
-                        alt={`${scan.type} - ${image.viewType}`}
+                        alt={image.caption || scan.type}
                         className="scan-image"
                       />
                       {index === 3 && scan.images.length > 4 && (
@@ -209,7 +244,7 @@ const ScansPage = () => {
 
                   <div className="scan-card-footer">
                     <div className="scan-card-date">
-                      📅 {new Date(scan.scanDate).toLocaleDateString()}
+                      📅 {new Date(scan.date).toLocaleDateString()}
                     </div>
                     <div className="scan-card-meta">
                       <span className="scan-card-count">📸 {scan.images.length}</span>
@@ -246,11 +281,11 @@ const ScansPage = () => {
                 <div className="scan-modal-image-container">
                   <img
                     src={selectedScan.images[selectedImageIndex].url}
-                    alt={`${selectedScan.type} - ${selectedScan.images[selectedImageIndex].viewType}`}
+                    alt={selectedScan.images[selectedImageIndex].caption || selectedScan.type}
                     className="scan-modal-image"
                   />
                   <div className="scan-modal-image-info">
-                    <span>{selectedScan.images[selectedImageIndex].viewType} • {selectedScan.images[selectedImageIndex].position}</span>
+                    <span>{selectedScan.images[selectedImageIndex].caption || 'Scan image'}</span>
                     <span>{selectedImageIndex + 1} / {selectedScan.images.length}</span>
                   </div>
                 </div>
@@ -262,7 +297,7 @@ const ScansPage = () => {
                       <img
                         key={image.id}
                         src={image.url}
-                        alt={image.viewType}
+                          alt={image.caption || 'Scan image'}
                         className={`scan-modal-thumbnail ${index === selectedImageIndex ? 'active' : ''}`}
                         onClick={() => setSelectedImageIndex(index)}
                       />
@@ -302,23 +337,11 @@ const ScansPage = () => {
                 <div className="scan-modal-info">
                   <div className="info-row">
                     <span className="info-label">Date:</span>
-                    <span className="info-value">{new Date(selectedScan.scanDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                    <span className="info-value">{new Date(selectedScan.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                   </div>
                   <div className="info-row">
-                    <span className="info-label">Ordered By:</span>
-                    <span className="info-value">Dr. {selectedScan.orderingPhysician}</span>
-                  </div>
-                  <div className="info-row">
-                    <span className="info-label">Facility:</span>
-                    <span className="info-value">{selectedScan.facility}</span>
-                  </div>
-                  <div className="info-row">
-                    <span className="info-label">Modality:</span>
-                    <span className="info-value">{selectedScan.modality}</span>
-                  </div>
-                  <div className="info-row">
-                    <span className="info-label">Protocol:</span>
-                    <span className="info-value">{selectedScan.protocol}</span>
+                    <span className="info-label">Radiologist:</span>
+                    <span className="info-value">{selectedScan.radiologist}</span>
                   </div>
                 </div>
 
@@ -326,13 +349,6 @@ const ScansPage = () => {
                   <div className="scan-modal-section findings">
                     <h3>Findings</h3>
                     <p>{selectedScan.findings}</p>
-                  </div>
-                )}
-
-                {selectedScan.impressions && (
-                  <div className="scan-modal-section impressions">
-                    <h3>Impressions</h3>
-                    <p>{selectedScan.impressions}</p>
                   </div>
                 )}
 

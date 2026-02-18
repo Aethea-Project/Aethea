@@ -1,0 +1,26 @@
+.reservations-page { padding: 2rem; animation: pageIn 0.3s ease; }
+.res-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.res-title { font-size: 2rem; font-weight: 700; }
+.res-actions { display: flex; gap: 0.75rem; }
+.res-card { background: #fff; border-radius: 1rem; padding: 1.25rem; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05); margin-bottom: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.res-row { display: flex; gap: 0.5rem; font-size: 0.95rem; }
+.res-label { color: #475569; font-weight: 600; min-width: 100px; }
+.res-status { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.65rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; }
+.res-status.scheduled { background: #e0f2fe; color: #0369a1; }
+.res-status.confirmed { background: #ecfeff; color: #0f766e; }
+.res-status.in_progress { background: #fef9c3; color: #92400e; }
+.res-status.completed { background: #dcfce7; color: #15803d; }
+.res-status.cancelled { background: #fee2e2; color: #b91c1c; }
+.res-status.no_show { background: #f8fafc; color: #475569; }
+.res-buttons { display: flex; gap: 0.5rem; }
+.btn { padding: 0.5rem 0.85rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; background: #fff; cursor: pointer; }
+.btn-primary { background: linear-gradient(135deg, #0ea5e9, #0d9488); color: #fff; border: none; }
+.btn-ghost { background: #f8fafc; color: #0f172a; }
+.form-card { background: #fff; border-radius: 1rem; padding: 1.25rem; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05); margin-bottom: 1.25rem; }
+.form-grid { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.form-control { display: flex; flex-direction: column; gap: 0.3rem; }
+.form-control label { font-weight: 600; color: #475569; }
+.form-control input, .form-control textarea, .form-control select { border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 0.6rem 0.75rem; font-size: 0.95rem; }
+.error { color: #b91c1c; background: #fee2e2; border-radius: 0.75rem; padding: 0.75rem; margin-bottom: 1rem; }
+.loading { color: #0f172a; padding: 1rem 0; }
+@keyframes pageIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }

@@ -8,6 +8,9 @@
     <meta name="theme-color" content="#0D9488" />
     <meta name="color-scheme" content="light" />
 
+    <!-- Content Security Policy - Allow Cloudflare Turnstile CAPTCHA -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://smxwhvdmucvctxzudtxg.supabase.co https://challenges.cloudflare.com https://cloudflareinsights.com wss://smxwhvdmucvctxzudtxg.supabase.co; frame-src 'self' https://challenges.cloudflare.com; worker-src 'self' blob:;" />
+
     <!-- Preconnect to Google Fonts for faster font loading (LCP optimization) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

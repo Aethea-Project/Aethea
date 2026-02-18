@@ -180,7 +180,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         error: error instanceof Error ? { message: error.message } : null,
       }));
     }
-  }, []);
+  }, [navigate]);
 
   // Reset password handler
   const resetPassword = useCallback(async (email: string) => {

@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LabTestStatus {
+  normal
+  borderline
+  abnormal
+  critical
+}
+
+enum ScanPriority {
+  routine
+  urgent
+  emergency
+}
+
+enum ScanStatus {
+  pending
+  in_progress
+  completed
+  reviewed
+}
+
+enum ReservationStatus {
+  scheduled
+  confirmed
+  in_progress
+  completed
+  cancelled
+  no_show
+}
+
+model User {
+  id           String        @id @db.Uuid
+  email        String        @unique @db.Text
+  firstName    String?       @db.VarChar(50)
+  lastName     String?       @db.VarChar(50)
+  createdAt    DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime      @updatedAt @db.Timestamptz(6)
+  labTests     LabTest[]
+  scans        Scan[]
+  reservations Reservation[]
+
+  @@map("users")
+}
+
+model LabTest {
+  id          String        @id @default(uuid()) @db.Uuid
+  userId      String        @db.Uuid
+  testName    String        @db.VarChar(120)
+  category    String        @db.VarChar(80)
+  value       String        @db.VarChar(120)
+  unit        String        @db.VarChar(40)
+  refMin      Decimal?      @db.Decimal(10, 2)
+  refMax      Decimal?      @db.Decimal(10, 2)
+  refText     String?       @db.VarChar(120)
+  status      LabTestStatus @default(normal)
+  orderedBy   String        @db.VarChar(120)
+  notes       String?
+  measuredAt  DateTime      @db.Timestamptz(6)
+  createdAt   DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime      @updatedAt @db.Timestamptz(6)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, measuredAt])
+  @@map("lab_tests")
+}
+
+model Scan {
+  id          String       @id @default(uuid()) @db.Uuid
+  userId      String       @db.Uuid
+  type        String       @db.VarChar(80)
+  bodyPart    String       @db.VarChar(80)
+  description String
+  findings    String?
+  radiologist String       @db.VarChar(120)
+  priority    ScanPriority @default(routine)
+  status      ScanStatus   @default(pending)
+  reportUrl   String?
+  scanDate    DateTime     @db.Timestamptz(6)
+  createdAt   DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime     @updatedAt @db.Timestamptz(6)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, scanDate])
+  @@map("scans")
+}
+
+model Reservation {
+  id          String            @id @default(uuid()) @db.Uuid
+  userId      String            @db.Uuid
+  doctorName  String            @db.VarChar(120)
+  specialty   String            @db.VarChar(120)
+  reason      String
+  location    String            @db.VarChar(180)
+  startAt     DateTime          @db.Timestamptz(6)
+  endAt       DateTime?         @db.Timestamptz(6)
+  status      ReservationStatus @default(scheduled)
+  notes       String?
+  createdAt   DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime          @updatedAt @db.Timestamptz(6)
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startAt])
+  @@map("reservations")
+}

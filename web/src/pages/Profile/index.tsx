@@ -83,7 +83,6 @@ const ProfilePage: React.FC = () => {
 
   // Password change
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -201,7 +200,6 @@ const ProfilePage: React.FC = () => {
       setPasswordSuccess('Password updated successfully!');
       setNewPassword('');
       setConfirmNewPassword('');
-      setCurrentPassword('');
       setTimeout(() => setShowPasswordModal(false), 2000);
     } catch {
       setPasswordError('Failed to update password. Please try again.');
@@ -504,7 +502,6 @@ const ProfilePage: React.FC = () => {
                 setPasswordSuccess('');
                 setNewPassword('');
                 setConfirmNewPassword('');
-                setCurrentPassword('');
               }}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">

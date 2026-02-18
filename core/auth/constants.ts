@@ -28,8 +28,16 @@ export const getSupabaseConfig = () => {
 };
 
 // Cloudflare Turnstile CAPTCHA
+// Fallback: Cloudflare's always-pass test key (safe for local dev, never use in production)
+// See: https://developers.cloudflare.com/turnstile/troubleshooting/testing/
+const turnstileSiteKey =
+  (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_TURNSTILE_SITE_KEY) ||
+  (typeof process !== 'undefined' && process.env?.VITE_TURNSTILE_SITE_KEY) ||
+  (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_TURNSTILE_SITE_KEY) ||
+  '1x00000000000000000000AA';
+
 export const TURNSTILE_CONFIG = {
-  SITE_KEY: '0x4AAAAAACYzi5W7lMirEEZA',
+  SITE_KEY: turnstileSiteKey,
   SCRIPT_URL: 'https://challenges.cloudflare.com/turnstile/v0/api.js',
 } as const;
 

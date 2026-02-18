@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { FeatureHeader } from '../../components/FeatureHeader';
+import { imageAssets } from '../../constants/imageAssets';
 import './styles.css';
 
 /**
@@ -170,12 +172,13 @@ export default function RecoveryAssistantPage() {
   return (
     <div className="recovery-assistant-page">
       {/* Header */}
-      <div className="page-header">
-        <div className="header-content">
-          <h1>💪 Recovery Assistant</h1>
-          <p>Personalized exercises and guidance for your recovery</p>
-        </div>
-      </div>
+      <FeatureHeader
+        title="Recovery Assistant"
+        subtitle="Personalized exercises and guidance for your recovery"
+        variant="rec"
+        imageSrc={imageAssets.headers.recovery}
+        imageAlt="Physical therapy and recovery"
+      />
 
       {/* Progress Banner */}
       <div className="progress-banner">

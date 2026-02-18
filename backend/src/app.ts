@@ -49,7 +49,7 @@ export function createApp(config: AppConfig = {}) {
   const {
     supabaseUrl,
     supabaseServiceKey,
-    corsOrigins = ['http://localhost:5173', 'http://localhost:19006'],
+    corsOrigins = ['http://localhost:5173', 'http://localhost:19006', 'https://aethea.me'],
     isProduction = process.env.NODE_ENV === 'production',
   } = config;
 

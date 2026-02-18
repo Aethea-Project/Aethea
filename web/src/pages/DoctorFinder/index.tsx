@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { FeatureHeader } from '../../components/FeatureHeader';
+import { imageAssets } from '../../constants/imageAssets';
 import './styles.css';
 
 /**
@@ -164,12 +166,13 @@ export default function DoctorFinderPage() {
   return (
     <div className="doctor-finder-page">
       {/* Header */}
-      <div className="page-header">
-        <div className="header-content">
-          <h1>📍 Find a Doctor</h1>
-          <p>Search for doctors near you and book appointments instantly</p>
-        </div>
-      </div>
+      <FeatureHeader
+        title="Find a Doctor"
+        subtitle="Search for doctors near you and book appointments instantly"
+        variant="doc"
+        imageSrc={imageAssets.headers.doctor}
+        imageAlt="Healthcare professionals"
+      />
 
       <div className="content-layout">
         {/* Sidebar - Search & Filters */}
