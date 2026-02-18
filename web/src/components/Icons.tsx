@@ -1,12 +1,5 @@
 import React from 'react';
 
-export const LogoIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} stroke="currentColor">
-    <path d="M12 3L14.5 8.5L20 9.5L16 14L17.5 20L12 17L6.5 20L8 14L4 9.5L9.5 8.5L12 3Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M12 17V21M12 14V3" strokeWidth="1.5" strokeOpacity="0.5"/>
-  </svg>
-);
-
 export const DashboardIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="3" width="7" height="7"></rect>
@@ -71,11 +64,13 @@ export const ChatIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
   </svg>
 );
 
-export const LogoutIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
+export const CalendarIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-    <polyline points="16 17 21 12 16 7"></polyline>
-    <line x1="21" y1="12" x2="9" y2="12"></line>
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+    <line x1="16" y1="2" x2="16" y2="6"></line>
+    <line x1="8" y1="2" x2="8" y2="6"></line>
+    <line x1="3" y1="10" x2="21" y2="10"></line>
+    <rect x="7" y="14" width="5" height="4" rx="1"></rect>
   </svg>
 );
 

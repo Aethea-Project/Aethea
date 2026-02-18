@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { FeatureHeader } from '../../components/FeatureHeader';
+import { imageAssets } from '../../constants/imageAssets';
 import './styles.css';
 
 /**
@@ -147,12 +149,13 @@ export default function NutritionPlannerPage() {
   return (
     <div className="nutrition-planner-page">
       {/* Header */}
-      <div className="page-header">
-        <div className="header-content">
-          <h1>🥗 Nutrition Planner</h1>
-          <p>Personalized meal plans based on your health profile</p>
-        </div>
-      </div>
+      <FeatureHeader
+        title="Nutrition Planner"
+        subtitle="Personalized meal plans based on your health profile"
+        variant="food"
+        imageSrc={imageAssets.headers.nutrition}
+        imageAlt="Healthy meal planning"
+      />
 
       {/* Health Profile Summary */}
       <div className="profile-banner">

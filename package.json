@@ -5,21 +5,38 @@
   "private": true,
   "workspaces": [
     "web",
-    "shared"
+    "core",
+    "backend"
   ],
   "scripts": {
-    "setup": "npm install --legacy-peer-deps && npm run install:shared",
+    "setup": "npm install --legacy-peer-deps && npm run install:core",
     "install:web": "cd web && npm install --legacy-peer-deps",
-    "install:shared": "cd shared && npm install --legacy-peer-deps",
+    "install:core": "cd core && npm install --legacy-peer-deps",
+    "install:shared": "npm run install:core",
     "dev": "cd web && npm run dev",
     "build": "cd web && npm run build",
-    "clean": "npm run clean:web && npm run clean:shared",
+    "clean": "npm run clean:web && npm run clean:core",
     "clean:web": "cd web && rm -rf node_modules dist .vite",
-    "clean:shared": "cd shared && rm -rf node_modules dist",
-    "lint": "cd web && npm run lint"
-  },
-  "devDependencies": {
-    "concurrently": "^8.2.2"
+    "clean:core": "cd core && rm -rf node_modules dist",
+    "clean:shared": "npm run clean:core",
+    "lint": "cd web && npm run lint",
+
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down",
+    "docker:db": "docker compose up postgres redis -d",
+    "docker:prod": "docker compose --profile prod up --build -d",
+    "docker:tools": "docker compose --profile tools up -d",
+    "docker:logs": "docker compose logs -f",
+    "docker:clean": "docker compose down -v --rmi local",
+    "docker:restart": "docker compose down && docker compose up --build",
+    "docker:tunnel": "docker compose up cloudflared -d",
+    "docker:prisma:studio": "cd backend && npx prisma studio",
+    "docker:prisma:migrate": "cd backend && npx prisma migrate dev",
+    "start:server": "powershell -ExecutionPolicy Bypass -File ./scripts/start-server.ps1",
+    "start:server:dev": "powershell -ExecutionPolicy Bypass -File ./scripts/start-server.ps1 -DevMode",
+    "start:server:prod": "powershell -ExecutionPolicy Bypass -File ./scripts/start-server.ps1 -Production",
+    "start:server:all": "powershell -ExecutionPolicy Bypass -File ./scripts/start-server.ps1 -WithTools",
+    "pause:server": "powershell -ExecutionPolicy Bypass -File ./scripts/pause-server.ps1"
   },
   "engines": {
     "node": ">=18.0.0",

@@ -6,17 +6,32 @@
  * Source: Express.js Security Best Practices
  *   "Block authorization attempts using two metrics — consecutive fails by same user+IP,
  *    and total fails from an IP."
- * Package: express-rate-limit (in-memory by default)
  *
- * To switch to Redis-backed (production):
- *   npm install rate-limit-redis
- *   import RedisStore from 'rate-limit-redis';
- *   import { createClient } from 'redis';
- *   const redisClient = createClient({ url: process.env.REDIS_URL });
- *   Then pass `store: new RedisStore({ sendCommand: (...args) => redisClient.sendCommand(args) })`
+ * Uses Redis-backed store when REDIS_URL is available (Docker/production),
+ * falls back to in-memory store for simple local development.
  */
 
-import rateLimit from 'express-rate-limit';
+import rateLimit, { type Store } from 'express-rate-limit';
+import { createClient } from 'redis';
+import logger from '../lib/logger.js';
+
+/* ---------- Redis store (optional) ---------- */
+let redisStore: Store | undefined;
+
+if (process.env.REDIS_URL) {
+  try {
+    const { RedisStore } = await import('rate-limit-redis');
+    const redisClient = createClient({ url: process.env.REDIS_URL });
+    await redisClient.connect();
+    redisStore = new RedisStore({
+      sendCommand: (...args: string[]) => redisClient.sendCommand(args),
+      prefix: 'rl:',
+    });
+    logger.info('Rate limiter using Redis store');
+  } catch {
+    logger.warn('Redis unavailable for rate limiter — falling back to in-memory store');
+  }
+}
 
 /**
  * General API rate limiter — 100 requests per 15 minutes per IP
@@ -26,6 +41,7 @@ export const apiLimiter = rateLimit({
   max: 100,                  // limit each IP to 100 requests per window
   standardHeaders: true,     // Return rate limit info in `RateLimit-*` headers
   legacyHeaders: false,      // Disable `X-RateLimit-*` headers
+  ...(redisStore && { store: redisStore }),
   message: {
     error: 'Too many requests',
     message: 'You have exceeded the rate limit. Please try again later.',
@@ -45,6 +61,7 @@ export const authLimiter = rateLimit({
   max: 10,                   // only 10 auth attempts per window
   standardHeaders: true,
   legacyHeaders: false,
+  ...(redisStore && { store: redisStore }),
   message: {
     error: 'Too many authentication attempts',
     message: 'Please try again after 15 minutes.',

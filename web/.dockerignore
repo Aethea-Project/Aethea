@@ -1,0 +1,34 @@
+# Dependencies (rebuilt inside container)
+node_modules/
+dist/
+
+# Version control
+.git/
+.github/
+
+# Environment files (injected via build args)
+.env
+.env.*
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Tests & coverage
+coverage/
+
+# Docker files
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Nginx config is COPIED separately
+# nginx.conf  ← keep this in context

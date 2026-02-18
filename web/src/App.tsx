@@ -11,11 +11,12 @@ import { useAuth } from '@core/auth/useAuth';
 import { LoginForm } from './components/LoginForm';
 import { RegisterForm } from './components/RegisterForm';
 import { ForgotPasswordForm } from './components/ForgotPasswordForm';
+import { imageAssets } from './constants/imageAssets';
 import './App.css';
 
 import {
   DashboardIcon, LabIcon, ScanIcon, MedicineIcon, DoctorIcon,
-  NutritionIcon, RecoveryIcon, ChatIcon, ProfileIcon, MenuIcon
+  NutritionIcon, RecoveryIcon, ChatIcon, ProfileIcon, MenuIcon, CalendarIcon
 } from './components/Icons';
 
 /* ── Lazy-loaded page components (code splitting for performance) ── */
@@ -23,6 +24,7 @@ const LabResultsPage = lazy(() => import('./pages/LabResults'));
 const ScansPage = lazy(() => import('./pages/Scans'));
 const MedicineGuidePage = lazy(() => import('./pages/MedicineGuide'));
 const DoctorFinderPage = lazy(() => import('./pages/DoctorFinder'));
+const ReservationsPage = lazy(() => import('./pages/Reservations'));
 const NutritionPlannerPage = lazy(() => import('./pages/NutritionPlanner'));
 const RecoveryAssistantPage = lazy(() => import('./pages/RecoveryAssistant'));
 const DoctorChatPage = lazy(() => import('./pages/DoctorChat'));
@@ -50,6 +52,36 @@ const PageLoader = () => (
     <span className="sr-only">Loading...</span>
   </div>
 );
+
+const ImageWithFallback = ({
+  src,
+  alt,
+  className,
+  loading = 'lazy',
+  fallback,
+}: {
+  src: string;
+  alt: string;
+  className: string;
+  loading?: 'lazy' | 'eager';
+  fallback: React.ReactNode;
+}) => {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError) {
+    return <>{fallback}</>;
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      loading={loading}
+      onError={() => setHasError(true)}
+    />
+  );
+};
 
 /* ───────── Inline Illustration Components ───────── */
 
@@ -132,6 +164,78 @@ const HeroIllustration = () => (
 /* ───────── Landing Page ───────── */
 
 const LandingPage = () => {
+  const trustIndicators = [
+    { label: 'HIPAA Compliant', detail: 'Security standard' },
+    { label: 'End-to-End Encrypted', detail: 'Private by design' },
+    { label: '24/7 Access', detail: 'Anytime, anywhere' },
+  ] as const;
+
+  const featureCards = [
+    {
+      icon: <LabIcon />,
+      title: 'Lab Results',
+      desc: 'View blood work, biomarkers, and historical trends with smart status indicators.',
+      type: 'lab',
+      path: '/lab-results',
+      imageSrc: imageAssets.features.lab,
+      imageAlt: 'Preview of lab results dashboard',
+    },
+    {
+      icon: <ScanIcon />,
+      title: 'Medical Scans',
+      desc: 'Browse X-rays, MRIs, and CT scans with zoom and comparison tools.',
+      type: 'scan',
+      path: '/scans',
+      imageSrc: imageAssets.features.scan,
+      imageAlt: 'Preview of medical scans viewer',
+    },
+    {
+      icon: <MedicineIcon />,
+      title: 'Medicine Guide',
+      desc: 'Check drug safety, interactions, and get personalized warnings.',
+      type: 'medicine',
+      path: '/medicines',
+      imageSrc: imageAssets.features.medicine,
+      imageAlt: 'Preview of medicine safety checker',
+    },
+    {
+      icon: <DoctorIcon />,
+      title: 'Doctor Finder',
+      desc: 'Search specialists, read reviews, and book appointments instantly.',
+      type: 'doctor',
+      path: '/doctors',
+      imageSrc: imageAssets.features.doctor,
+      imageAlt: 'Preview of doctor search and booking',
+    },
+    {
+      icon: <NutritionIcon />,
+      title: 'Nutrition Planner',
+      desc: 'AI-powered meal plans tailored to your health profile.',
+      type: 'nutrition',
+      path: '/nutrition',
+      imageSrc: imageAssets.features.nutrition,
+      imageAlt: 'Preview of personalized meal planning view',
+    },
+    {
+      icon: <RecoveryIcon />,
+      title: 'Recovery Assistant',
+      desc: 'Post-surgery exercise programs with guided instructions.',
+      type: 'recovery',
+      path: '/recovery',
+      imageSrc: imageAssets.features.recovery,
+      imageAlt: 'Preview of recovery progress and exercise plan',
+    },
+    {
+      icon: <ChatIcon />,
+      title: 'Doctor Chat',
+      desc: 'Secure real-time messaging and video consultations.',
+      type: 'chat',
+      path: '/chat',
+      imageSrc: imageAssets.features.chat,
+      imageAlt: 'Preview of secure doctor chat interface',
+    },
+  ] as const;
+
   return (
     <div className="landing">
       {/* Skip to content for keyboard users */}
@@ -176,16 +280,25 @@ const LandingPage = () => {
             <a href="#features" className="btn-outline-lg">Explore Features</a>
           </div>
           <div className="landing-hero-trust" role="list" aria-label="Trust indicators">
-            {['HIPAA Compliant', 'End-to-End Encrypted', '24/7 Access'].map(t => (
-              <div key={t} className="trust-item" role="listitem">
+            {trustIndicators.map(t => (
+              <div key={t.label} className="trust-item" role="listitem">
                 <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" aria-hidden="true"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
-                <span>{t}</span>
+                <div className="trust-copy">
+                  <span>{t.label}</span>
+                  <small>{t.detail}</small>
+                </div>
               </div>
             ))}
           </div>
         </div>
         <div className="landing-hero-visual">
-          <HeroIllustration />
+          <ImageWithFallback
+            src={imageAssets.landingHero}
+            alt="Doctor reviewing patient medical records on a digital tablet"
+            className="landing-photo"
+            loading="eager"
+            fallback={<HeroIllustration />}
+          />
         </div>
       </section>
 
@@ -197,16 +310,16 @@ const LandingPage = () => {
           <p>From lab results to doctor consultations — your entire health journey, organized.</p>
         </div>
         <div className="features-grid">
-          {([
-            { icon: <LabIcon />, title: 'Lab Results', desc: 'View blood work, biomarkers, and historical trends with smart status indicators.', type: 'lab' },
-            { icon: <ScanIcon />, title: 'Medical Scans', desc: 'Browse X-rays, MRIs, and CT scans with zoom and comparison tools.', type: 'scan' },
-            { icon: <MedicineIcon />, title: 'Medicine Guide', desc: 'Check drug safety, interactions, and get personalized warnings.', type: 'medicine' },
-            { icon: <DoctorIcon />, title: 'Doctor Finder', desc: 'Search specialists, read reviews, and book appointments instantly.', type: 'doctor' },
-            { icon: <NutritionIcon />, title: 'Nutrition Planner', desc: 'AI-powered meal plans tailored to your health profile.', type: 'nutrition' },
-            { icon: <RecoveryIcon />, title: 'Recovery Assistant', desc: 'Post-surgery exercise programs with guided instructions.', type: 'recovery' },
-            { icon: <ChatIcon />, title: 'Doctor Chat', desc: 'Secure real-time messaging and video consultations.', type: 'chat' },
-          ] as const).map((f, i) => (
-            <Link to={f.type === 'lab' ? '/lab-results' : f.type === 'scan' ? '/scans' : f.type === 'medicine' ? '/medicines' : f.type === 'doctor' ? '/doctors' : f.type === 'nutrition' ? '/nutrition' : f.type === 'recovery' ? '/recovery' : '/chat'} key={i} className={`feature-showcase-card fsc-${f.type}`}>
+          {featureCards.map((f) => (
+            <Link to={f.path} key={f.type} className={`feature-showcase-card fsc-${f.type}`}>
+              <div className="fsc-media" aria-hidden="true">
+                <ImageWithFallback
+                  src={f.imageSrc}
+                  alt={f.imageAlt}
+                  className="fsc-media-image"
+                  fallback={<div className="fsc-media-fallback"></div>}
+                />
+              </div>
               <div className="fsc-icon">{f.icon}</div>
               <h3>{f.title}</h3>
               <p>{f.desc}</p>
@@ -245,20 +358,27 @@ const LandingPage = () => {
             </div>
           </div>
           <div className="about-visual">
-            <div className="about-card-stack">
-              <div className="about-card ac-1">
-                <div className="ac-dot" style={{ background: '#10B981' }}></div>
-                <span>Lab Results — All Normal</span>
-              </div>
-              <div className="about-card ac-2">
-                <div className="ac-dot" style={{ background: '#3B82F6' }}></div>
-                <span>MRI scan uploaded successfully</span>
-              </div>
-              <div className="about-card ac-3">
-                <div className="ac-dot" style={{ background: '#F59E0B' }}></div>
-                <span>Appointment with Dr. Chen — Tomorrow</span>
-              </div>
-            </div>
+            <ImageWithFallback
+              src={imageAssets.aboutSection}
+              alt="Healthcare professionals collaborating with a patient"
+              className="about-photo"
+              fallback={
+                <div className="about-card-stack">
+                  <div className="about-card ac-1">
+                    <div className="ac-dot" style={{ background: '#10B981' }}></div>
+                    <span>Lab Results — All Normal</span>
+                  </div>
+                  <div className="about-card ac-2">
+                    <div className="ac-dot" style={{ background: '#3B82F6' }}></div>
+                    <span>MRI scan uploaded successfully</span>
+                  </div>
+                  <div className="about-card ac-3">
+                    <div className="ac-dot" style={{ background: '#F59E0B' }}></div>
+                    <span>Appointment with Dr. Chen — Tomorrow</span>
+                  </div>
+                </div>
+              }
+            />
           </div>
         </div>
       </section>
@@ -290,7 +410,7 @@ const LandingPage = () => {
 
 /* ───────── Sidebar ───────── */
 
-const SidebarItem = ({ to, icon: Icon, label }: { to: string; icon: any; label: string }) => {
+const SidebarItem = ({ to, icon: Icon, label }: { to: string; icon: React.ComponentType<{ className?: string }>; label: string }) => {
   const location = useLocation();
   const isActive = location.pathname === to;
   return (
@@ -331,6 +451,7 @@ const Sidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
           <span className="nav-label" id="nav-care">Care &amp; Wellness</span>
           <SidebarItem to="/medicines" icon={MedicineIcon} label="Medicines" />
           <SidebarItem to="/doctors" icon={DoctorIcon} label="Doctors" />
+          <SidebarItem to="/reservations" icon={CalendarIcon} label="Appointments" />
           <SidebarItem to="/nutrition" icon={NutritionIcon} label="Nutrition" />
           <SidebarItem to="/recovery" icon={RecoveryIcon} label="Recovery" />
           <SidebarItem to="/chat" icon={ChatIcon} label="Consultations" />
@@ -393,11 +514,19 @@ const Dashboard = () => {
           </p>
         </div>
         <div className="hero-art" aria-hidden="true">
-          <svg viewBox="0 0 200 200" fill="none">
-            <circle cx="100" cy="100" r="80" fill="rgba(255,255,255,0.08)"/>
-            <circle cx="100" cy="100" r="50" fill="rgba(255,255,255,0.06)"/>
-            <path d="M80 100 L90 100 L95 85 L100 115 L105 95 L110 105 L115 100 L120 100" stroke="rgba(255,255,255,0.4)" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-          </svg>
+          <ImageWithFallback
+            src={imageAssets.dashboardHero}
+            alt="Medical dashboard background"
+            className="dashboard-hero-image"
+            loading="eager"
+            fallback={
+              <svg className="dashboard-hero-fallback" viewBox="0 0 200 200" fill="none">
+                <circle cx="100" cy="100" r="80" fill="rgba(255,255,255,0.08)"/>
+                <circle cx="100" cy="100" r="50" fill="rgba(255,255,255,0.06)"/>
+                <path d="M80 100 L90 100 L95 85 L100 115 L105 95 L110 105 L115 100 L120 100" stroke="rgba(255,255,255,0.4)" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
+              </svg>
+            }
+          />
         </div>
       </div>
 
@@ -437,77 +566,150 @@ const Dashboard = () => {
 
       {/* Bento Grid — limited to 7 items per Miller's Law (7±2) */}
       <div className="bento-grid" role="list" aria-label="Quick access features">
+
+        {/* Doctor — spans 2 rows, has live appointment preview */}
         <Link to="/doctors" className="bento-card theme-doc bento-span-row" role="listitem">
+          <div className="bento-img-wrap" aria-hidden="true">
+            <ImageWithFallback
+              src={imageAssets.bento.doctor}
+              alt="Doctor consultation preview"
+              className="bento-img"
+              fallback={<div className="bento-img-fallback theme-doc-bg" />}
+            />
+          </div>
           <div className="card-decoration" aria-hidden="true"></div>
-          <div className="card-icon-wrapper" aria-hidden="true"><DoctorIcon /></div>
-          <div>
-            <h3 className="card-title">Find a Doctor</h3>
-            <p className="card-desc">Book appointments with top specialists near you.</p>
-          </div>
-          <div className="card-mini-info">
-            <div className="card-mini-label">Next Appointment</div>
-            <div className="card-mini-value">Dr. Sarah Smith</div>
-            <div className="card-mini-sub">Tomorrow, 2:00 PM</div>
-          </div>
-        </Link>
-
-        <Link to="/lab-results" className="bento-card theme-lab">
-          <div className="card-decoration"></div>
-          <div className="card-icon-wrapper"><LabIcon /></div>
-          <div>
-            <h3 className="card-title">Lab Results</h3>
-            <p className="card-desc">Blood work, biomarkers &amp; trends.</p>
-          </div>
-          <div className="card-mini-info">
-            <div className="card-mini-label">Latest</div>
-            <div className="card-mini-value">5 Normal &middot; 1 Borderline</div>
+          <div className="bento-body">
+            <div className="card-icon-wrapper" aria-hidden="true"><DoctorIcon /></div>
+            <div>
+              <h3 className="card-title">Find a Doctor</h3>
+              <p className="card-desc">Book appointments with top specialists near you.</p>
+            </div>
+            <div className="card-mini-info">
+              <div className="card-mini-label">Next Appointment</div>
+              <div className="card-mini-value">Dr. Sarah Smith</div>
+              <div className="card-mini-sub">Tomorrow, 2:00 PM</div>
+            </div>
           </div>
         </Link>
 
-        <Link to="/scans" className="bento-card theme-scan">
+        <Link to="/lab-results" className="bento-card theme-lab" role="listitem">
+          <div className="bento-img-wrap" aria-hidden="true">
+            <ImageWithFallback
+              src={imageAssets.bento.lab}
+              alt="Lab results preview"
+              className="bento-img"
+              fallback={<div className="bento-img-fallback theme-lab-bg" />}
+            />
+          </div>
           <div className="card-decoration"></div>
-          <div className="card-icon-wrapper"><ScanIcon /></div>
-          <div>
-            <h3 className="card-title">Medical Scans</h3>
-            <p className="card-desc">X-Rays, MRIs &amp; CT imaging.</p>
+          <div className="bento-body">
+            <div className="card-icon-wrapper"><LabIcon /></div>
+            <div>
+              <h3 className="card-title">Lab Results</h3>
+              <p className="card-desc">Blood work, biomarkers &amp; trends.</p>
+            </div>
+            <div className="card-mini-info">
+              <div className="card-mini-label">Latest</div>
+              <div className="card-mini-value">5 Normal &middot; 1 Borderline</div>
+            </div>
           </div>
         </Link>
 
-        <Link to="/medicines" className="bento-card theme-med">
+        <Link to="/scans" className="bento-card theme-scan" role="listitem">
+          <div className="bento-img-wrap" aria-hidden="true">
+            <ImageWithFallback
+              src={imageAssets.bento.scan}
+              alt="Medical scan viewer preview"
+              className="bento-img"
+              fallback={<div className="bento-img-fallback theme-scan-bg" />}
+            />
+          </div>
           <div className="card-decoration"></div>
-          <div className="card-icon-wrapper"><MedicineIcon /></div>
-          <div>
-            <h3 className="card-title">Medicine Guide</h3>
-            <p className="card-desc">Safety checks &amp; drug interactions.</p>
+          <div className="bento-body">
+            <div className="card-icon-wrapper"><ScanIcon /></div>
+            <div>
+              <h3 className="card-title">Medical Scans</h3>
+              <p className="card-desc">X-Rays, MRIs &amp; CT imaging.</p>
+            </div>
           </div>
         </Link>
 
-        <Link to="/nutrition" className="bento-card theme-food">
+        <Link to="/medicines" className="bento-card theme-med" role="listitem">
+          <div className="bento-img-wrap" aria-hidden="true">
+            <ImageWithFallback
+              src={imageAssets.bento.medicine}
+              alt="Medicine guide preview"
+              className="bento-img"
+              fallback={<div className="bento-img-fallback theme-med-bg" />}
+            />
+          </div>
           <div className="card-decoration"></div>
-          <div className="card-icon-wrapper"><NutritionIcon /></div>
-          <div>
-            <h3 className="card-title">Nutrition Plan</h3>
-            <p className="card-desc">AI-powered meal planning &amp; tracking.</p>
+          <div className="bento-body">
+            <div className="card-icon-wrapper"><MedicineIcon /></div>
+            <div>
+              <h3 className="card-title">Medicine Guide</h3>
+              <p className="card-desc">Safety checks &amp; drug interactions.</p>
+            </div>
           </div>
         </Link>
 
-        <Link to="/recovery" className="bento-card theme-rec">
+        <Link to="/nutrition" className="bento-card theme-food" role="listitem">
+          <div className="bento-img-wrap" aria-hidden="true">
+            <ImageWithFallback
+              src={imageAssets.bento.nutrition}
+              alt="Nutrition planner preview"
+              className="bento-img"
+              fallback={<div className="bento-img-fallback theme-food-bg" />}
+            />
+          </div>
           <div className="card-decoration"></div>
-          <div className="card-icon-wrapper"><RecoveryIcon /></div>
-          <div>
-            <h3 className="card-title">Recovery</h3>
-            <p className="card-desc">Post-surgery exercises &amp; progress.</p>
+          <div className="bento-body">
+            <div className="card-icon-wrapper"><NutritionIcon /></div>
+            <div>
+              <h3 className="card-title">Nutrition Plan</h3>
+              <p className="card-desc">AI-powered meal planning &amp; tracking.</p>
+            </div>
           </div>
         </Link>
 
-        <Link to="/chat" className="bento-card theme-chat">
+        <Link to="/recovery" className="bento-card theme-rec" role="listitem">
+          <div className="bento-img-wrap" aria-hidden="true">
+            <ImageWithFallback
+              src={imageAssets.bento.recovery}
+              alt="Recovery assistant preview"
+              className="bento-img"
+              fallback={<div className="bento-img-fallback theme-rec-bg" />}
+            />
+          </div>
           <div className="card-decoration"></div>
-          <div className="card-icon-wrapper"><ChatIcon /></div>
-          <div>
-            <h3 className="card-title">Doctor Chat</h3>
-            <p className="card-desc">Secure real-time consultations.</p>
+          <div className="bento-body">
+            <div className="card-icon-wrapper"><RecoveryIcon /></div>
+            <div>
+              <h3 className="card-title">Recovery</h3>
+              <p className="card-desc">Post-surgery exercises &amp; progress.</p>
+            </div>
           </div>
         </Link>
+
+        <Link to="/chat" className="bento-card theme-chat" role="listitem">
+          <div className="bento-img-wrap" aria-hidden="true">
+            <ImageWithFallback
+              src={imageAssets.bento.chat}
+              alt="Doctor chat preview"
+              className="bento-img"
+              fallback={<div className="bento-img-fallback theme-chat-bg" />}
+            />
+          </div>
+          <div className="card-decoration"></div>
+          <div className="bento-body">
+            <div className="card-icon-wrapper"><ChatIcon /></div>
+            <div>
+              <h3 className="card-title">Doctor Chat</h3>
+              <p className="card-desc">Secure real-time consultations.</p>
+            </div>
+          </div>
+        </Link>
+
       </div>
     </div>
   );
@@ -531,6 +733,7 @@ function AppRoutes() {
         <Route path="/scans" element={<ProtectedRoute><PageLayout><ScansPage /></PageLayout></ProtectedRoute>} />
         <Route path="/medicines" element={<ProtectedRoute><PageLayout><MedicineGuidePage /></PageLayout></ProtectedRoute>} />
         <Route path="/doctors" element={<ProtectedRoute><PageLayout><DoctorFinderPage /></PageLayout></ProtectedRoute>} />
+        <Route path="/reservations" element={<ProtectedRoute><PageLayout><ReservationsPage /></PageLayout></ProtectedRoute>} />
         <Route path="/nutrition" element={<ProtectedRoute><PageLayout><NutritionPlannerPage /></PageLayout></ProtectedRoute>} />
         <Route path="/recovery" element={<ProtectedRoute><PageLayout><RecoveryAssistantPage /></PageLayout></ProtectedRoute>} />
         <Route path="/chat" element={<ProtectedRoute><PageLayout><DoctorChatPage /></PageLayout></ProtectedRoute>} />
@@ -545,7 +748,7 @@ function AppRoutes() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <AppRoutes />
       </AuthProvider>

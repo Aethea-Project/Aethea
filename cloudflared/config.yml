@@ -1,0 +1,13 @@
+# =============================================
+# Cloudflare Tunnel Config — Docker version
+# Used inside the cloudflared container
+# =============================================
+tunnel: de687480-54da-4632-a55e-b3d1b4a8575d
+credentials-file: /etc/cloudflared/creds/de687480-54da-4632-a55e-b3d1b4a8575d.json
+
+ingress:
+  - hostname: aethea.me
+    service: http://web:5173
+  - hostname: api.aethea.me
+    service: http://backend:3001
+  - service: http_status:404

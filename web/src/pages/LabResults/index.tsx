@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { theme } from '@core/ui/theme';
-import { mockLabTests, mockLabHistory } from '@core/data/mockData';
 import { LabTest, LabStatus } from '@core/types/medical';
+import { medicalApi } from '../../services/medicalApi';
+import { FeatureHeader } from '../../components/FeatureHeader';
+import { imageAssets } from '../../constants/imageAssets';
 import './styles.css';
 
 /**
@@ -10,25 +12,51 @@ import './styles.css';
  */
 
 export default function LabResultsPage() {
+  const [labTests, setLabTests] = useState<LabTest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'date' | 'status' | 'name'>('date');
   const [selectedTest, setSelectedTest] = useState<LabTest | null>(null);
 
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const data = await medicalApi.fetchLabTests();
+        if (!active) return;
+        setLabTests(data);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load lab tests');
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const categories = useMemo(
+    () => ['all', ...Array.from(new Set(labTests.map((t) => t.category)))],
+    [labTests]
+  );
+
+  const filteredTests = useMemo(() => {
+    const base = selectedCategory === 'all'
+      ? labTests
+      : labTests.filter((t) => t.category === selectedCategory);
+
+    return [...base].sort((a, b) => {
+      if (sortBy === 'date') return b.date.getTime() - a.date.getTime();
+      if (sortBy === 'status') return a.status.localeCompare(b.status);
+      if (sortBy === 'name') return a.testName.localeCompare(b.testName);
+      return 0;
+    });
+  }, [labTests, selectedCategory, sortBy]);
+
   // Get unique categories
-  const categories = ['all', ...Array.from(new Set(mockLabTests.map(t => t.category)))];
-
-  // Filter and sort tests
-  let filteredTests = selectedCategory === 'all'
-    ? mockLabTests
-    : mockLabTests.filter(t => t.category === selectedCategory);
-
-  filteredTests = [...filteredTests].sort((a, b) => {
-    if (sortBy === 'date') return b.date.getTime() - a.date.getTime();
-    if (sortBy === 'status') return a.status.localeCompare(b.status);
-    if (sortBy === 'name') return a.testName.localeCompare(b.testName);
-    return 0;
-  });
-
   const getStatusColor = (status: LabStatus) => {
     switch (status) {
       case 'normal':
@@ -44,39 +72,50 @@ export default function LabResultsPage() {
   };
 
   const stats = {
-    normal: mockLabTests.filter(t => t.status === 'normal').length,
-    borderline: mockLabTests.filter(t => t.status === 'borderline').length,
-    abnormal: mockLabTests.filter(t => t.status === 'abnormal' || t.status === 'critical').length,
+    normal: labTests.filter((t) => t.status === 'normal').length,
+    borderline: labTests.filter((t) => t.status === 'borderline').length,
+    abnormal: labTests.filter((t) => t.status === 'abnormal' || t.status === 'critical').length,
   };
+
+  if (loading) {
+    return <div className="lab-results-page"><p className="loading">Loading lab results…</p></div>;
+  }
+
+  if (error) {
+    return (
+      <div className="lab-results-page">
+        <p className="error">Failed to load lab results: {error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="lab-results-page">
       {/* Header */}
-      <header className="page-header">
-        <div className="header-content">
-          <div>
-            <h1 className="page-title">Lab Results</h1>
-            <p className="page-subtitle">{mockLabTests.length} total tests</p>
-          </div>
+      <FeatureHeader
+        title="Lab Results"
+        subtitle={`${labTests.length} total tests`}
+        variant="lab"
+        imageSrc={imageAssets.headers.lab}
+        imageAlt="Medical laboratory equipment"
+      />
 
-          {/* Filters */}
-          <div className="header-actions">
-            <select
-              className="sort-select"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-            >
-              <option value="date">Sort by Date</option>
-              <option value="status">Sort by Status</option>
-              <option value="name">Sort by Name</option>
-            </select>
-            
-            <button className="btn-primary">
-              Download All Reports
-            </button>
-          </div>
-        </div>
-      </header>
+      {/* Filters */}
+      <div className="header-actions">
+        <select
+          className="sort-select"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as 'date' | 'status' | 'name')}
+        >
+          <option value="date">Sort by Date</option>
+          <option value="status">Sort by Status</option>
+          <option value="name">Sort by Name</option>
+        </select>
+        
+        <button className="btn-primary">
+          Download All Reports
+        </button>
+      </div>
 
       <div className="page-content">
         {/* Sidebar */}
@@ -114,8 +153,8 @@ export default function LabResultsPage() {
                     </span>
                     <span className="filter-count">
                       {category === 'all'
-                        ? mockLabTests.length
-                        : mockLabTests.filter(t => t.category === category).length}
+                        ? labTests.length
+                        : labTests.filter(t => t.category === category).length}
                     </span>
                   </button>
                 </li>
@@ -256,30 +295,10 @@ export default function LabResultsPage() {
                 </div>
               )}
 
-              {mockLabHistory.find(h => h.testName === selectedTest.testName)?.data.length > 1 && (
-                <div className="detail-section">
-                  <h3>Historical Trend</h3>
-                  <div className="chart-container">
-                    {mockLabHistory.find(h => h.testName === selectedTest.testName)?.data.map((point, i) => (
-                      <div key={i} className="chart-bar">
-                        <div
-                          className="bar"
-                          style={{
-                            height: `${(point.value / Math.max(...mockLabHistory.find(h => h.testName === selectedTest.testName)!.data.map(d => d.value))) * 100}%`,
-                            backgroundColor: point.value === Number(selectedTest.value)
-                              ? getStatusColor(selectedTest.status)
-                              : theme.colors.neutral[300],
-                          }}
-                        />
-                        <div className="bar-label">{point.value.toFixed(1)}</div>
-                        <div className="bar-date">
-                          {point.date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <div className="detail-section">
+                <h3>Historical Trend</h3>
+                <p className="notes-text">Trend data will appear once multiple results are recorded for this test.</p>
+              </div>
             </div>
 
             <div className="modal-footer">

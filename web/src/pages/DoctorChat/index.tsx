@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { FeatureHeader } from '../../components/FeatureHeader';
+import { imageAssets } from '../../constants/imageAssets';
 import './styles.css';
 
 /**
@@ -137,7 +139,16 @@ export default function DoctorChatPage() {
 
   return (
     <div className="doctor-chat-page">
-      {/* Header */}
+      {/* Feature Header */}
+      <FeatureHeader
+        title="Doctor Chat"
+        subtitle="Secure messaging and video consultation with your doctor"
+        variant="chat"
+        imageSrc={imageAssets.headers.chat}
+        imageAlt="Doctor consultation"
+      />
+
+      {/* Chat Header */}
       <div className="chat-header">
         <div className="doctor-info">
           <div className="doctor-avatar-container">

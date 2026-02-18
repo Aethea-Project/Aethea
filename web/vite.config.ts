@@ -14,6 +14,11 @@ export default defineConfig({
   server: {
     port: 5173,
     open: true,
+    host: true, // Listen on all addresses (allows tunnel access)
+    allowedHosts: ['aethea.me'], // Allow Cloudflare tunnel hostname
+    hmr: {
+      clientPort: 443, // Cloudflare tunnel uses HTTPS (port 443)
+    },
   },
   build: {
     // Performance: Target modern browsers for smaller bundles
