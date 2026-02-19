@@ -117,18 +117,20 @@ try {
   Write-Step "Services Ready"
   
   if ($DevMode) {
-    Write-Host "`nFrontend (Dev):  http://localhost:5173" -ForegroundColor Green
-    Write-Host "Backend API (Dev): http://localhost:3001" -ForegroundColor Green
+    Write-Host "`nFrontend (Dev) URL:  http://localhost:5173" -ForegroundColor Green
+    Write-Host "Backend API (Dev) URL: http://localhost:3001" -ForegroundColor Green
+    Write-Host "Public URL: https://aethea.me" -ForegroundColor Cyan
   } else {
-    Write-Host "`nFrontend:  http://localhost:80" -ForegroundColor Green
-    Write-Host "Backend API: http://localhost:3001" -ForegroundColor Green
-    Write-Host "Health Check: http://localhost:3001/health" -ForegroundColor Green
+    Write-Host "`nFrontend URL:  http://localhost:80" -ForegroundColor Green
+    Write-Host "Backend API URL: http://localhost:3001" -ForegroundColor Green
+    Write-Host "Health Check URL: http://localhost:3001/health" -ForegroundColor Green
+    Write-Host "Public URL: https://aethea.me" -ForegroundColor Cyan
     
     if ($WithTools) {
-      Write-Host "`nTools:" -ForegroundColor Cyan
-      Write-Host "  - pgAdmin:      http://localhost:5050 (admin@aethea.local / admin123)" -ForegroundColor Gray
-      Write-Host "  - RedisInsight: http://localhost:8001" -ForegroundColor Gray
-      Write-Host "  - MailHog:      http://localhost:8025" -ForegroundColor Gray
+        Write-Host "`nTools URLs:" -ForegroundColor Cyan
+        Write-Host "  - pgAdmin URL:      http://localhost:5050 (admin@aethea.local / admin123)" -ForegroundColor Gray
+        Write-Host "  - RedisInsight URL: http://localhost:8001" -ForegroundColor Gray
+        Write-Host "  - MailHog URL:      http://localhost:8025" -ForegroundColor Gray
     }
   }
   
