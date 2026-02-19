@@ -3,17 +3,121 @@
  * Allows users to request a password reset email
  */
 
-import React, { useState, FormEvent } from 'react';
+import React, { useState, useEffect, useRef, useCallback, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@core/auth/useAuth';
 import { isValidEmail } from '@core/auth/auth-utils';
+import { TURNSTILE_CONFIG } from '@core/auth/constants';
 import './LoginForm.css'; // Reuses login form styles
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: string | HTMLElement, options: Record<string, unknown>) => string;
+      reset: (widgetId: string) => void;
+      remove: (widgetId: string) => void;
+    };
+  }
+}
 
 export const ForgotPasswordForm: React.FC = () => {
   const { resetPassword, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | null>(null);
+
+  const renderTurnstileWidget = useCallback((): boolean => {
+    if (!window.turnstile || !turnstileRef.current || widgetIdRef.current) {
+      return false;
+    }
+
+    widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
+      sitekey: TURNSTILE_CONFIG.SITE_KEY,
+      callback: (token: string) => {
+        setCaptchaToken(token);
+        setLocalError(null);
+      },
+      'expired-callback': () => {
+        setCaptchaToken(null);
+        setLocalError('CAPTCHA expired. Please verify again.');
+      },
+      'error-callback': () => {
+        setCaptchaToken(null);
+        setLocalError('CAPTCHA failed to load. Refresh and try again.');
+      },
+      theme: 'light',
+      size: 'normal',
+    });
+
+    return true;
+  }, []);
+
+  useEffect(() => {
+    let retryTimer: ReturnType<typeof setInterval> | undefined;
+
+    const ensureRendered = () => {
+      if (renderTurnstileWidget()) {
+        if (retryTimer) {
+          clearInterval(retryTimer);
+          retryTimer = undefined;
+        }
+        return;
+      }
+
+      let attempts = 0;
+      retryTimer = setInterval(() => {
+        attempts += 1;
+        if (renderTurnstileWidget() || attempts >= 30) {
+          if (retryTimer) {
+            clearInterval(retryTimer);
+            retryTimer = undefined;
+          }
+        }
+      }, 100);
+    };
+
+    const existingScript = document.getElementById('cf-turnstile-script') as HTMLScriptElement | null;
+    if (existingScript) {
+      if (window.turnstile) {
+        ensureRendered();
+      } else {
+        existingScript.onload = ensureRendered;
+      }
+      return () => {
+        if (retryTimer) {
+          clearInterval(retryTimer);
+        }
+        if (widgetIdRef.current && window.turnstile) {
+          window.turnstile.remove(widgetIdRef.current);
+          widgetIdRef.current = null;
+        }
+      };
+    }
+
+    const script = document.createElement('script');
+    script.id = 'cf-turnstile-script';
+    script.src = `${TURNSTILE_CONFIG.SCRIPT_URL}?render=explicit`;
+    script.async = true;
+    script.defer = true;
+    script.onload = ensureRendered;
+    script.onerror = () => {
+      setLocalError('Security verification failed to load.');
+    };
+    document.head.appendChild(script);
+
+    return () => {
+      if (retryTimer) {
+        clearInterval(retryTimer);
+      }
+      if (widgetIdRef.current && window.turnstile) {
+        window.turnstile.remove(widgetIdRef.current);
+        widgetIdRef.current = null;
+      }
+    };
+  }, [renderTurnstileWidget]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -29,11 +133,21 @@ export const ForgotPasswordForm: React.FC = () => {
       return;
     }
 
+    if (!captchaToken) {
+      setLocalError('Please complete the CAPTCHA verification');
+      return;
+    }
+
     try {
-      await resetPassword(email.trim().toLowerCase());
+      await resetPassword(email.trim().toLowerCase(), captchaToken);
       setSuccess(true);
     } catch (err) {
       setLocalError(err instanceof Error ? err.message : 'Failed to send reset email');
+    } finally {
+      if (widgetIdRef.current && window.turnstile) {
+        window.turnstile.reset(widgetIdRef.current);
+      }
+      setCaptchaToken(null);
     }
   };
 
@@ -97,6 +211,10 @@ export const ForgotPasswordForm: React.FC = () => {
             >
               {loading ? 'Sending...' : 'Send Reset Link'}
             </button>
+
+            <div className="captcha-container" style={{ marginTop: '0.75rem' }}>
+              <div ref={turnstileRef} />
+            </div>
           </>
         )}
 

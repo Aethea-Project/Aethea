@@ -255,6 +255,7 @@ export class AuthService {
 
     return this.repository.resetPassword({
       email: sanitizeInput(request.email.toLowerCase()),
+      captchaToken: request.captchaToken,
     });
   }
 

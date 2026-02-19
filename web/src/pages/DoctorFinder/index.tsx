@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FeatureHeader } from '../../components/FeatureHeader';
 import { imageAssets } from '../../constants/imageAssets';
 import './styles.css';
@@ -27,6 +27,70 @@ interface Doctor {
   image: string;
   verified: boolean;
 }
+
+interface LatLng {
+  lat: number;
+  lng: number;
+}
+
+interface NearbyPlace {
+  id: string;
+  name: string;
+  address: string;
+  location: LatLng;
+}
+
+const DEFAULT_CENTER: LatLng = { lat: 30.0444, lng: 31.2357 };
+const GOOGLE_MAPS_SCRIPT_ID = 'aethea-google-maps-script';
+
+const getCurrentPositionAsync = () =>
+  new Promise<LatLng>((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error('Geolocation is not supported'));
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      },
+      (error) => reject(error),
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  });
+
+const loadGoogleMapsApi = (apiKey: string) =>
+  new Promise<any>((resolve, reject) => {
+    const windowWithGoogle = window as Window & {
+      google?: {
+        maps?: any;
+      };
+    };
+
+    if (windowWithGoogle.google?.maps) {
+      resolve(windowWithGoogle.google);
+      return;
+    }
+
+    const existingScript = document.getElementById(GOOGLE_MAPS_SCRIPT_ID) as HTMLScriptElement | null;
+    if (existingScript) {
+      existingScript.addEventListener('load', () => resolve(windowWithGoogle.google));
+      existingScript.addEventListener('error', () => reject(new Error('Failed to load Google Maps script')));
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.id = GOOGLE_MAPS_SCRIPT_ID;
+    script.async = true;
+    script.defer = true;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
+    script.onload = () => resolve(windowWithGoogle.google);
+    script.onerror = () => reject(new Error('Failed to load Google Maps script'));
+    document.head.appendChild(script);
+  });
 
 const mockDoctors: Doctor[] = [
   {
@@ -145,15 +209,244 @@ export default function DoctorFinderPage() {
   const [showBooking, setShowBooking] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState('');
 
-  const filteredDoctors = mockDoctors.filter((doctor) => {
-    const matchesSearch =
-      doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doctor.location.district.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSpecialty =
-      selectedSpecialty === 'All Specialties' || doctor.specialty === selectedSpecialty;
-    return matchesSearch && matchesSpecialty;
-  });
+  const [mapError, setMapError] = useState('');
+  const [mapReady, setMapReady] = useState(false);
+  const [nearbyPharmacies, setNearbyPharmacies] = useState<NearbyPlace[]>([]);
+  const [nearbyDoctors, setNearbyDoctors] = useState<NearbyPlace[]>([]);
+
+  const mapElementRef = useRef<HTMLDivElement | null>(null);
+  const mapInstanceRef = useRef<any | null>(null);
+  const userLocationRef = useRef<LatLng>(DEFAULT_CENTER);
+  const googleMapsRef = useRef<any | null>(null);
+  const placeMarkersRef = useRef<any[]>([]);
+
+  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+  const filteredDoctors = useMemo(
+    () =>
+      mockDoctors.filter((doctor) => {
+        const matchesSearch =
+          doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          doctor.location.district.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSpecialty =
+          selectedSpecialty === 'All Specialties' || doctor.specialty === selectedSpecialty;
+        return matchesSearch && matchesSpecialty;
+      }),
+    [searchTerm, selectedSpecialty]
+  );
+
+  const clearMarkers = (markers: React.MutableRefObject<any[]>) => {
+    markers.current.forEach((marker) => marker.setMap(null));
+    markers.current = [];
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const initializeMap = async () => {
+      if (!googleMapsApiKey) {
+        setMapError('Add VITE_GOOGLE_MAPS_API_KEY in web/.env to enable map and nearby places.');
+        return;
+      }
+
+      if (!mapElementRef.current) {
+        return;
+      }
+
+      try {
+        const google = await loadGoogleMapsApi(googleMapsApiKey);
+        if (cancelled || !mapElementRef.current) {
+          return;
+        }
+
+        googleMapsRef.current = google;
+
+        try {
+          userLocationRef.current = await getCurrentPositionAsync();
+        } catch {
+          userLocationRef.current = DEFAULT_CENTER;
+        }
+
+        const map = new google.maps.Map(mapElementRef.current, {
+          center: userLocationRef.current,
+          zoom: 13,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false,
+          clickableIcons: false,
+          styles: [
+            {
+              featureType: 'poi',
+              stylers: [{ visibility: 'off' }],
+            },
+            {
+              featureType: 'poi.business',
+              elementType: 'all',
+              stylers: [{ visibility: 'off' }],
+            },
+            {
+              featureType: 'poi.school',
+              elementType: 'all',
+              stylers: [{ visibility: 'off' }],
+            },
+            {
+              featureType: 'poi.medical',
+              elementType: 'all',
+              stylers: [{ visibility: 'off' }],
+            },
+            {
+              featureType: 'poi.attraction',
+              elementType: 'all',
+              stylers: [{ visibility: 'off' }],
+            },
+            {
+              featureType: 'poi.government',
+              elementType: 'all',
+              stylers: [{ visibility: 'off' }],
+            },
+            {
+              featureType: 'poi.place_of_worship',
+              elementType: 'all',
+              stylers: [{ visibility: 'off' }],
+            },
+            {
+              featureType: 'poi.sports_complex',
+              elementType: 'all',
+              stylers: [{ visibility: 'off' }],
+            },
+            {
+              featureType: 'poi.park',
+              elementType: 'labels',
+              stylers: [{ visibility: 'off' }],
+            },
+            {
+              featureType: 'transit.station',
+              elementType: 'all',
+              stylers: [{ visibility: 'off' }],
+            },
+            {
+              featureType: 'transit',
+              stylers: [{ visibility: 'off' }],
+            },
+          ],
+        });
+
+        mapInstanceRef.current = map;
+
+        new google.maps.Marker({
+          map,
+          position: userLocationRef.current,
+          title: 'Your current location',
+          icon: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+        });
+
+        const placesService = new google.maps.places.PlacesService(map);
+
+        const searchNearby = (type: string, setter: React.Dispatch<React.SetStateAction<NearbyPlace[]>>) =>
+          new Promise<void>((resolve) => {
+            placesService.nearbySearch(
+              {
+                location: userLocationRef.current,
+                radius: 4000,
+                type,
+              },
+              (results: any[] | null, status: string) => {
+                if (cancelled) {
+                  resolve();
+                  return;
+                }
+
+                if (status !== google.maps.places.PlacesServiceStatus.OK || !results) {
+                  setter([]);
+                  resolve();
+                  return;
+                }
+
+                const places = results
+                  .slice(0, 6)
+                  .map((place) => {
+                    const lat = place.geometry?.location?.lat?.();
+                    const lng = place.geometry?.location?.lng?.();
+
+                    if (typeof lat !== 'number' || typeof lng !== 'number') {
+                      return null;
+                    }
+
+                    return {
+                      id: place.place_id,
+                      name: place.name,
+                      address: place.vicinity ?? 'Address unavailable',
+                      location: { lat, lng },
+                    } as NearbyPlace;
+                  })
+                  .filter((place): place is NearbyPlace => place !== null);
+
+                setter(places);
+                resolve();
+              }
+            );
+          });
+
+        await Promise.all([
+          searchNearby('pharmacy', setNearbyPharmacies),
+          searchNearby('doctor', setNearbyDoctors),
+        ]);
+
+        if (!cancelled) {
+          setMapReady(true);
+          setMapError('');
+        }
+      } catch {
+        if (!cancelled) {
+          setMapReady(false);
+          setMapError('Could not load Google Maps right now. Please verify the API key and enabled APIs.');
+        }
+      }
+    };
+
+    void initializeMap();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [googleMapsApiKey]);
+
+  useEffect(() => {
+    if (!mapReady || !mapInstanceRef.current || !googleMapsRef.current) {
+      return;
+    }
+
+    clearMarkers(placeMarkersRef);
+
+    const google = googleMapsRef.current;
+    const places = [
+      ...nearbyPharmacies.map((place) => ({ ...place, icon: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png' })),
+      ...nearbyDoctors.map((place) => ({ ...place, icon: 'https://maps.google.com/mapfiles/ms/icons/purple-dot.png' })),
+    ];
+
+    placeMarkersRef.current = places.map((place) =>
+      new google.maps.Marker({
+        map: mapInstanceRef.current,
+        position: place.location,
+        title: place.name,
+        icon: place.icon,
+      })
+    );
+
+    return () => {
+      clearMarkers(placeMarkersRef);
+    };
+  }, [nearbyPharmacies, nearbyDoctors, mapReady]);
+
+  const focusOnPlace = (place: NearbyPlace) => {
+    if (!mapInstanceRef.current) {
+      return;
+    }
+
+    mapInstanceRef.current.panTo(place.location);
+    mapInstanceRef.current.setZoom(15);
+  };
 
   const handleBookAppointment = () => {
     if (selectedSlot) {
@@ -225,13 +518,67 @@ export default function DoctorFinderPage() {
 
         {/* Main Content */}
         <div className="main-content">
-          {/* Map Mockup */}
+          {/* Map */}
           <div className="map-container">
-            <div className="map-placeholder">
-              <span className="map-icon">🗺️</span>
-              <p>Interactive Map View</p>
-              <small>Showing {filteredDoctors.length} doctors near you</small>
-            </div>
+            {mapError ? (
+              <div className="map-status">{mapError}</div>
+            ) : (
+              <>
+                <div ref={mapElementRef} className="map-canvas" aria-label="Map showing nearby doctors and pharmacies" />
+                <div className="map-summary">
+                  <div className="map-summary-item">
+                    <strong>{filteredDoctors.length}</strong>
+                    <span>Doctors in Aethea list</span>
+                  </div>
+                  <div className="map-summary-item">
+                    <strong>{nearbyPharmacies.length}</strong>
+                    <span>Nearby pharmacies</span>
+                  </div>
+                  <div className="map-summary-item">
+                    <strong>{nearbyDoctors.length}</strong>
+                    <span>Nearby doctors</span>
+                  </div>
+                </div>
+                <div className="nearby-grid">
+                  <div className="nearby-column">
+                    <h3>Nearby Pharmacies</h3>
+                    {nearbyPharmacies.length === 0 ? (
+                      <p className="nearby-empty">No nearby pharmacies were found.</p>
+                    ) : (
+                      nearbyPharmacies.map((pharmacy) => (
+                        <button
+                          key={pharmacy.id}
+                          type="button"
+                          className="nearby-item"
+                          onClick={() => focusOnPlace(pharmacy)}
+                        >
+                          <span>{pharmacy.name}</span>
+                          <small>{pharmacy.address}</small>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                  <div className="nearby-column">
+                    <h3>Nearby Doctors</h3>
+                    {nearbyDoctors.length === 0 ? (
+                      <p className="nearby-empty">No nearby doctors were found.</p>
+                    ) : (
+                      nearbyDoctors.map((doctor) => (
+                        <button
+                          key={doctor.id}
+                          type="button"
+                          className="nearby-item"
+                          onClick={() => focusOnPlace(doctor)}
+                        >
+                          <span>{doctor.name}</span>
+                          <small>{doctor.address}</small>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Doctor Cards */}

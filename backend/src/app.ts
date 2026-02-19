@@ -53,6 +53,10 @@ export function createApp(config: AppConfig = {}) {
     isProduction = process.env.NODE_ENV === 'production',
   } = config;
 
+  const normalizedCorsOrigins = corsOrigins
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
   // ─── Fail closed: in production, missing Supabase creds is fatal ───
   // Source: OWASP API2:2023 — never silently skip authentication
   if (isProduction && (!supabaseUrl || !supabaseServiceKey)) {
@@ -67,8 +71,24 @@ export function createApp(config: AppConfig = {}) {
 
   // ─── CORS with explicit origins (OWASP REST CORS) ───
   app.use(cors({
-    origin: corsOrigins,
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      const isListedOrigin = normalizedCorsOrigins.includes(origin);
+      const isAetheaSubdomain = /^https:\/\/[a-z0-9-]+\.aethea\.me$/i.test(origin);
+
+      if (isListedOrigin || origin === 'https://aethea.me' || isAetheaSubdomain) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true,
+    optionsSuccessStatus: 204,
   }));
 
   // ─── Compression (Express Performance Best Practices) ───

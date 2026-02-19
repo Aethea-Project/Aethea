@@ -53,12 +53,17 @@ export class AuthRepository {
     try {
       const fullName = `${credentials.firstName} ${credentials.lastName}`.trim();
       const fullPhone = `${credentials.countryCode}${credentials.phone}`;
+      const origin =
+        typeof window !== 'undefined' && window.location?.origin
+          ? window.location.origin
+          : 'https://app.aethea.com';
 
       const { data, error } = await this.supabase.auth.signUp({
         email: credentials.email,
         password: credentials.password,
         options: {
           captchaToken: credentials.captchaToken,
+          emailRedirectTo: `${origin}/auth/confirm`,
           data: {
             first_name: credentials.firstName,
             last_name: credentials.lastName,
@@ -82,6 +87,16 @@ export class AuthRepository {
           error: {
             message: 'This email is already registered. Please sign in instead.',
             code: 'EMAIL_EXISTS',
+          },
+        };
+      }
+
+      if (!data.user) {
+        return {
+          data: null,
+          error: {
+            message: 'Registration could not be completed. Please try again.',
+            code: 'SIGNUP_NO_USER',
           },
         };
       }
@@ -179,6 +194,7 @@ export class AuthRepository {
 
       const { error } = await this.supabase.auth.resetPasswordForEmail(request.email, {
         redirectTo: `${origin}/reset-password`,
+        captchaToken: request.captchaToken,
       });
 
       if (error) {
@@ -236,10 +252,14 @@ export class AuthRepository {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         return { data: null, error: parseAuthError(error) };
+      }
+
+      if (!data) {
+        return { data: null, error: null };
       }
 
       // Map database row to UserProfile using shared helper

@@ -29,6 +29,24 @@ const NutritionPlannerPage = lazy(() => import('./pages/NutritionPlanner'));
 const RecoveryAssistantPage = lazy(() => import('./pages/RecoveryAssistant'));
 const DoctorChatPage = lazy(() => import('./pages/DoctorChat'));
 const ProfilePage = lazy(() => import('./pages/Profile'));
+const TestMassegeEmailPage = lazy(() => import('./pages/TestMassegeEmail'));
+const AuthConfirmPage = lazy(() => import('./pages/AuthConfirm'));
+
+const RootRoute = () => {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const hasAuthCallback =
+    params.has('code') ||
+    params.has('error') ||
+    params.has('error_description') ||
+    params.has('type');
+
+  if (hasAuthCallback) {
+    return <Navigate to={`/auth/confirm${location.search}`} replace />;
+  }
+
+  return <LandingPage />;
+};
 
 /* ── Protected Route — redirects to /login if not authenticated ── */
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -722,10 +740,12 @@ function AppRoutes() {
     <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* ── Public routes ── */}
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={<RootRoute />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
         <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+        <Route path="/auth/confirm" element={<AuthConfirmPage />} />
+        <Route path="/test-massege-email" element={<TestMassegeEmailPage />} />
 
         {/* ── Protected routes ── */}
         <Route path="/dashboard" element={<ProtectedRoute><PageLayout><Dashboard /></PageLayout></ProtectedRoute>} />

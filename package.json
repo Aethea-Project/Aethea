@@ -1,6 +1,6 @@
 {
   "name": "aethea-medical-platform",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "Aethea Medical Platform - X-ray scans, blood tests, and reservations system",
   "private": true,
   "workspaces": [
@@ -20,7 +20,6 @@
     "clean:core": "cd core && rm -rf node_modules dist",
     "clean:shared": "npm run clean:core",
     "lint": "cd web && npm run lint",
-
     "docker:up": "docker compose up --build",
     "docker:down": "docker compose down",
     "docker:db": "docker compose up postgres redis -d",
@@ -36,7 +35,9 @@
     "start:server:dev": "powershell -ExecutionPolicy Bypass -File ./scripts/start-server.ps1 -DevMode",
     "start:server:prod": "powershell -ExecutionPolicy Bypass -File ./scripts/start-server.ps1 -Production",
     "start:server:all": "powershell -ExecutionPolicy Bypass -File ./scripts/start-server.ps1 -WithTools",
-    "pause:server": "powershell -ExecutionPolicy Bypass -File ./scripts/pause-server.ps1"
+    "pause:server": "powershell -ExecutionPolicy Bypass -File ./scripts/pause-server.ps1",
+    "restart:server": "powershell -ExecutionPolicy Bypass -File ./scripts/restart-server.ps1",
+    "setup:first-time": "powershell -ExecutionPolicy Bypass -File ./scripts/first-time-setup.ps1"
   },
   "engines": {
     "node": ">=18.0.0",

@@ -36,3 +36,11 @@ export const requireAuth = async (redirectUrl: string = '/login'): Promise<boole
   }
   return true;
 };
+
+// Test API helper — easy to rename/remove later
+export const testMassegeEmailApi = async (email: string, captchaToken?: string) => {
+  return authService.resetPassword({
+    email,
+    captchaToken,
+  });
+};

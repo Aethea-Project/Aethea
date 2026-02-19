@@ -5,11 +5,9 @@ param(
 
 $ErrorActionPreference = 'SilentlyContinue'
 
-function Write-Step($message) {
-  Write-Host "`n=== $message ===" -ForegroundColor Cyan
-}
+. (Join-Path $PSScriptRoot "common.ps1")
 
-Write-Host "Pausing Aethea dev/server stack..." -ForegroundColor Yellow
+Write-Info "Pausing Aethea dev/server stack..."
 
 # 1) Stop Docker Compose stack for this project
 Write-Step "Stopping Docker Compose services"
@@ -18,12 +16,12 @@ Push-Location $projectRoot
 if (Get-Command docker -ErrorAction SilentlyContinue) {
   docker compose down | Out-Host
   if ($LASTEXITCODE -eq 0) {
-    Write-Host "Docker Compose services stopped." -ForegroundColor Green
+    Write-Success "Docker Compose services stopped."
   } else {
-    Write-Host "Docker Compose was not running or returned a non-zero code." -ForegroundColor DarkYellow
+    Write-Warn "Docker Compose was not running or returned a non-zero code."
   }
 } else {
-  Write-Host "Docker CLI not found. Skipping compose shutdown." -ForegroundColor DarkYellow
+  Write-Warn "Docker CLI not found. Skipping compose shutdown."
 }
 Pop-Location
 
@@ -36,10 +34,10 @@ $nodeProcesses = Get-CimInstance Win32_Process -Filter "name = 'node.exe'" |
 if ($nodeProcesses) {
   $nodeProcesses | ForEach-Object {
     Stop-Process -Id $_.ProcessId -Force
-    Write-Host "Stopped node.exe PID $($_.ProcessId)" -ForegroundColor Green
+    Write-Success "Stopped node.exe PID $($_.ProcessId)"
   }
 } else {
-  Write-Host "No project node.exe processes found." -ForegroundColor DarkYellow
+  Write-Warn "No project node.exe processes found."
 }
 
 # 3) Stop cloudflared processes
@@ -47,16 +45,16 @@ Write-Step "Stopping cloudflared"
 $cloudflaredProcesses = Get-Process -Name cloudflared -ErrorAction SilentlyContinue
 if ($cloudflaredProcesses) {
   $cloudflaredProcesses | Stop-Process -Force
-  Write-Host "Stopped cloudflared process(es)." -ForegroundColor Green
+  Write-Success "Stopped cloudflared process(es)."
 } else {
-  Write-Host "No cloudflared process found." -ForegroundColor DarkYellow
+  Write-Warn "No cloudflared process found."
 }
 
 if ($StopCloudflaredService) {
   $svc = Get-Service -Name cloudflared -ErrorAction SilentlyContinue
   if ($svc -and $svc.Status -ne 'Stopped') {
     Stop-Service -Name cloudflared -Force
-    Write-Host "Stopped cloudflared Windows service." -ForegroundColor Green
+    Write-Success "Stopped cloudflared Windows service."
   }
 }
 
@@ -67,8 +65,9 @@ if ($AlsoQuitDockerDesktop) {
     ForEach-Object {
       Get-Process -Name $_ -ErrorAction SilentlyContinue | Stop-Process -Force
     }
-  Write-Host "Docker Desktop processes stopped (if running)." -ForegroundColor Green
+  Write-Success "Docker Desktop processes stopped (if running)."
 }
 
-Write-Host "`nDone. Your local server/tunnel stack is paused." -ForegroundColor Yellow
-Write-Host "When ready to resume: npm run docker:up (or npm run docker:tunnel for tunnel only)." -ForegroundColor Cyan
+Write-Info "`nDone. Your local server/tunnel stack is paused."
+Write-Step "Next"
+Write-Info "When ready to resume: npm run docker:up (or npm run docker:tunnel for tunnel only)."

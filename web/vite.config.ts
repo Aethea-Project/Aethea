@@ -1,6 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import fs from 'fs';
+
+const corePath = fs.existsSync(path.resolve(__dirname, './core'))
+  ? path.resolve(__dirname, './core')
+  : path.resolve(__dirname, '../core');
+
+const runningInDocker = fs.existsSync('/.dockerenv');
+const apiProxyTarget = runningInDocker ? 'http://backend:3001' : 'http://localhost:3001';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -8,7 +16,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@core': path.resolve(__dirname, '../core'),
+      '@core': corePath,
     },
   },
   server: {
@@ -18,6 +26,12 @@ export default defineConfig({
     allowedHosts: ['aethea.me'], // Allow Cloudflare tunnel hostname
     hmr: {
       clientPort: 443, // Cloudflare tunnel uses HTTPS (port 443)
+    },
+    proxy: {
+      '/api': {
+        target: apiProxyTarget,
+        changeOrigin: true,
+      },
     },
   },
   build: {

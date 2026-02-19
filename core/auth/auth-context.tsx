@@ -11,7 +11,7 @@ export interface AuthContextValue extends AuthState {
   signIn: (email: string, password: string, captchaToken?: string) => Promise<void>;
   signUp: (credentials: SignUpCredentials) => Promise<{ success: boolean; message?: string }>;
   signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
+  resetPassword: (email: string, captchaToken?: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
   updateProfile: (updates: ProfileUpdateRequest) => Promise<{ success: boolean; message?: string }>;
   refreshProfile: () => Promise<void>;

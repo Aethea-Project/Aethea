@@ -169,6 +169,7 @@ export interface SignInCredentials {
 // Password reset
 export interface PasswordResetRequest {
   email: string;
+  captchaToken?: string;
 }
 
 // Update password

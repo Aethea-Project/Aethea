@@ -201,6 +201,7 @@ export const parseAuthError = (error: any): AuthError => {
   // Map common Supabase error codes
   const errorMap: Record<string, string> = {
     invalid_credentials: AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS,
+    invalid_grant: AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS,
     user_not_found: AUTH_ERROR_MESSAGES.USER_NOT_FOUND,
     email_exists: AUTH_ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
     user_already_exists: AUTH_ERROR_MESSAGES.EMAIL_ALREADY_EXISTS,
@@ -214,10 +215,52 @@ export const parseAuthError = (error: any): AuthError => {
 
   // Check if error message contains captcha-related keywords
   const errorMessage = error.message?.toLowerCase() || '';
+
+  if (errorMessage.includes('email not confirmed') || errorMessage.includes('confirm your email')) {
+    return {
+      message: 'Your email is not confirmed yet. Please check your inbox/spam and confirm your account.',
+      code: error.code || 'EMAIL_NOT_CONFIRMED',
+      status: error.status,
+    };
+  }
+
+  if (errorMessage.includes('300030') || errorMessage.includes('invalid site key')) {
+    return {
+      message:
+        'CAPTCHA site key is invalid for this domain. Add this domain in Cloudflare Turnstile settings or use the test key for local development.',
+      code: error.code || 'CAPTCHA_SITEKEY_INVALID',
+      status: error.status,
+    };
+  }
+
+  if (errorMessage.includes('invalid input response') || errorMessage.includes('missing-input-response')) {
+    return {
+      message: 'CAPTCHA token is invalid or expired. Please complete verification again.',
+      code: error.code || 'CAPTCHA_TOKEN_INVALID',
+      status: error.status,
+    };
+  }
+
   if (errorMessage.includes('captcha')) {
     return {
       message: 'CAPTCHA verification failed. Please complete the verification and try again.',
       code: error.code || 'CAPTCHA_FAILED',
+      status: error.status,
+    };
+  }
+
+  if (error.code === 'invalid_grant' && error.status === 400) {
+    return {
+      message: AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS,
+      code: error.code,
+      status: error.status,
+    };
+  }
+
+  if (error.status === 500 && (errorMessage.includes('/recover') || errorMessage.includes('smtp') || errorMessage.includes('email'))) {
+    return {
+      message: 'Email service is not configured correctly in Supabase (SMTP/Auth settings). Please check dashboard configuration and try again.',
+      code: error.code || 'EMAIL_SERVICE_ERROR',
       status: error.status,
     };
   }

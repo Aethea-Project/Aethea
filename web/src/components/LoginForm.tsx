@@ -3,7 +3,7 @@
  * Follows web.dev best practices for accessibility and UX
  */
 
-import React, { useState, useEffect, useRef, FormEvent } from 'react';
+import React, { useState, useEffect, useRef, useCallback, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@core/auth/useAuth';
 import { TURNSTILE_CONFIG } from '@core/auth/constants';
@@ -32,26 +32,73 @@ export const LoginForm: React.FC = () => {
   const turnstileRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
 
+  const renderTurnstileWidget = useCallback((): boolean => {
+    if (!window.turnstile || !turnstileRef.current || widgetIdRef.current) {
+      return false;
+    }
+
+    widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
+      sitekey: TURNSTILE_CONFIG.SITE_KEY,
+      callback: (token: string) => {
+        setCaptchaToken(token);
+        setLocalError(null);
+      },
+      'expired-callback': () => {
+        setCaptchaToken(null);
+        setLocalError('CAPTCHA expired. Please verify again.');
+      },
+      'error-callback': () => {
+        setCaptchaToken(null);
+        setLocalError('CAPTCHA failed to load. Refresh the page and try again.');
+      },
+      theme: 'light',
+      size: 'normal',
+    });
+
+    return true;
+  }, []);
+
   /**
    * Load Turnstile script and render widget
    */
   useEffect(() => {
+    let retryTimer: ReturnType<typeof setInterval> | undefined;
+
+    const ensureRendered = () => {
+      if (renderTurnstileWidget()) {
+        if (retryTimer) {
+          clearInterval(retryTimer);
+          retryTimer = undefined;
+        }
+        return;
+      }
+
+      let attempts = 0;
+      retryTimer = setInterval(() => {
+        attempts += 1;
+        if (renderTurnstileWidget() || attempts >= 30) {
+          if (retryTimer) {
+            clearInterval(retryTimer);
+            retryTimer = undefined;
+          }
+          if (attempts >= 30 && !widgetIdRef.current) {
+            setLocalError('Security verification is unavailable. Please refresh and try again.');
+          }
+        }
+      }, 100);
+    };
+
     if (document.getElementById('cf-turnstile-script')) {
-      // Script already loaded, just render widget
-      const renderWidget = () => {
-        if (window.turnstile && turnstileRef.current && !widgetIdRef.current) {
-          widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
-            sitekey: TURNSTILE_CONFIG.SITE_KEY,
-            callback: (token: string) => setCaptchaToken(token),
-            'expired-callback': () => setCaptchaToken(null),
-            'error-callback': () => setCaptchaToken(null),
-            theme: 'light',
-            size: 'normal',
-          });
+      ensureRendered();
+      return () => {
+        if (retryTimer) {
+          clearInterval(retryTimer);
+        }
+        if (widgetIdRef.current && window.turnstile) {
+          window.turnstile.remove(widgetIdRef.current);
+          widgetIdRef.current = null;
         }
       };
-      setTimeout(renderWidget, 100);
-      return;
     }
 
     const script = document.createElement('script');
@@ -60,28 +107,23 @@ export const LoginForm: React.FC = () => {
     script.async = true;
     script.defer = true;
 
-    script.onload = () => {
-      if (window.turnstile && turnstileRef.current) {
-        widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
-          sitekey: TURNSTILE_CONFIG.SITE_KEY,
-          callback: (token: string) => setCaptchaToken(token),
-          'expired-callback': () => setCaptchaToken(null),
-          'error-callback': () => setCaptchaToken(null),
-          theme: 'light',
-          size: 'normal',
-        });
-      }
+    script.onload = ensureRendered;
+    script.onerror = () => {
+      setLocalError('Security verification failed to load. Please check your connection and retry.');
     };
 
     document.head.appendChild(script);
 
     return () => {
+      if (retryTimer) {
+        clearInterval(retryTimer);
+      }
       if (widgetIdRef.current && window.turnstile) {
         window.turnstile.remove(widgetIdRef.current);
         widgetIdRef.current = null;
       }
     };
-  }, []);
+  }, [renderTurnstileWidget]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

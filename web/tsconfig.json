@@ -4,7 +4,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@core/*": ["../core/*"]
+      "@core/*": ["../core/*", "core/*"]
     },
     "target": "ES2020",
     "useDefineForClassFields": true,
@@ -24,6 +24,6 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src", "../core"],
+  "include": ["src", "../core", "core"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

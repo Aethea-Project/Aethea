@@ -7,17 +7,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-function Write-Step($message) {
-  Write-Host "`n=== $message ===" -ForegroundColor Cyan
-}
-
-function Write-Success($message) {
-  Write-Host $message -ForegroundColor Green
-}
-
-function Write-Info($message) {
-  Write-Host $message -ForegroundColor Yellow
-}
+. (Join-Path $PSScriptRoot "common.ps1")
 
 Write-Host "Starting Aethea dev/server stack..." -ForegroundColor Yellow
 
@@ -31,38 +21,8 @@ try {
     throw "Docker CLI not found. Please install Docker Desktop."
   }
 
-  # 2) Check if Docker Desktop is running
-  $dockerInfo = docker info 2>&1
-  if ($LASTEXITCODE -ne 0) {
-    Write-Info "Docker Desktop is not running. Starting Docker Desktop..."
-    
-    # Try to start Docker Desktop
-    $dockerDesktopPath = "C:\Program Files\Docker\Docker\Docker Desktop.exe"
-    if (Test-Path $dockerDesktopPath) {
-      Start-Process $dockerDesktopPath
-      Write-Info "Waiting for Docker Desktop to start (30s)..."
-      Start-Sleep -Seconds 30
-      
-      # Verify Docker is ready
-      $retries = 6
-      $dockerReady = $false
-      for ($i = 0; $i -lt $retries; $i++) {
-        $dockerInfo = docker info 2>&1
-        if ($LASTEXITCODE -eq 0) {
-          $dockerReady = $true
-          break
-        }
-        Write-Info "Waiting for Docker daemon... ($($i+1)/$retries)"
-        Start-Sleep -Seconds 10
-      }
-      
-      if (-not $dockerReady) {
-        throw "Docker Desktop did not start in time. Please start it manually and retry."
-      }
-    } else {
-      throw "Docker Desktop executable not found at: $dockerDesktopPath"
-    }
-  }
+  # 2) Ensure Docker daemon is ready
+  Ensure-DockerReady
   Write-Success "Docker is running."
 
   # 3) Start Docker Compose stack
@@ -115,6 +75,14 @@ try {
     }
     
     Write-Success "Docker Compose services started successfully."
+
+    # Apply database migrations after backend is up
+    Write-Step "Applying database migrations"
+    & docker compose exec -T backend npx prisma migrate deploy
+    if ($LASTEXITCODE -ne 0) {
+      throw "Prisma migration failed."
+    }
+    Write-Success "Database migrations applied successfully."
     
     # 4) Wait for services to be healthy
     Write-Step "Checking service health"

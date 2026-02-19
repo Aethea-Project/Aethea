@@ -276,6 +276,13 @@
   gap: 0.4rem;
 }
 
+.captcha-container > div {
+  min-height: 65px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
 /* ── Submit button ────────────────────────── */
 .register-form .submit-button {
   width: 100%;

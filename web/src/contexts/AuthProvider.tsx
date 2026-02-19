@@ -183,11 +183,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [navigate]);
 
   // Reset password handler
-  const resetPassword = useCallback(async (email: string) => {
+  const resetPassword = useCallback(async (email: string, captchaToken?: string) => {
     setAuthState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
-      const response = await authService.resetPassword({ email });
+      const response = await authService.resetPassword({ email, captchaToken });
 
       setAuthState((prev) => ({
         ...prev,

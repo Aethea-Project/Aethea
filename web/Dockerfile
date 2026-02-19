@@ -15,7 +15,7 @@ RUN npm ci && npm cache clean --force
 # ---------- Build ----------
 FROM deps AS build
 # Copy shared core package (path aliases resolve to ../core)
-COPY ../core /core
+COPY ../core ./core
 COPY . .
 ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_ANON_KEY

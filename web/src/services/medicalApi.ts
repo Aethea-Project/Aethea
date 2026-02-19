@@ -10,7 +10,29 @@ import {
 } from '@core/types/medical';
 import { authService } from './auth';
 
-const API_BASE = `${import.meta.env.VITE_API_URL ?? ''}/api`;
+const resolveApiBaseUrl = (): string => {
+  const configuredUrl = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/+$/, '');
+
+  if (typeof window !== 'undefined') {
+    const { hostname } = window.location;
+    if (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === 'aethea.me' ||
+      hostname.endsWith('.aethea.me')
+    ) {
+      return '/api';
+    }
+  }
+
+  if (configuredUrl) {
+    return `${configuredUrl}/api`;
+  }
+
+  return 'http://localhost:3001/api';
+};
+
+const API_BASE = resolveApiBaseUrl();
 
 type RawLabTest = {
   id: string;

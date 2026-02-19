@@ -71,49 +71,138 @@ export const RegisterForm: React.FC = () => {
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  const renderTurnstileWidget = useCallback((): boolean => {
+    if (!window.turnstile || !turnstileRef.current || widgetIdRef.current) {
+      return false;
+    }
+
+    widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
+      sitekey: TURNSTILE_CONFIG.SITE_KEY,
+      callback: (token: string) => {
+        setCaptchaToken(token);
+        setFieldErrors((prev) => ({ ...prev, captcha: undefined }));
+        setGlobalError(null);
+      },
+      'expired-callback': () => {
+        setCaptchaToken(null);
+        setFieldErrors((prev) => ({ ...prev, captcha: 'CAPTCHA expired. Please verify again.' }));
+      },
+      'error-callback': () => {
+        setCaptchaToken(null);
+        setFieldErrors((prev) => ({
+          ...prev,
+          captcha: 'CAPTCHA failed to load. Refresh the page and try again.',
+        }));
+      },
+      theme: 'light',
+    });
+
+    return true;
+  }, []);
+
   /**
    * Load Turnstile script and render widget (explicit mode for SPA)
    */
   useEffect(() => {
-    const renderWidget = () => {
-      if (window.turnstile && turnstileRef.current && !widgetIdRef.current) {
-        widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
-          sitekey: TURNSTILE_CONFIG.SITE_KEY,
-          callback: (token: string) => {
-            setCaptchaToken(token);
-            setFieldErrors((prev) => ({ ...prev, captcha: undefined }));
-          },
-          'expired-callback': () => setCaptchaToken(null),
-          'error-callback': () => setCaptchaToken(null),
-          theme: 'light',
-        });
+    let retryTimer: ReturnType<typeof setInterval> | undefined;
+    let fallbackScriptTimer: ReturnType<typeof setTimeout> | undefined;
+    let boundScriptEl: HTMLScriptElement | null = null;
+
+    const cleanupScriptListeners = () => {
+      if (boundScriptEl) {
+        boundScriptEl.onload = null;
+        boundScriptEl.onerror = null;
       }
+      boundScriptEl = null;
     };
 
-    // If the script is already loaded (e.g. user came from LoginForm), render immediately
-    if (document.getElementById('cf-turnstile-script')) {
-      setTimeout(renderWidget, 100);
-      return;
+    const injectScript = () => {
+      const script = document.createElement('script');
+      script.id = 'cf-turnstile-script';
+      script.src = `${TURNSTILE_CONFIG.SCRIPT_URL}?render=explicit`;
+      script.async = true;
+      script.defer = true;
+
+      script.onload = ensureRendered;
+      script.onerror = () => {
+        setFieldErrors((prev) => ({
+          ...prev,
+          captcha: 'Security verification failed to load. Please check your connection and retry.',
+        }));
+      };
+
+      boundScriptEl = script;
+      document.head.appendChild(script);
+    };
+
+    const ensureRendered = () => {
+      if (renderTurnstileWidget()) {
+        if (retryTimer) {
+          clearInterval(retryTimer);
+          retryTimer = undefined;
+        }
+        return;
+      }
+
+      let attempts = 0;
+      retryTimer = setInterval(() => {
+        attempts += 1;
+        if (renderTurnstileWidget() || attempts >= 30) {
+          if (retryTimer) {
+            clearInterval(retryTimer);
+            retryTimer = undefined;
+          }
+          if (attempts >= 30 && !widgetIdRef.current) {
+            setFieldErrors((prev) => ({
+              ...prev,
+              captcha: 'Security verification is unavailable. Please refresh and try again.',
+            }));
+          }
+        }
+      }, 100);
+    };
+
+    const existingScript = document.getElementById('cf-turnstile-script') as HTMLScriptElement | null;
+
+    // Script tag exists but Turnstile may still be loading or failed previously
+    if (existingScript) {
+      if (window.turnstile) {
+        ensureRendered();
+      } else {
+        boundScriptEl = existingScript;
+        existingScript.onload = ensureRendered;
+        existingScript.onerror = () => {
+          setFieldErrors((prev) => ({
+            ...prev,
+            captcha: 'Security verification failed to load. Please check your connection and retry.',
+          }));
+        };
+
+        fallbackScriptTimer = setTimeout(() => {
+          if (!window.turnstile) {
+            existingScript.remove();
+            injectScript();
+          }
+        }, 2500);
+      }
+    } else {
+      injectScript();
     }
 
-    const script = document.createElement('script');
-    script.id = 'cf-turnstile-script';
-    script.src = `${TURNSTILE_CONFIG.SCRIPT_URL}?render=explicit`;
-    script.async = true;
-    script.defer = true;
-
-    script.onload = () => {
-      renderWidget();
-    };
-
-    document.head.appendChild(script);
-
     return () => {
+      if (fallbackScriptTimer) {
+        clearTimeout(fallbackScriptTimer);
+      }
+      cleanupScriptListeners();
+      if (retryTimer) {
+        clearInterval(retryTimer);
+      }
       if (widgetIdRef.current && window.turnstile) {
         window.turnstile.remove(widgetIdRef.current);
+        widgetIdRef.current = null;
       }
     };
-  }, []);
+  }, [renderTurnstileWidget]);
 
   /**
    * Clear a specific field error on user input

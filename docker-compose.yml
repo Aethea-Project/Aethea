@@ -93,7 +93,7 @@ services:
     volumes:
       - ./web/src:/app/src
       - ./web/index.html:/app/index.html
-      - ./core:/core
+      - ./core:/app/core
     depends_on:
       backend:
         condition: service_healthy
@@ -109,9 +109,7 @@ services:
     command: tunnel --config /etc/cloudflared/config.yml run
     volumes:
       - ./cloudflared/config.yml:/etc/cloudflared/config.yml:ro
-      - ${CLOUDFLARED_CREDENTIALS_DIR:-~/.cloudflared}:/etc/cloudflared/creds:ro
-    environment:
-      TUNNEL_ORIGIN_CERT: /etc/cloudflared/creds/cert.pem
+      - ../de687480-54da-4632-a55e-b3d1b4a8575d.json:/etc/cloudflared/creds/de687480-54da-4632-a55e-b3d1b4a8575d.json:ro
     networks:
       - aethea-network
     depends_on:
