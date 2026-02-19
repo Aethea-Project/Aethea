@@ -44,7 +44,7 @@ try {
   Copy-IfMissing (Join-Path $projectRoot "backend/.env.example") (Join-Path $projectRoot "backend/.env")
   Copy-IfMissing (Join-Path $projectRoot "web/.env.example") (Join-Path $projectRoot "web/.env")
 
-  Write-Host "`n⚠️  Important:" -ForegroundColor Yellow
+  Write-Host "`nImportant:" -ForegroundColor Yellow
   Write-Host "- Fill secrets in backend/.env and web/.env (Supabase, Turnstile, Google Maps key)." -ForegroundColor Gray
   Write-Host "- Keep your cloudflared tunnel JSON file outside git and mounted via docker-compose." -ForegroundColor Gray
 
@@ -67,9 +67,9 @@ try {
     Write-Host "`nSetup finished. You can start later with: npm run start:server" -ForegroundColor Cyan
   }
 
-  Write-Host "`n✅ First-time setup completed." -ForegroundColor Green
+  Write-Host "`nFirst-time setup completed." -ForegroundColor Green
 } catch {
-  Write-Host "`n❌ Error: $_" -ForegroundColor Red
+  Write-Host "`nError: $_" -ForegroundColor Red
   exit 1
 } finally {
   Pop-Location

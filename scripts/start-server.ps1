@@ -117,15 +117,15 @@ try {
   Write-Step "Services Ready"
   
   if ($DevMode) {
-    Write-Host "`n📱 Frontend (Dev):  http://localhost:5173" -ForegroundColor Green
-    Write-Host "🔧 Backend API (Dev): http://localhost:3001" -ForegroundColor Green
+    Write-Host "`nFrontend (Dev):  http://localhost:5173" -ForegroundColor Green
+    Write-Host "Backend API (Dev): http://localhost:3001" -ForegroundColor Green
   } else {
-    Write-Host "`n📱 Frontend:  http://localhost:80" -ForegroundColor Green
-    Write-Host "🔧 Backend API: http://localhost:3001" -ForegroundColor Green
-    Write-Host "❤️  Health Check: http://localhost:3001/health" -ForegroundColor Green
+    Write-Host "`nFrontend:  http://localhost:80" -ForegroundColor Green
+    Write-Host "Backend API: http://localhost:3001" -ForegroundColor Green
+    Write-Host "Health Check: http://localhost:3001/health" -ForegroundColor Green
     
     if ($WithTools) {
-      Write-Host "`n🛠️  Tools:" -ForegroundColor Cyan
+      Write-Host "`nTools:" -ForegroundColor Cyan
       Write-Host "  - pgAdmin:      http://localhost:5050 (admin@aethea.local / admin123)" -ForegroundColor Gray
       Write-Host "  - RedisInsight: http://localhost:8001" -ForegroundColor Gray
       Write-Host "  - MailHog:      http://localhost:8025" -ForegroundColor Gray
@@ -133,10 +133,10 @@ try {
   }
   
   if ($StartTunnel) {
-    Write-Host "`n🌐 Cloudflare Tunnel: Check tunnel URL in cloudflared logs" -ForegroundColor Magenta
+    Write-Host "`nCloudflare Tunnel: Check tunnel URL in cloudflared logs" -ForegroundColor Magenta
   }
   
-  Write-Host "`n✅ Aethea stack is running!" -ForegroundColor Yellow
+  Write-Host "`nAethea stack is running!" -ForegroundColor Yellow
   Write-Host "To stop: npm run docker:down (or .\scripts\pause-server.ps1)" -ForegroundColor Cyan
   
   if ($DevMode) {
@@ -147,7 +147,7 @@ try {
   }
 
 } catch {
-  Write-Host "`n❌ Error: $_" -ForegroundColor Red
+  Write-Host "`nError: $_" -ForegroundColor Red
   exit 1
 } finally {
   Pop-Location

@@ -1,5 +1,5 @@
 param(
-  [switch]$AlsoQuitDockerDesktop = $true,
+  [switch]$AlsoQuitDockerDesktop = $false,
   [switch]$StopCloudflaredService = $true
 )
 
@@ -70,4 +70,6 @@ if ($AlsoQuitDockerDesktop) {
 
 Write-Info "`nDone. Your local server/tunnel stack is paused."
 Write-Step "Next"
+Write-Info "Docker Desktop remains running by default."
+Write-Info "To also close Docker Desktop: npm run pause:server -- -AlsoQuitDockerDesktop"
 Write-Info "When ready to resume: npm run docker:up (or npm run docker:tunnel for tunnel only)."

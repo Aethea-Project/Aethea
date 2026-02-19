@@ -37,9 +37,9 @@ try {
     throw "Failed to start stack after shutdown."
   }
 
-  Write-Success "`n✅ Restart completed successfully."
+  Write-Success "`nRestart completed successfully."
 } catch {
-  Write-Host "`n❌ Error: $_" -ForegroundColor Red
+  Write-Host "`nError: $_" -ForegroundColor Red
   exit 1
 } finally {
   Pop-Location
