@@ -5,13 +5,11 @@
 // Supabase Configuration — loaded from environment variables (NEVER hardcode secrets)
 export const getSupabaseConfig = () => {
   const url =
-    (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_SUPABASE_URL) ||
     (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_URL) ||
     (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SUPABASE_URL) ||
     '';
 
   const anonKey =
-    (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_SUPABASE_ANON_KEY) ||
     (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_ANON_KEY) ||
     (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SUPABASE_ANON_KEY) ||
     '';
@@ -19,8 +17,7 @@ export const getSupabaseConfig = () => {
   if (!url || !anonKey) {
     console.warn(
       '⚠️  Supabase credentials not found in environment variables.\n' +
-      '   Web: set VITE_SUPABASE_URL & VITE_SUPABASE_ANON_KEY in .env\n' +
-      '   Mobile: set EXPO_PUBLIC_SUPABASE_URL & EXPO_PUBLIC_SUPABASE_ANON_KEY in .env'
+      '   Set VITE_SUPABASE_URL & VITE_SUPABASE_ANON_KEY in .env'
     );
   }
 
@@ -31,7 +28,6 @@ export const getSupabaseConfig = () => {
 // Fallback: Cloudflare's always-pass test key (safe for local dev, never use in production)
 // See: https://developers.cloudflare.com/turnstile/troubleshooting/testing/
 const turnstileSiteKey =
-  (typeof process !== 'undefined' && process.env?.EXPO_PUBLIC_TURNSTILE_SITE_KEY) ||
   (typeof process !== 'undefined' && process.env?.VITE_TURNSTILE_SITE_KEY) ||
   (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_TURNSTILE_SITE_KEY) ||
   '1x00000000000000000000AA';

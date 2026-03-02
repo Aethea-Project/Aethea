@@ -67,8 +67,8 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
-  border: 1px solid #f1f5f9;
+  box-shadow: var(--shadow-card);
+  border: var(--border-card);
   transition: all 0.2s ease;
 }
 .scans-sidebar .stat-card:hover {
@@ -93,8 +93,8 @@
   background: white;
   border-radius: 1.25rem;
   padding: 1.5rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
-  border: 1px solid #f1f5f9;
+  box-shadow: var(--shadow-card);
+  border: var(--border-card);
 }
 .scans-sidebar .filter-title {
   font-size: 0.8125rem;
@@ -180,7 +180,7 @@
   border-radius: 1.5rem;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-  border: 1px solid #f1f5f9;
+  border: var(--border-card);
   cursor: pointer;
   transition: all 0.3s ease;
 }

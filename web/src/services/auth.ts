@@ -15,30 +15,8 @@ const supabase = initializeSupabase({
 // Create auth service instance
 export const authService = new AuthService(supabase);
 
-// Helper function to check if user is authenticated
-export const isAuthenticated = async (): Promise<boolean> => {
-  const sessionResponse = await authService.getSession();
-  return !!sessionResponse.data;
-};
-
-// Helper to get current user
-export const getCurrentUser = async () => {
-  const userResponse = await authService.getUser();
-  return userResponse.data;
-};
-
-// Helper to redirect to login if not authenticated
-export const requireAuth = async (redirectUrl: string = '/login'): Promise<boolean> => {
-  const authenticated = await isAuthenticated();
-  if (!authenticated) {
-    window.location.href = redirectUrl;
-    return false;
-  }
-  return true;
-};
-
 // Test API helper — easy to rename/remove later
-export const testMassegeEmailApi = async (email: string, captchaToken?: string) => {
+export const testMessageEmailApi = async (email: string, captchaToken?: string) => {
   return authService.resetPassword({
     email,
     captchaToken,

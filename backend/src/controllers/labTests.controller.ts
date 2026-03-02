@@ -1,42 +1,38 @@
 /**
- * Lab Tests Controller (placeholder)
+ * Lab Tests Controller
+ *
+ * Auth is handled by `requireLocalUser` middleware in the route layer.
+ * Each handler receives `req.localUser` (the Prisma User record).
  */
 
 import { Request, Response } from 'express';
 import prisma from '../lib/prisma.js';
-import { ensureLocalUser, getAuthenticatedUser } from '../lib/authUser.js';
+import { AppError } from '../lib/AppError.js';
+import { parsePagination, paginatedResult } from '../lib/pagination.js';
 
 export const listLabTests = async (req: Request, res: Response): Promise<void> => {
-  const authUser = getAuthenticatedUser(req);
+  const user = req.localUser!;
+  const { page, limit, skip } = parsePagination(req);
 
-  if (!authUser) {
-    res.status(401).json({ error: 'Unauthorized' });
-    return;
-  }
+  const [tests, total] = await Promise.all([
+    prisma.labTest.findMany({
+      where: { userId: user.id },
+      orderBy: { measuredAt: 'desc' },
+      skip,
+      take: limit,
+    }),
+    prisma.labTest.count({ where: { userId: user.id } }),
+  ]);
 
-  await ensureLocalUser(authUser);
-
-  const tests = await prisma.labTest.findMany({
-    where: { userId: authUser.id },
-    orderBy: { measuredAt: 'desc' },
-  });
-
-  res.json({ tests });
+  res.json(paginatedResult(tests, total, page, limit));
 };
 
 export const createLabTest = async (req: Request, res: Response): Promise<void> => {
-  const authUser = getAuthenticatedUser(req);
-
-  if (!authUser) {
-    res.status(401).json({ error: 'Unauthorized' });
-    return;
-  }
-
-  await ensureLocalUser(authUser);
+  const user = req.localUser!;
 
   const test = await prisma.labTest.create({
     data: {
-      userId: authUser.id,
+      userId: user.id,
       testName: req.body.testName,
       category: req.body.category,
       value: req.body.value,
@@ -55,25 +51,17 @@ export const createLabTest = async (req: Request, res: Response): Promise<void> 
 };
 
 export const updateLabTest = async (req: Request, res: Response): Promise<void> => {
-  const authUser = getAuthenticatedUser(req);
+  const user = req.localUser!;
 
-  if (!authUser) {
-    res.status(401).json({ error: 'Unauthorized' });
-    return;
-  }
-
-  const { id } = req.params;
+  const idParam = req.params.id;
+  const id = Array.isArray(idParam) ? idParam[0] : idParam;
   if (!id) {
-    res.status(400).json({ error: 'Missing lab test id' });
-    return;
+    throw AppError.badRequest('Missing lab test id');
   }
 
-  await ensureLocalUser(authUser);
-
-  const existing = await prisma.labTest.findFirst({ where: { id, userId: authUser.id } });
+  const existing = await prisma.labTest.findFirst({ where: { id, userId: user.id } });
   if (!existing) {
-    res.status(404).json({ error: 'Lab test not found' });
-    return;
+    throw AppError.notFound('Lab test not found');
   }
 
   const test = await prisma.labTest.update({

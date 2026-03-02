@@ -53,6 +53,10 @@
   /* Transition — keep under 300ms for perceived speed */
   --transition-fast: 150ms ease;
   --transition-base: 200ms ease;
+
+  /* Card surface — used by glass-card and page list cards */
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.03);
+  --border-card: 1px solid #f1f5f9;
 }
 
 /* Reset */
@@ -414,7 +418,7 @@ img, svg {
   background: white;
   border-radius: 1.25rem;
   padding: 1rem;
-  border: 1px solid #f1f5f9;
+  border: var(--border-card);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -582,7 +586,7 @@ img, svg {
   font-weight: 500;
   color: var(--color-text-main);
   box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-  border: 1px solid #f1f5f9;
+  border: var(--border-card);
   transition: transform 0.3s ease;
 }
 .ac-dot {
@@ -871,8 +875,8 @@ img, svg {
   display: flex;
   align-items: center;
   gap: 1rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
-  border: 1px solid #f1f5f9;
+  box-shadow: var(--shadow-card);
+  border: var(--border-card);
   transition: transform 0.2s ease;
 }
 .summary-card:hover { transform: translateY(-2px); }
@@ -946,7 +950,7 @@ img, svg {
   padding: 0;
   display: flex;
   flex-direction: column;
-  border: 1px solid #f1f5f9;
+  border: var(--border-card);
   box-shadow: 0 2px 12px rgba(0,0,0,0.02);
   transition: all 0.3s ease;
   position: relative;
@@ -1093,7 +1097,7 @@ img, svg {
    ================================================================ */
 
 .feature-page {
-  animation: pageIn 0.35s ease-out;
+  animation: pageIn 0.4s ease-out;
 }
 @keyframes pageIn {
   from { opacity: 0; transform: translateY(10px); }
@@ -1169,7 +1173,7 @@ img, svg {
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255,255,255,0.5);
   border-radius: 1.25rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+  box-shadow: var(--shadow-card);
   transition: all 0.3s ease;
 }
 .glass-card:hover {
@@ -1307,7 +1311,7 @@ img, svg {
   padding: 1.25rem;
   text-align: center;
   box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-  border: 1px solid #f1f5f9;
+  border: var(--border-card);
 }
 .stat-card .stat-number {
   font-family: 'Fraunces', serif;

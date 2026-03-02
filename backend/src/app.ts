@@ -49,7 +49,7 @@ export function createApp(config: AppConfig = {}) {
   const {
     supabaseUrl,
     supabaseServiceKey,
-    corsOrigins = ['http://localhost:5173', 'http://localhost:19006', 'https://aethea.me'],
+    corsOrigins = ['http://localhost:5173', 'https://aethea.me'],
     isProduction = process.env.NODE_ENV === 'production',
   } = config;
 
@@ -67,7 +67,16 @@ export function createApp(config: AppConfig = {}) {
   }
 
   // ─── Security headers (OWASP REST Security Headers) ───
-  app.use(helmet());
+  // API-only CSP: browsers should never render API responses as HTML
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+      },
+    },
+    crossOriginResourcePolicy: { policy: 'same-origin' },
+  }));
 
   // ─── CORS with explicit origins (OWASP REST CORS) ───
   app.use(cors({
@@ -101,7 +110,7 @@ export function createApp(config: AppConfig = {}) {
   app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
   // ─── Structured request logging (Pino) ───
-  app.use(pinoHttp({ logger, autoLogging: !isProduction ? true : { ignore: (req) => req.url === '/health' } }));
+  app.use(pinoHttp({ logger, autoLogging: isProduction ? { ignore: (req) => req.url === '/health' } : true }));
 
   // ─── Cache-Control: no-store on all API responses ───
   // Source: OWASP REST Security Headers
@@ -148,16 +157,24 @@ export function createApp(config: AppConfig = {}) {
       version: '1.0.0',
       endpoints: {
         health: '/health',
-        auth: '/api/auth/*',
-        users: '/api/users/*',
-        scans: '/api/scans/*',
-        labTests: '/api/lab-tests/*',
-        reservations: '/api/reservations/*',
+        auth: '/api/v1/auth/*',
+        users: '/api/v1/users/*',
+        scans: '/api/v1/scans/*',
+        labTests: '/api/v1/lab-tests/*',
+        reservations: '/api/v1/reservations/*',
       },
     });
   });
 
   // ─── Mount route modules (Router Pattern) ───
+  // API v1 — explicit versioning (REST best practice)
+  app.use('/api/v1/auth', authRoutes);
+  app.use('/api/v1/users', createUserRoutes(authMiddleware));
+  app.use('/api/v1/scans', createScanRoutes(authMiddleware));
+  app.use('/api/v1/lab-tests', createLabTestRoutes(authMiddleware));
+  app.use('/api/v1/reservations', createReservationRoutes(authMiddleware));
+
+  // Backward-compatible aliases (non-versioned paths → v1)
   app.use('/api/auth', authRoutes);
   app.use('/api/users', createUserRoutes(authMiddleware));
   app.use('/api/scans', createScanRoutes(authMiddleware));

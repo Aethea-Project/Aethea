@@ -13,6 +13,7 @@
 
 import rateLimit, { type Store } from 'express-rate-limit';
 import { createClient } from 'redis';
+import { RedisStore } from 'rate-limit-redis';
 import logger from '../lib/logger.js';
 
 /* ---------- Redis store (optional) ---------- */
@@ -20,14 +21,23 @@ let redisStore: Store | undefined;
 
 if (process.env.REDIS_URL) {
   try {
-    const { RedisStore } = await import('rate-limit-redis');
     const redisClient = createClient({ url: process.env.REDIS_URL });
-    await redisClient.connect();
+    redisClient.on('error', () => {
+      logger.warn('Redis unavailable for rate limiter — falling back to in-memory behavior');
+    });
+
+    void redisClient.connect()
+      .then(() => {
+        logger.info('Rate limiter using Redis store');
+      })
+      .catch(() => {
+        logger.warn('Redis unavailable for rate limiter — falling back to in-memory behavior');
+      });
+
     redisStore = new RedisStore({
       sendCommand: (...args: string[]) => redisClient.sendCommand(args),
       prefix: 'rl:',
     });
-    logger.info('Rate limiter using Redis store');
   } catch {
     logger.warn('Redis unavailable for rate limiter — falling back to in-memory store');
   }

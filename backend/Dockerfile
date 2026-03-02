@@ -4,7 +4,7 @@
 # =============================================
 
 # ---------- Base ----------
-FROM node:20-alpine AS base
+FROM node:24-alpine3.21 AS base
 WORKDIR /app
 RUN addgroup -g 1001 -S nodejs && \
     adduser  -S nodejs -u 1001 -G nodejs
@@ -13,7 +13,7 @@ RUN addgroup -g 1001 -S nodejs && \
 FROM base AS deps
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma/
-RUN npm ci --omit=dev && \
+RUN npm install --omit=dev && \
     npx prisma generate && \
     npm cache clean --force
 
@@ -21,7 +21,7 @@ RUN npm ci --omit=dev && \
 FROM base AS build-deps
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma/
-RUN npm ci && \
+RUN npm install && \
     npx prisma generate && \
     npm cache clean --force
 

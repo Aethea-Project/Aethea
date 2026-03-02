@@ -3,42 +3,21 @@
  * Grid view for medical scans with filters, zoom modal, and comparison features
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { MedicalScan, ScanType, ScanStatus } from '@core/types/medical';
-import { medicalApi } from '../../services/medicalApi';
+import { useScans } from '../../hooks/useScans';
 import { FeatureHeader } from '../../components/FeatureHeader';
+import { Modal } from '../../components/Modal';
 import { imageAssets } from '../../constants/imageAssets';
 import './styles.css';
 
 const ScansPage = () => {
-  const [scans, setScans] = useState<MedicalScan[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { scans, loading, error } = useScans();
   const [selectedScan, setSelectedScan] = useState<MedicalScan | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [filterType, setFilterType] = useState<ScanType | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<ScanStatus | 'all'>('all');
   const [sortBy, setSortBy] = useState<'date' | 'priority' | 'type'>('date');
-
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const data = await medicalApi.fetchScans();
-        if (!active) return;
-        // Ensure images array exists to keep UI stable
-        setScans(data.map((scan) => ({ ...scan, images: scan.images ?? [] })) as MedicalScan[]);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load scans');
-      } finally {
-        if (active) setLoading(false);
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, []);
 
   const filteredScans = useMemo(() => {
     return scans
@@ -270,10 +249,9 @@ const ScansPage = () => {
       </div>
 
       {/* Modal */}
-      {selectedScan && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content scan-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={closeModal}>×</button>
+      <Modal isOpen={!!selectedScan} onClose={closeModal} contentClassName="scan-modal" ariaLabel="Scan details">
+        {selectedScan && (
+          <>
 
             <div className="scan-modal-layout">
               {/* Left: Image Viewer */}
@@ -371,9 +349,9 @@ const ScansPage = () => {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </Modal>
     </div>
   );
 };

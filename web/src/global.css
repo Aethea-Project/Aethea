@@ -78,3 +78,35 @@ html {
   }
 }
 
+/* ================================================================
+   SHARED FORM BANNERS
+   Used by LoginForm, RegisterForm, ForgotPasswordForm, etc.
+   ================================================================ */
+.error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: #fef2f2;
+  border-left: 4px solid #dc2626;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  color: #991b1b;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.success-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: #f0fdf4;
+  border-left: 4px solid #16a34a;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  color: #166534;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+

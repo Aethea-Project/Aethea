@@ -1,9 +1,14 @@
 /**
  * JWT Verification for Backend
- * Verifies Supabase JWT tokens
+ * Verifies Supabase JWT tokens with timeout protection.
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { Request, Response, NextFunction } from 'express';
+import { AppError } from '../../lib/AppError.js';
+
+/** Maximum time (ms) to wait for Supabase to verify a token */
+const VERIFY_TIMEOUT_MS = 8_000;
 
 export interface JWTPayload {
   sub: string;
@@ -21,12 +26,18 @@ export class JWTVerifier {
   }
 
   /**
-   * Verify JWT token and get user
+   * Verify JWT token and get user (with timeout)
    */
   async verifyToken(token: string): Promise<{ valid: boolean; user?: any; error?: string }> {
     try {
-      // Verify token with Supabase
-      const { data, error } = await this.supabase.auth.getUser(token);
+      const result = await Promise.race([
+        this.supabase.auth.getUser(token),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Supabase auth verification timed out')), VERIFY_TIMEOUT_MS)
+        ),
+      ]);
+
+      const { data, error } = result;
 
       if (error || !data.user) {
         return {
@@ -62,29 +73,31 @@ export class JWTVerifier {
   }
 
   /**
-   * Middleware function for Express
+   * Express middleware — verifies JWT and attaches user to `req.user`.
+   * Throws `AppError.unauthorized()` on failure; the centralised
+   * error handler will format the response.
    */
   authMiddleware() {
-    return async (req: any, res: any, next: any) => {
-      const token = this.extractTokenFromHeader(req.headers.authorization);
+    return async (req: Request, _res: Response, next: NextFunction) => {
+      try {
+        const token = this.extractTokenFromHeader(req.headers.authorization);
 
-      if (!token) {
-        return res.status(401).json({
-          error: 'No authorization token provided',
-        });
+        if (!token) {
+          throw AppError.unauthorized('No authorization token provided');
+        }
+
+        const verification = await this.verifyToken(token);
+
+        if (!verification.valid) {
+          throw AppError.unauthorized(verification.error || 'Invalid token');
+        }
+
+        // Attach user to request
+        req.user = verification.user;
+        next();
+      } catch (error) {
+        next(error);
       }
-
-      const verification = await this.verifyToken(token);
-
-      if (!verification.valid) {
-        return res.status(401).json({
-          error: verification.error || 'Invalid token',
-        });
-      }
-
-      // Attach user to request
-      req.user = verification.user;
-      next();
     };
   }
 }

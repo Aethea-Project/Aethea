@@ -19,5 +19,3 @@ export const createUserRoutes = (authMiddleware: RequestHandler): Router => {
 
   return router;
 };
-
-export default createUserRoutes;

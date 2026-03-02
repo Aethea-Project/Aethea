@@ -9,16 +9,14 @@
     "backend"
   ],
   "scripts": {
-    "setup": "npm install --legacy-peer-deps && npm run install:core",
-    "install:web": "cd web && npm install --legacy-peer-deps",
-    "install:core": "cd core && npm install --legacy-peer-deps",
-    "install:shared": "npm run install:core",
+    "setup": "powershell -ExecutionPolicy Bypass -File ./scripts/setup.ps1",
+    "install:web": "npm install -w web",
+    "install:core": "npm install -w core",
     "dev": "cd web && npm run dev",
     "build": "cd web && npm run build",
     "clean": "npm run clean:web && npm run clean:core",
     "clean:web": "cd web && rm -rf node_modules dist .vite",
     "clean:core": "cd core && rm -rf node_modules dist",
-    "clean:shared": "npm run clean:core",
     "lint": "cd web && npm run lint",
     "docker:up": "docker compose up --build",
     "docker:down": "docker compose down",
@@ -31,16 +29,26 @@
     "docker:tunnel": "docker compose up cloudflared -d",
     "docker:prisma:studio": "cd backend && npx prisma studio",
     "docker:prisma:migrate": "cd backend && npx prisma migrate dev",
-    "start:server": "powershell -ExecutionPolicy Bypass -File ./scripts/start-server.ps1",
-    "start:server:dev": "powershell -ExecutionPolicy Bypass -File ./scripts/start-server.ps1 -DevMode",
-    "start:server:prod": "powershell -ExecutionPolicy Bypass -File ./scripts/start-server.ps1 -Production",
-    "start:server:all": "powershell -ExecutionPolicy Bypass -File ./scripts/start-server.ps1 -WithTools",
-    "pause:server": "powershell -ExecutionPolicy Bypass -File ./scripts/pause-server.ps1",
-    "restart:server": "powershell -ExecutionPolicy Bypass -File ./scripts/restart-server.ps1",
-    "setup:first-time": "powershell -ExecutionPolicy Bypass -File ./scripts/first-time-setup.ps1"
+    "start:server": "powershell -ExecutionPolicy Bypass -File ./scripts/start-project.ps1",
+    "start:server:dev": "powershell -ExecutionPolicy Bypass -File ./scripts/start-project.ps1 -DevMode",
+    "start:server:prod": "powershell -ExecutionPolicy Bypass -File ./scripts/start-project.ps1 -Production",
+    "start:server:tunnel": "powershell -ExecutionPolicy Bypass -File ./scripts/start-project.ps1 -StartTunnel",
+    "start:server:all": "powershell -ExecutionPolicy Bypass -File ./scripts/start-project.ps1 -WithTools",
+    "pause:server": "powershell -ExecutionPolicy Bypass -File ./scripts/stop-project.ps1",
+    "restart:server": "powershell -ExecutionPolicy Bypass -File ./scripts/refresh-project.ps1",
+    "setup:first-time": "powershell -ExecutionPolicy Bypass -File ./scripts/setup.ps1",
+    "setup:start": "powershell -ExecutionPolicy Bypass -File ./scripts/setup.ps1 -StartServices",
+    "install:all": "powershell -ExecutionPolicy Bypass -File ./scripts/install-dependencies.ps1",
+    "docs:generate": "powershell -ExecutionPolicy Bypass -File ./documentation/generate-report.ps1 -OpenAfter"
   },
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
+    "node": ">=24.0.0",
+    "npm": ">=11.0.0"
+  },
+  "packageManager": "npm@11.11.0",
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "typescript-eslint": "^8.56.1"
   }
 }

@@ -1,27 +1,14 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FeatureHeader } from '../../components/FeatureHeader';
 import { imageAssets } from '../../constants/imageAssets';
 import './styles.css';
-import { medicalApi, ReservationPayload, ReservationStatus } from '../../services/medicalApi';
-
-interface ReservationView {
-  id: string;
-  doctorName: string;
-  specialty: string;
-  reason: string;
-  location: string;
-  startAt: string;
-  endAt?: string | null;
-  status: ReservationStatus;
-  notes?: string | null;
-}
+import { ReservationPayload, ReservationStatus } from '../../services/medicalApi';
+import { useReservations } from '../../hooks/useReservations';
 
 const statusOptions: ReservationStatus[] = ['scheduled', 'confirmed', 'in_progress', 'completed', 'cancelled', 'no_show'];
 
 export default function ReservationsPage() {
-  const [reservations, setReservations] = useState<ReservationView[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { reservations, loading, error, createReservation, updateStatus } = useReservations();
 
   const [form, setForm] = useState<ReservationPayload>({
     doctorName: '',
@@ -34,23 +21,6 @@ export default function ReservationsPage() {
     notes: '',
   });
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const data = await medicalApi.fetchReservations();
-      setReservations(data);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load reservations');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const handleChange = (field: keyof ReservationPayload, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -58,24 +28,22 @@ export default function ReservationsPage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await medicalApi.createReservation({
+      await createReservation({
         ...form,
         startAt: new Date(form.startAt).toISOString(),
         endAt: form.endAt ? new Date(form.endAt).toISOString() : undefined,
       });
-      await fetchData();
       setForm({ ...form, reason: '', notes: '' });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create reservation');
+      console.error(err);
     }
   };
 
   const handleStatusUpdate = async (id: string, status: ReservationStatus) => {
     try {
-      await medicalApi.updateReservation(id, { status });
-      await fetchData();
+      await updateStatus(id, status);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update reservation');
+      console.error(err);
     }
   };
 

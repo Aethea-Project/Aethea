@@ -1,42 +1,38 @@
 /**
- * Reservations Controller (placeholder)
+ * Reservations Controller
+ *
+ * Auth is handled by `requireLocalUser` middleware in the route layer.
+ * Each handler receives `req.localUser` (the Prisma User record).
  */
 
 import { Request, Response } from 'express';
 import prisma from '../lib/prisma.js';
-import { ensureLocalUser, getAuthenticatedUser } from '../lib/authUser.js';
+import { AppError } from '../lib/AppError.js';
+import { parsePagination, paginatedResult } from '../lib/pagination.js';
 
 export const listReservations = async (req: Request, res: Response): Promise<void> => {
-  const authUser = getAuthenticatedUser(req);
+  const user = req.localUser!;
+  const { page, limit, skip } = parsePagination(req);
 
-  if (!authUser) {
-    res.status(401).json({ error: 'Unauthorized' });
-    return;
-  }
+  const [reservations, total] = await Promise.all([
+    prisma.reservation.findMany({
+      where: { userId: user.id },
+      orderBy: { startAt: 'asc' },
+      skip,
+      take: limit,
+    }),
+    prisma.reservation.count({ where: { userId: user.id } }),
+  ]);
 
-  await ensureLocalUser(authUser);
-
-  const reservations = await prisma.reservation.findMany({
-    where: { userId: authUser.id },
-    orderBy: { startAt: 'asc' },
-  });
-
-  res.json({ reservations });
+  res.json(paginatedResult(reservations, total, page, limit));
 };
 
 export const createReservation = async (req: Request, res: Response): Promise<void> => {
-  const authUser = getAuthenticatedUser(req);
-
-  if (!authUser) {
-    res.status(401).json({ error: 'Unauthorized' });
-    return;
-  }
-
-  await ensureLocalUser(authUser);
+  const user = req.localUser!;
 
   const reservation = await prisma.reservation.create({
     data: {
-      userId: authUser.id,
+      userId: user.id,
       doctorName: req.body.doctorName,
       specialty: req.body.specialty,
       reason: req.body.reason,
@@ -52,25 +48,17 @@ export const createReservation = async (req: Request, res: Response): Promise<vo
 };
 
 export const updateReservation = async (req: Request, res: Response): Promise<void> => {
-  const authUser = getAuthenticatedUser(req);
+  const user = req.localUser!;
 
-  if (!authUser) {
-    res.status(401).json({ error: 'Unauthorized' });
-    return;
-  }
-
-  const { id } = req.params;
+  const idParam = req.params.id;
+  const id = Array.isArray(idParam) ? idParam[0] : idParam;
   if (!id) {
-    res.status(400).json({ error: 'Missing reservation id' });
-    return;
+    throw AppError.badRequest('Missing reservation id');
   }
 
-  await ensureLocalUser(authUser);
-
-  const existing = await prisma.reservation.findFirst({ where: { id, userId: authUser.id } });
+  const existing = await prisma.reservation.findFirst({ where: { id, userId: user.id } });
   if (!existing) {
-    res.status(404).json({ error: 'Reservation not found' });
-    return;
+    throw AppError.notFound('Reservation not found');
   }
 
   const reservation = await prisma.reservation.update({

@@ -1,10 +1,10 @@
 /**
  * Auth Context - Shared definition
- * Platform-specific implementations in mobile/web folders
+ * Web implementation lives in web/src/contexts/AuthProvider.tsx
  */
 
 import { createContext } from 'react';
-import { AuthState, SignUpCredentials, ProfileUpdateRequest, UserProfile } from './auth-types';
+import { AuthState, SignUpCredentials, ProfileUpdateRequest } from './auth-types';
 
 // Context value interface
 export interface AuthContextValue extends AuthState {

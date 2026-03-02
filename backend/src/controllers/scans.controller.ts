@@ -1,42 +1,38 @@
 /**
- * Scans Controller (placeholder)
+ * Scans Controller
+ *
+ * Auth is handled by `requireLocalUser` middleware in the route layer.
+ * Each handler receives `req.localUser` (the Prisma User record).
  */
 
 import { Request, Response } from 'express';
 import prisma from '../lib/prisma.js';
-import { ensureLocalUser, getAuthenticatedUser } from '../lib/authUser.js';
+import { AppError } from '../lib/AppError.js';
+import { parsePagination, paginatedResult } from '../lib/pagination.js';
 
 export const listScans = async (req: Request, res: Response): Promise<void> => {
-  const authUser = getAuthenticatedUser(req);
+  const user = req.localUser!;
+  const { page, limit, skip } = parsePagination(req);
 
-  if (!authUser) {
-    res.status(401).json({ error: 'Unauthorized' });
-    return;
-  }
+  const [scans, total] = await Promise.all([
+    prisma.scan.findMany({
+      where: { userId: user.id },
+      orderBy: { scanDate: 'desc' },
+      skip,
+      take: limit,
+    }),
+    prisma.scan.count({ where: { userId: user.id } }),
+  ]);
 
-  await ensureLocalUser(authUser);
-
-  const scans = await prisma.scan.findMany({
-    where: { userId: authUser.id },
-    orderBy: { scanDate: 'desc' },
-  });
-
-  res.json({ scans });
+  res.json(paginatedResult(scans, total, page, limit));
 };
 
 export const createScan = async (req: Request, res: Response): Promise<void> => {
-  const authUser = getAuthenticatedUser(req);
-
-  if (!authUser) {
-    res.status(401).json({ error: 'Unauthorized' });
-    return;
-  }
-
-  await ensureLocalUser(authUser);
+  const user = req.localUser!;
 
   const scan = await prisma.scan.create({
     data: {
-      userId: authUser.id,
+      userId: user.id,
       type: req.body.type,
       bodyPart: req.body.bodyPart,
       description: req.body.description,
@@ -53,25 +49,17 @@ export const createScan = async (req: Request, res: Response): Promise<void> => 
 };
 
 export const updateScan = async (req: Request, res: Response): Promise<void> => {
-  const authUser = getAuthenticatedUser(req);
+  const user = req.localUser!;
 
-  if (!authUser) {
-    res.status(401).json({ error: 'Unauthorized' });
-    return;
-  }
-
-  const { id } = req.params;
+  const idParam = req.params.id;
+  const id = Array.isArray(idParam) ? idParam[0] : idParam;
   if (!id) {
-    res.status(400).json({ error: 'Missing scan id' });
-    return;
+    throw AppError.badRequest('Missing scan id');
   }
 
-  await ensureLocalUser(authUser);
-
-  const existing = await prisma.scan.findFirst({ where: { id, userId: authUser.id } });
+  const existing = await prisma.scan.findFirst({ where: { id, userId: user.id } });
   if (!existing) {
-    res.status(404).json({ error: 'Scan not found' });
-    return;
+    throw AppError.notFound('Scan not found');
   }
 
   const scan = await prisma.scan.update({

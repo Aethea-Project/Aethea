@@ -40,7 +40,8 @@ export const validatePassword = (password: string): { valid: boolean; error?: st
   }
 
   // Check for special characters
-  if (PASSWORD_RULES.REQUIRE_SPECIAL && !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+  const hasSpecialCharacter = /[^A-Za-z0-9]/.test(password);
+  if (PASSWORD_RULES.REQUIRE_SPECIAL && !hasSpecialCharacter) {
     return {
       valid: false,
       error: 'Password must contain at least one special character (!@#$%^&*...)',
@@ -198,6 +199,17 @@ export const parseAuthError = (error: any): AuthError => {
     };
   }
 
+  if (
+    (error instanceof TypeError && /failed to fetch/i.test(error.message || '')) ||
+    /err_name_not_resolved|failed to fetch|networkerror/i.test(String(error?.message || ''))
+  ) {
+    return {
+      message:
+        'Cannot reach authentication server. Check VITE_SUPABASE_URL in web/.env (must be a valid existing https://<project>.supabase.co domain) and verify internet/DNS connectivity.',
+      code: 'NETWORK_UNREACHABLE',
+    };
+  }
+
   // Map common Supabase error codes
   const errorMap: Record<string, string> = {
     invalid_credentials: AUTH_ERROR_MESSAGES.INVALID_CREDENTIALS,
@@ -237,6 +249,15 @@ export const parseAuthError = (error: any): AuthError => {
     return {
       message: 'CAPTCHA token is invalid or expired. Please complete verification again.',
       code: error.code || 'CAPTCHA_TOKEN_INVALID',
+      status: error.status,
+    };
+  }
+
+  if (errorMessage.includes('captcha verification process failed')) {
+    return {
+      message:
+        'CAPTCHA provider rejected verification. Ensure Cloudflare Turnstile is configured in Supabase Auth (site key + secret key) and that aethea.me is allowed in Turnstile domain settings.',
+      code: error.code || 'CAPTCHA_PROVIDER_MISCONFIGURED',
       status: error.status,
     };
   }

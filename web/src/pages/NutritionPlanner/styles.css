@@ -43,8 +43,8 @@
   border-radius: 1.25rem;
   padding: 1.25rem 1.75rem;
   margin-bottom: 2rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
-  border: 1px solid #f1f5f9;
+  box-shadow: var(--shadow-card);
+  border: var(--border-card);
 }
 .profile-banner .banner-content {
   display: flex;
@@ -96,8 +96,8 @@
   background: white;
   border-radius: 1.25rem;
   padding: 1.5rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
-  border: 1px solid #f1f5f9;
+  box-shadow: var(--shadow-card);
+  border: var(--border-card);
 }
 .plan-card h3 {
   font-size: 0.78rem;
@@ -161,8 +161,8 @@
   background: white;
   border-radius: 1.25rem;
   padding: 1.5rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
-  border: 1px solid #f1f5f9;
+  box-shadow: var(--shadow-card);
+  border: var(--border-card);
 }
 .day-selector h3 {
   font-size: 0.78rem;
@@ -259,8 +259,8 @@
   display: flex;
   gap: 1rem;
   align-items: center;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
-  border: 1px solid #f1f5f9;
+  box-shadow: var(--shadow-card);
+  border: var(--border-card);
   cursor: pointer;
   transition: all 0.25s ease;
 }

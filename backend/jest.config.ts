@@ -18,6 +18,8 @@ export default {
     '^@core/(.*)$': '<rootDir>/../core/$1',
     // Map @/* path alias
     '^@/(.*)$': '<rootDir>/src/$1',
+    // Mock Prisma 7 generated client (uses import.meta.url, incompatible with Jest CJS)
+    '^.*/generated/prisma/client$': '<rootDir>/tests/__mocks__/prismaClient.ts',
   },
   roots: ['<rootDir>/src', '<rootDir>/tests'],
   testMatch: ['**/*.test.ts'],
@@ -26,6 +28,7 @@ export default {
     'src/**/*.ts',
     '!src/index.ts',        // Entry point (thin)
     '!src/**/*.d.ts',
+    '!src/generated/**',    // Auto-generated Prisma files
   ],
   coverageDirectory: 'coverage',
   verbose: true,

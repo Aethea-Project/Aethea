@@ -43,8 +43,8 @@
   border-radius: 1.25rem;
   padding: 1.25rem 1.5rem;
   margin-bottom: 2rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
-  border: 1px solid #f1f5f9;
+  box-shadow: var(--shadow-card);
+  border: var(--border-card);
 }
 .conditions-banner .banner-content {
   display: flex;
@@ -148,8 +148,8 @@
   background: white;
   border-radius: 1.25rem;
   padding: 1.5rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
-  border: 1px solid #f1f5f9;
+  box-shadow: var(--shadow-card);
+  border: var(--border-card);
   cursor: pointer;
   transition: all 0.25s ease;
 }
@@ -239,7 +239,7 @@
   background: white;
   border-radius: 1.5rem;
   box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-  border: 1px solid #f1f5f9;
+  border: var(--border-card);
   position: sticky;
   top: 2rem;
   max-height: calc(100vh - 4rem);

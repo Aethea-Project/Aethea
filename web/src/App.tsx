@@ -29,7 +29,7 @@ const NutritionPlannerPage = lazy(() => import('./pages/NutritionPlanner'));
 const RecoveryAssistantPage = lazy(() => import('./pages/RecoveryAssistant'));
 const DoctorChatPage = lazy(() => import('./pages/DoctorChat'));
 const ProfilePage = lazy(() => import('./pages/Profile'));
-const TestMassegeEmailPage = lazy(() => import('./pages/TestMassegeEmail'));
+const TestMessageEmailPage = lazy(() => import('./pages/TestMessageEmail'));
 const AuthConfirmPage = lazy(() => import('./pages/AuthConfirm'));
 
 const RootRoute = () => {
@@ -745,7 +745,7 @@ function AppRoutes() {
         <Route path="/register" element={<RegisterForm />} />
         <Route path="/forgot-password" element={<ForgotPasswordForm />} />
         <Route path="/auth/confirm" element={<AuthConfirmPage />} />
-        <Route path="/test-massege-email" element={<TestMassegeEmailPage />} />
+        <Route path="/test-message-email" element={<TestMessageEmailPage />} />
 
         {/* ── Protected routes ── */}
         <Route path="/dashboard" element={<ProtectedRoute><PageLayout><Dashboard /></PageLayout></ProtectedRoute>} />

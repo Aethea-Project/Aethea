@@ -4,11 +4,10 @@
  * Follows web.dev best practices for accessibility and UX
  */
 
-import React, { useState, useEffect, useRef, useCallback, FormEvent } from 'react';
+import React, { useState, useCallback, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@core/auth/useAuth';
 import { GENDER_OPTIONS, type Gender } from '@core/auth/auth-types';
-import { TURNSTILE_CONFIG } from '@core/auth/constants';
 import {
   isValidEmail,
   validatePassword,
@@ -17,18 +16,8 @@ import {
   isValidDateOfBirth,
   doPasswordsMatch,
 } from '@core/auth/auth-utils';
+import { useTurnstile } from '../hooks/useTurnstile';
 import './RegisterForm.css';
-
-// Turnstile global type declaration
-declare global {
-  interface Window {
-    turnstile?: {
-      render: (container: string | HTMLElement, options: Record<string, unknown>) => string;
-      reset: (widgetId: string) => void;
-      remove: (widgetId: string) => void;
-    };
-  }
-}
 
 /** Field-level error state */
 interface FieldErrors {
@@ -61,148 +50,27 @@ export const RegisterForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Captcha state
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const turnstileRef = useRef<HTMLDivElement>(null);
-  const widgetIdRef = useRef<string | null>(null);
+  // Captcha — wired into field-level errors
+  const handleCaptchaError = useCallback(
+    (msg: string) => {
+      setFieldErrors((prev) => ({ ...prev, captcha: msg }));
+    },
+    [],
+  );
+  const handleCaptchaSuccess = useCallback(() => {
+    setFieldErrors((prev) => ({ ...prev, captcha: undefined }));
+    setGlobalError(null);
+  }, []);
+
+  const { captchaToken, turnstileRef, resetCaptcha } = useTurnstile({
+    onError: handleCaptchaError,
+    onSuccess: handleCaptchaSuccess,
+  });
 
   // UI state
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  const renderTurnstileWidget = useCallback((): boolean => {
-    if (!window.turnstile || !turnstileRef.current || widgetIdRef.current) {
-      return false;
-    }
-
-    widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
-      sitekey: TURNSTILE_CONFIG.SITE_KEY,
-      callback: (token: string) => {
-        setCaptchaToken(token);
-        setFieldErrors((prev) => ({ ...prev, captcha: undefined }));
-        setGlobalError(null);
-      },
-      'expired-callback': () => {
-        setCaptchaToken(null);
-        setFieldErrors((prev) => ({ ...prev, captcha: 'CAPTCHA expired. Please verify again.' }));
-      },
-      'error-callback': () => {
-        setCaptchaToken(null);
-        setFieldErrors((prev) => ({
-          ...prev,
-          captcha: 'CAPTCHA failed to load. Refresh the page and try again.',
-        }));
-      },
-      theme: 'light',
-    });
-
-    return true;
-  }, []);
-
-  /**
-   * Load Turnstile script and render widget (explicit mode for SPA)
-   */
-  useEffect(() => {
-    let retryTimer: ReturnType<typeof setInterval> | undefined;
-    let fallbackScriptTimer: ReturnType<typeof setTimeout> | undefined;
-    let boundScriptEl: HTMLScriptElement | null = null;
-
-    const cleanupScriptListeners = () => {
-      if (boundScriptEl) {
-        boundScriptEl.onload = null;
-        boundScriptEl.onerror = null;
-      }
-      boundScriptEl = null;
-    };
-
-    const injectScript = () => {
-      const script = document.createElement('script');
-      script.id = 'cf-turnstile-script';
-      script.src = `${TURNSTILE_CONFIG.SCRIPT_URL}?render=explicit`;
-      script.async = true;
-      script.defer = true;
-
-      script.onload = ensureRendered;
-      script.onerror = () => {
-        setFieldErrors((prev) => ({
-          ...prev,
-          captcha: 'Security verification failed to load. Please check your connection and retry.',
-        }));
-      };
-
-      boundScriptEl = script;
-      document.head.appendChild(script);
-    };
-
-    const ensureRendered = () => {
-      if (renderTurnstileWidget()) {
-        if (retryTimer) {
-          clearInterval(retryTimer);
-          retryTimer = undefined;
-        }
-        return;
-      }
-
-      let attempts = 0;
-      retryTimer = setInterval(() => {
-        attempts += 1;
-        if (renderTurnstileWidget() || attempts >= 30) {
-          if (retryTimer) {
-            clearInterval(retryTimer);
-            retryTimer = undefined;
-          }
-          if (attempts >= 30 && !widgetIdRef.current) {
-            setFieldErrors((prev) => ({
-              ...prev,
-              captcha: 'Security verification is unavailable. Please refresh and try again.',
-            }));
-          }
-        }
-      }, 100);
-    };
-
-    const existingScript = document.getElementById('cf-turnstile-script') as HTMLScriptElement | null;
-
-    // Script tag exists but Turnstile may still be loading or failed previously
-    if (existingScript) {
-      if (window.turnstile) {
-        ensureRendered();
-      } else {
-        boundScriptEl = existingScript;
-        existingScript.onload = ensureRendered;
-        existingScript.onerror = () => {
-          setFieldErrors((prev) => ({
-            ...prev,
-            captcha: 'Security verification failed to load. Please check your connection and retry.',
-          }));
-        };
-
-        fallbackScriptTimer = setTimeout(() => {
-          if (!window.turnstile) {
-            existingScript.remove();
-            injectScript();
-          }
-        }, 2500);
-      }
-    } else {
-      injectScript();
-    }
-
-    return () => {
-      if (fallbackScriptTimer) {
-        clearTimeout(fallbackScriptTimer);
-      }
-      cleanupScriptListeners();
-      if (retryTimer) {
-        clearInterval(retryTimer);
-      }
-      if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.remove(widgetIdRef.current);
-        widgetIdRef.current = null;
-      }
-    };
-  }, [renderTurnstileWidget]);
 
   /**
    * Clear a specific field error on user input
@@ -325,21 +193,13 @@ export const RegisterForm: React.FC = () => {
 
     if (result.success) {
       setSuccessMessage(result.message || 'Registration successful! Check your email.');
-      // Reset Turnstile widget
-      if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.reset(widgetIdRef.current);
-      }
-      setCaptchaToken(null);
+      resetCaptcha();
 
       // Redirect to login after 3 seconds
       setTimeout(() => navigate('/login'), 3000);
     } else {
       setGlobalError(result.message || 'Registration failed. Please try again.');
-      // Reset Turnstile on failure so user can retry
-      if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.reset(widgetIdRef.current);
-      }
-      setCaptchaToken(null);
+      resetCaptcha();
     }
   };
 

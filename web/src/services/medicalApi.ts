@@ -1,3 +1,17 @@
+/**
+ * Medical API — Repository Layer
+ *
+ * Responsibilities:
+ *   - Call the Aethea backend via the shared `authFetch` client
+ *   - Normalize raw server shapes into typed domain models
+ *
+ * Architecture (Modular Monolith — Repository pattern):
+ *   Pages → Hooks (use-case) → medicalApi (repository) → apiClient (infrastructure)
+ *
+ * Domain hooks that consume this file live in src/hooks/:
+ *   useLabTests, useScans, useReservations
+ */
+
 import {
   LabCategory,
   LabTest,
@@ -8,31 +22,7 @@ import {
   ScanStatus,
   ScanType,
 } from '@core/types/medical';
-import { authService } from './auth';
-
-const resolveApiBaseUrl = (): string => {
-  const configuredUrl = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/+$/, '');
-
-  if (typeof window !== 'undefined') {
-    const { hostname } = window.location;
-    if (
-      hostname === 'localhost' ||
-      hostname === '127.0.0.1' ||
-      hostname === 'aethea.me' ||
-      hostname.endsWith('.aethea.me')
-    ) {
-      return '/api';
-    }
-  }
-
-  if (configuredUrl) {
-    return `${configuredUrl}/api`;
-  }
-
-  return 'http://localhost:3001/api';
-};
-
-const API_BASE = resolveApiBaseUrl();
+import { authFetch } from '../lib/apiClient';
 
 type RawLabTest = {
   id: string;
@@ -78,27 +68,6 @@ type RawReservation = {
   status: ReservationStatus;
   notes?: string | null;
 };
-
-async function authFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const sessionResponse = await authService.getSession();
-  const token = sessionResponse.data?.access_token;
-
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(init?.headers || {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || `Request failed (${res.status})`);
-  }
-
-  return res.json() as Promise<T>;
-}
 
 const toLabTest = (item: RawLabTest): LabTest => {
   const numericValue = Number(item.value);
@@ -153,18 +122,22 @@ const toReservation = (item: RawReservation): Reservation => ({
 
 export const medicalApi = {
   async fetchLabTests(): Promise<LabTest[]> {
-    const data = await authFetch<{ tests: RawLabTest[] }>('/lab-tests');
-    return (data.tests || []).map(toLabTest);
+    // Support both paginated envelope and legacy flat response
+    const data = await authFetch<{ data?: RawLabTest[]; tests?: RawLabTest[] }>('/lab-tests');
+    const items = data.data ?? data.tests ?? [];
+    return items.map(toLabTest);
   },
 
   async fetchScans(): Promise<(MedicalScan & { scanDate?: Date })[]> {
-    const data = await authFetch<{ scans: RawMedicalScan[] }>('/scans');
-    return (data.scans || []).map(toMedicalScan);
+    const data = await authFetch<{ data?: RawMedicalScan[]; scans?: RawMedicalScan[] }>('/scans');
+    const items = data.data ?? data.scans ?? [];
+    return items.map(toMedicalScan);
   },
 
   async fetchReservations(): Promise<Reservation[]> {
-    const data = await authFetch<{ reservations: RawReservation[] }>('/reservations');
-    return (data.reservations || []).map(toReservation);
+    const data = await authFetch<{ data?: RawReservation[]; reservations?: RawReservation[] }>('/reservations');
+    const items = data.data ?? data.reservations ?? [];
+    return items.map(toReservation);
   },
 
   async createReservation(payload: ReservationPayload): Promise<Reservation> {

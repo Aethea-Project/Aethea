@@ -3,22 +3,12 @@
  * Follows web.dev best practices for accessibility and UX
  */
 
-import React, { useState, useEffect, useRef, useCallback, FormEvent } from 'react';
+import React, { useState, useCallback, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@core/auth/useAuth';
-import { TURNSTILE_CONFIG } from '@core/auth/constants';
+import { isValidEmail } from '@core/auth/auth-utils';
+import { useTurnstile } from '../hooks/useTurnstile';
 import './LoginForm.css';
-
-// Turnstile global type declaration
-declare global {
-  interface Window {
-    turnstile?: {
-      render: (container: string | HTMLElement, options: Record<string, unknown>) => string;
-      reset: (widgetId: string) => void;
-      remove: (widgetId: string) => void;
-    };
-  }
-}
 
 export const LoginForm: React.FC = () => {
   const { signIn, loading, error } = useAuth();
@@ -27,103 +17,13 @@ export const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
-  // Captcha state
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const turnstileRef = useRef<HTMLDivElement>(null);
-  const widgetIdRef = useRef<string | null>(null);
+  const handleCaptchaError = useCallback((msg: string) => setLocalError(msg), []);
+  const handleCaptchaSuccess = useCallback(() => setLocalError(null), []);
 
-  const renderTurnstileWidget = useCallback((): boolean => {
-    if (!window.turnstile || !turnstileRef.current || widgetIdRef.current) {
-      return false;
-    }
-
-    widgetIdRef.current = window.turnstile.render(turnstileRef.current, {
-      sitekey: TURNSTILE_CONFIG.SITE_KEY,
-      callback: (token: string) => {
-        setCaptchaToken(token);
-        setLocalError(null);
-      },
-      'expired-callback': () => {
-        setCaptchaToken(null);
-        setLocalError('CAPTCHA expired. Please verify again.');
-      },
-      'error-callback': () => {
-        setCaptchaToken(null);
-        setLocalError('CAPTCHA failed to load. Refresh the page and try again.');
-      },
-      theme: 'light',
-      size: 'normal',
-    });
-
-    return true;
-  }, []);
-
-  /**
-   * Load Turnstile script and render widget
-   */
-  useEffect(() => {
-    let retryTimer: ReturnType<typeof setInterval> | undefined;
-
-    const ensureRendered = () => {
-      if (renderTurnstileWidget()) {
-        if (retryTimer) {
-          clearInterval(retryTimer);
-          retryTimer = undefined;
-        }
-        return;
-      }
-
-      let attempts = 0;
-      retryTimer = setInterval(() => {
-        attempts += 1;
-        if (renderTurnstileWidget() || attempts >= 30) {
-          if (retryTimer) {
-            clearInterval(retryTimer);
-            retryTimer = undefined;
-          }
-          if (attempts >= 30 && !widgetIdRef.current) {
-            setLocalError('Security verification is unavailable. Please refresh and try again.');
-          }
-        }
-      }, 100);
-    };
-
-    if (document.getElementById('cf-turnstile-script')) {
-      ensureRendered();
-      return () => {
-        if (retryTimer) {
-          clearInterval(retryTimer);
-        }
-        if (widgetIdRef.current && window.turnstile) {
-          window.turnstile.remove(widgetIdRef.current);
-          widgetIdRef.current = null;
-        }
-      };
-    }
-
-    const script = document.createElement('script');
-    script.id = 'cf-turnstile-script';
-    script.src = `${TURNSTILE_CONFIG.SCRIPT_URL}?render=explicit`;
-    script.async = true;
-    script.defer = true;
-
-    script.onload = ensureRendered;
-    script.onerror = () => {
-      setLocalError('Security verification failed to load. Please check your connection and retry.');
-    };
-
-    document.head.appendChild(script);
-
-    return () => {
-      if (retryTimer) {
-        clearInterval(retryTimer);
-      }
-      if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.remove(widgetIdRef.current);
-        widgetIdRef.current = null;
-      }
-    };
-  }, [renderTurnstileWidget]);
+  const { captchaToken, turnstileRef, resetCaptcha } = useTurnstile({
+    onError: handleCaptchaError,
+    onSuccess: handleCaptchaSuccess,
+  });
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -140,8 +40,7 @@ export const LoginForm: React.FC = () => {
     }
 
     // Email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!isValidEmail(email)) {
       setLocalError('Please enter a valid email address');
       return;
     }
@@ -155,18 +54,10 @@ export const LoginForm: React.FC = () => {
 
     try {
       await signIn(email, password, captchaToken);
-      // Reset captcha after attempt
-      if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.reset(widgetIdRef.current);
-      }
-      setCaptchaToken(null);
+      resetCaptcha();
     } catch (err) {
       setLocalError(err instanceof Error ? err.message : 'Login failed');
-      // Reset captcha on failure
-      if (widgetIdRef.current && window.turnstile) {
-        window.turnstile.reset(widgetIdRef.current);
-      }
-      setCaptchaToken(null);
+      resetCaptcha();
     }
   };
 

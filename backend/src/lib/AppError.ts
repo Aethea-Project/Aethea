@@ -45,5 +45,3 @@ export class AppError extends Error {
     return new AppError(message, 429, code);
   }
 }
-
-export default AppError;

@@ -3,7 +3,7 @@
  * Orchestrates auth operations with caching and validation
  */
 
-import { SupabaseClient, User, Session, AuthChangeEvent } from '@supabase/supabase-js';
+import { SupabaseClient, User, Session } from '@supabase/supabase-js';
 import { AuthRepository } from './auth-repository';
 import {
   SignUpCredentials,
@@ -50,14 +50,14 @@ export class AuthService {
    */
   private initializeAuthListener(): void {
     this.supabase.auth.onAuthStateChange((event, session) => {
-      this.handleAuthChange(event as any, session);
+      this.handleAuthChange(event, session);
     });
   }
 
   /**
    * Handle auth state changes
    */
-  private async handleAuthChange(event: string, session: Session | null): Promise<void> {
+  private async handleAuthChange(_event: string, session: Session | null): Promise<void> {
     const user = session?.user || null;
     let profile: UserProfile | null = null;
 

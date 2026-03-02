@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { theme } from '@core/ui/theme';
 import { LabTest, LabStatus } from '@core/types/medical';
-import { medicalApi } from '../../services/medicalApi';
+import { useLabTests } from '../../hooks/useLabTests';
 import { FeatureHeader } from '../../components/FeatureHeader';
+import { Modal } from '../../components/Modal';
 import { imageAssets } from '../../constants/imageAssets';
 import './styles.css';
 
@@ -12,31 +13,10 @@ import './styles.css';
  */
 
 export default function LabResultsPage() {
-  const [labTests, setLabTests] = useState<LabTest[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { labTests, loading, error } = useLabTests();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'date' | 'status' | 'name'>('date');
   const [selectedTest, setSelectedTest] = useState<LabTest | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const data = await medicalApi.fetchLabTests();
-        if (!active) return;
-        setLabTests(data);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load lab tests');
-      } finally {
-        if (active) setLoading(false);
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, []);
 
   const categories = useMemo(
     () => ['all', ...Array.from(new Set(labTests.map((t) => t.category)))],
@@ -231,12 +211,9 @@ export default function LabResultsPage() {
       </div>
 
       {/* Detail Modal */}
-      {selectedTest && (
-        <div className="modal-overlay" onClick={() => setSelectedTest(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setSelectedTest(null)}>
-              ×
-            </button>
+      <Modal isOpen={!!selectedTest} onClose={() => setSelectedTest(null)} ariaLabel="Lab test details">
+        {selectedTest && (
+          <>
 
             <div className="modal-header">
               <h2>{selectedTest.testName}</h2>
@@ -305,9 +282,9 @@ export default function LabResultsPage() {
               <button className="btn-secondary">Download Report</button>
               <button className="btn-primary">Schedule Follow-up</button>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </Modal>
     </div>
   );
 }

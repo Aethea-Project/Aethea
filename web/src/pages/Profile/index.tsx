@@ -21,6 +21,7 @@ import { GENDER_OPTIONS, BLOOD_TYPE_OPTIONS, ALLERGY_OPTIONS, CHRONIC_CONDITION_
 import type { ProfileUpdateRequest, UserProfile, BloodType, Gender } from '@core/auth/auth-types';
 import { isValidName, isValidDateOfBirth, isValidPhone } from '@core/auth/auth-utils';
 import { validatePassword, doPasswordsMatch } from '@core/auth/auth-utils';
+import { Modal } from '../../components/Modal';
 import './styles.css';
 
 // ── Validation ──────────────────────────────
@@ -532,9 +533,11 @@ const ProfilePage: React.FC = () => {
       </div>
 
       {/* ── Password Change Modal ─────────────── */}
-      {showPasswordModal && (
-        <div className="modal-overlay" onClick={() => !passwordSaving && setShowPasswordModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} role="dialog" aria-labelledby="password-modal-title" aria-modal="true">
+      <Modal
+        isOpen={showPasswordModal}
+        onClose={() => !passwordSaving && setShowPasswordModal(false)}
+        ariaLabelledBy="password-modal-title"
+      >
             <div className="modal-header">
               <h3 id="password-modal-title">Change Password</h3>
               <button className="modal-close" onClick={() => setShowPasswordModal(false)} aria-label="Close">
@@ -575,9 +578,7 @@ const ProfilePage: React.FC = () => {
                 Cancel
               </button>
             </div>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 };

@@ -120,8 +120,8 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
-  border: 1px solid #f1f5f9;
+  box-shadow: var(--shadow-card);
+  border: var(--border-card);
   transition: all 0.2s ease;
 }
 .lab-results-page .stat-card:hover {
@@ -153,8 +153,8 @@
   background: white;
   border-radius: 1.25rem;
   padding: 1.5rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
-  border: 1px solid #f1f5f9;
+  box-shadow: var(--shadow-card);
+  border: var(--border-card);
 }
 .filter-title {
   font-size: 0.8125rem;
@@ -220,7 +220,7 @@
   background: white;
   border-radius: 1.5rem;
   box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-  border: 1px solid #f1f5f9;
+  border: var(--border-card);
   overflow: hidden;
 }
 .lab-table {

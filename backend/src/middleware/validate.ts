@@ -12,6 +12,25 @@ import { Request, Response, NextFunction } from 'express';
 import { ZodSchema, ZodError, ZodIssue } from 'zod';
 import type { ParsedQs } from 'qs';
 
+const formatZodIssues = (issues: ZodIssue[]) => {
+  return issues.map((issue: ZodIssue) => ({
+    field: issue.path.join('.'),
+    message: issue.message,
+  }));
+};
+
+const sendValidationError = (
+  res: Response,
+  message: string,
+  issues: ZodIssue[]
+): void => {
+  res.status(400).json({
+    error: message,
+    code: 'VALIDATION_ERROR',
+    details: formatZodIssues(issues),
+  });
+};
+
 /**
  * Validate request body against a Zod schema.
  * Returns 400 with structured errors on failure.
@@ -23,14 +42,7 @@ export const validateBody = (schema: ZodSchema) => {
       next();
     } catch (err) {
       if (err instanceof ZodError) {
-        res.status(400).json({
-          error: 'Validation failed',
-          code: 'VALIDATION_ERROR',
-          details: err.issues.map((e: ZodIssue) => ({
-            field: e.path.join('.'),
-            message: e.message,
-          })),
-        });
+        sendValidationError(res, 'Validation failed', err.issues);
         return;
       }
       next(err);
@@ -48,14 +60,7 @@ export const validateQuery = (schema: ZodSchema) => {
       next();
     } catch (err) {
       if (err instanceof ZodError) {
-        res.status(400).json({
-          error: 'Invalid query parameters',
-          code: 'VALIDATION_ERROR',
-          details: err.issues.map((e: ZodIssue) => ({
-            field: e.path.join('.'),
-            message: e.message,
-          })),
-        });
+        sendValidationError(res, 'Invalid query parameters', err.issues);
         return;
       }
       next(err);
