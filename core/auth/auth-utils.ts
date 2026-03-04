@@ -165,24 +165,34 @@ export const COUNTRY_PHONE_RULES: Record<string, { code: string; length: number;
  * Validate phone number with country code
  */
 export const isValidPhone = (countryCode: string, phoneNumber: string): { valid: boolean; error?: string } => {
-  // Find country rule
-  const rule = Object.values(COUNTRY_PHONE_RULES).find(r => r.code === countryCode);
+  const normalizedCountryInput = (countryCode || '').trim().toUpperCase();
+
+  // Accept both ISO code (e.g. EG) and dialing code (e.g. +20)
+  const rule =
+    COUNTRY_PHONE_RULES[normalizedCountryInput] ||
+    Object.values(COUNTRY_PHONE_RULES).find(r => r.code === countryCode);
   
   if (!rule) {
     return { valid: false, error: 'Invalid country code' };
   }
 
   // Remove all non-digit characters
-  const cleanNumber = phoneNumber.replace(/\D/g, '');
+  const cleanNumber = (phoneNumber || '').replace(/\D/g, '');
+  const countryDigits = rule.code.replace(/\D/g, '');
+
+  // Support both local format (e.g. 10xxxxxxxx) and full international format (e.g. 2010xxxxxxxx)
+  const localNumber = cleanNumber.startsWith(countryDigits)
+    ? cleanNumber.slice(countryDigits.length)
+    : cleanNumber;
 
   // Check length
-  if (cleanNumber.length !== rule.length) {
-    return { valid: false, error: `Phone number must be ${rule.length} digits for ${countryCode}` };
+  if (localNumber.length !== rule.length) {
+    return { valid: false, error: `Phone number must be ${rule.length} digits for ${rule.code}` };
   }
 
   // Check pattern
-  if (!rule.pattern.test(cleanNumber)) {
-    return { valid: false, error: `Invalid phone number format for ${countryCode}` };
+  if (!rule.pattern.test(localNumber)) {
+    return { valid: false, error: `Invalid phone number format for ${rule.code}` };
   }
 
   return { valid: true };

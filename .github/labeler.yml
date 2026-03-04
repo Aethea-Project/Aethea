@@ -1,0 +1,41 @@
+'area: frontend':
+  - changed-files:
+      - any-glob-to-any-file: 'web/**'
+
+'area: backend':
+  - changed-files:
+      - any-glob-to-any-file: 'backend/**'
+
+'area: core':
+  - changed-files:
+      - any-glob-to-any-file: 'core/**'
+
+'area: devops':
+  - changed-files:
+      - any-glob-to-any-file: '.github/**'
+      - any-glob-to-any-file: 'docker-compose.yml'
+  - any-glob-to-any-file: 'scripts/**'
+
+'type: chore':
+  - changed-files:
+      - any-glob-to-any-file: '**/package.json'
+      - any-glob-to-any-file: '**/package-lock.json'
+  - any-glob-to-any-file: 'scripts/**'
+
+'area: database':
+  - changed-files:
+      - any-glob-to-any-file: 'backend/prisma/**'
+      - any-glob-to-any-file: 'scripts/supabase/**'
+
+'area: auth':
+  - changed-files:
+      - any-glob-to-any-file: 'core/auth/**'
+      - any-glob-to-any-file: 'backend/src/auth/**'
+      - any-glob-to-any-file: 'backend/src/lib/auth*'
+      - any-glob-to-any-file: 'web/src/contexts/AuthProvider.tsx'
+
+'type: documentation':
+  - changed-files:
+  - any-glob-to-any-file: '**/*.md'
+  - any-glob-to-any-file: 'docs/**'
+  - any-glob-to-any-file: '.github/**/*.md'

@@ -8,7 +8,8 @@ import { AuthState, SignUpCredentials, ProfileUpdateRequest } from './auth-types
 
 // Context value interface
 export interface AuthContextValue extends AuthState {
-  signIn: (email: string, password: string, captchaToken?: string) => Promise<void>;
+  signIn: (email: string, password: string, captchaToken?: string, rememberMe?: boolean) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signUp: (credentials: SignUpCredentials) => Promise<{ success: boolean; message?: string }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string, captchaToken?: string) => Promise<void>;

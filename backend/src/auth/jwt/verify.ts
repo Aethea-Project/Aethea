@@ -16,7 +16,22 @@ export interface JWTPayload {
   role?: string;
   aud?: string;
   exp?: number;
+  session_id?: string;
 }
+
+const decodePayload = (token: string): JWTPayload | null => {
+  try {
+    const parts = token.split('.');
+    if (parts.length < 2) {
+      return null;
+    }
+
+    const payloadBuffer = Buffer.from(parts[1], 'base64url');
+    return JSON.parse(payloadBuffer.toString('utf-8')) as JWTPayload;
+  } catch {
+    return null;
+  }
+};
 
 export class JWTVerifier {
   private supabase: SupabaseClient;
@@ -28,7 +43,7 @@ export class JWTVerifier {
   /**
    * Verify JWT token and get user (with timeout)
    */
-  async verifyToken(token: string): Promise<{ valid: boolean; user?: any; error?: string }> {
+  async verifyToken(token: string): Promise<{ valid: boolean; user?: any; payload?: JWTPayload | null; error?: string }> {
     try {
       const result = await Promise.race([
         this.supabase.auth.getUser(token),
@@ -49,6 +64,7 @@ export class JWTVerifier {
       return {
         valid: true,
         user: data.user,
+        payload: decodePayload(token),
       };
     } catch (error: any) {
       return {
@@ -93,7 +109,11 @@ export class JWTVerifier {
         }
 
         // Attach user to request
-        req.user = verification.user;
+        req.user = {
+          id: verification.user.id,
+          email: verification.user.email ?? undefined,
+          sessionId: verification.payload?.session_id,
+        };
         next();
       } catch (error) {
         next(error);

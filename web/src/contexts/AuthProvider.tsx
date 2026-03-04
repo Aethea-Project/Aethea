@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext, defaultAuthState } from '@core/auth/auth-context';
+import { STORAGE_KEYS } from '@core/auth/constants';
 import { authService } from '../services/auth';
 import type { AuthState, SignUpCredentials, ProfileUpdateRequest } from '@core/auth/auth-types';
 
@@ -92,11 +93,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [navigate]);
 
   // Sign in handler
-  const signIn = useCallback(async (email: string, password: string, captchaToken?: string) => {
+  const signIn = useCallback(async (email: string, password: string, captchaToken?: string, rememberMe: boolean = false) => {
     setAuthState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
-      const response = await authService.signIn({ email, password, captchaToken });
+      const response = await authService.signIn({ email, password, captchaToken, rememberMe });
 
       if (response.error) {
         setAuthState((prev) => ({
@@ -105,10 +106,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           error: response.error,
         }));
       } else {
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(STORAGE_KEYS.USER_SESSION, rememberMe ? 'remember-30d' : 'session-only');
+        }
         // Clear loading — session state will be updated by onAuthStateChange
         setAuthState((prev) => ({ ...prev, loading: false }));
       }
       // State will be updated by onAuthStateChange
+    } catch (error) {
+      setAuthState((prev) => ({
+        ...prev,
+        loading: false,
+        error: error instanceof Error ? { message: error.message } : null,
+      }));
+    }
+  }, []);
+
+  const signInWithGoogle = useCallback(async () => {
+    setAuthState((prev) => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const response = await authService.signInWithGoogle();
+
+      if (response.error) {
+        setAuthState((prev) => ({
+          ...prev,
+          loading: false,
+          error: response.error,
+        }));
+        return;
+      }
+
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(STORAGE_KEYS.USER_SESSION, 'session-only');
+      }
+
+      // OAuth redirects away; keep loading state until redirect occurs
     } catch (error) {
       setAuthState((prev) => ({
         ...prev,
@@ -167,6 +200,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           error: response.error,
         }));
       } else {
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem(STORAGE_KEYS.USER_SESSION);
+        }
         setAuthState({
           ...defaultAuthState,
           loading: false,
@@ -303,9 +339,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const intervalId = setInterval(async () => {
       try {
         const response = await authService.getUserProfile(userId);
-        
-        // If profile not found or error, logout user
-        if (response.error || !response.data) {
+
+        if (response.error) {
+          console.warn('Profile check failed, keeping session active:', response.error.message);
+          return;
+        }
+
+        // If profile truly missing, logout user
+        if (!response.data) {
           console.warn('Profile deleted or inaccessible, logging out...');
           await signOut();
         }
@@ -326,6 +367,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     () => ({
       ...authState,
       signIn,
+      signInWithGoogle,
       signUp,
       signOut,
       resetPassword,
@@ -333,7 +375,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       updateProfile,
       refreshProfile,
     }),
-    [authState, signIn, signUp, signOut, resetPassword, updatePassword, updateProfile, refreshProfile]
+    [authState, signIn, signInWithGoogle, signUp, signOut, resetPassword, updatePassword, updateProfile, refreshProfile]
   );
 
   return (

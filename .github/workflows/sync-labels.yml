@@ -1,0 +1,87 @@
+name: Sync Repository Labels
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/sync-labels.yml
+      - .github/workflows/pr-auto-label.yml
+      - .github/labeler.yml
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  sync-labels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create or update labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const desiredLabels = [
+              { name: 'type: feature', color: '0E8A16', description: 'New functionality or logic being added' },
+              { name: 'type: bug', color: '0E8A16', description: 'A fix for a confirmed issue or regression' },
+              { name: 'type: refactor', color: '0E8A16', description: 'Code structure improvements without behavior change' },
+              { name: 'type: chore', color: '0E8A16', description: 'Maintenance, tooling, or dependency updates' },
+              { name: 'type: documentation', color: '0E8A16', description: 'Documentation-only changes' },
+
+              { name: 'status: in-progress', color: 'FBCA04', description: 'Work is still in progress; do not merge yet' },
+              { name: 'status: needs-review', color: 'FBCA04', description: 'Ready for peer/maintainer review' },
+              { name: 'status: blocked', color: 'FBCA04', description: 'Blocked by dependency, issue, or technical constraint' },
+              { name: 'status: help-wanted', color: 'FBCA04', description: 'Author needs team assistance' },
+
+              { name: 'size: S', color: '5319E7', description: 'Changes under 50 lines' },
+              { name: 'size: M', color: '5319E7', description: 'Changes between 50 and 200 lines' },
+              { name: 'size: L', color: '5319E7', description: 'Changes between 200 and 1000 lines' },
+              { name: 'size: XL', color: '5319E7', description: 'Changes above 1000 lines' },
+
+              { name: 'priority: high', color: 'B60205', description: 'Should be reviewed and merged ASAP' },
+              { name: 'priority: low', color: 'B60205', description: 'Non-urgent cleanup or minor tweaks' },
+
+              { name: 'area: frontend', color: '1D76DB', description: 'React UI, components, styles, and web UX' },
+              { name: 'area: backend', color: '1D76DB', description: 'API endpoints, controllers, and server logic' },
+              { name: 'area: database', color: '1D76DB', description: 'Schema, migrations, Prisma, and DB access changes' },
+              { name: 'area: devops', color: '1D76DB', description: 'CI/CD, Docker, scripts, and infra automation' },
+              { name: 'area: core', color: '1D76DB', description: 'Shared core package and cross-layer contracts' },
+              { name: 'area: auth', color: '1D76DB', description: 'Authentication and authorization flows' }
+            ];
+
+            const existing = await github.paginate(github.rest.issues.listLabelsForRepo, {
+              owner,
+              repo,
+              per_page: 100,
+            });
+
+            const existingMap = new Map(existing.map((label) => [label.name.toLowerCase(), label]));
+
+            for (const label of desiredLabels) {
+              const current = existingMap.get(label.name.toLowerCase());
+
+              if (!current) {
+                await github.rest.issues.createLabel({ owner, repo, ...label });
+                core.info(`Created label: ${label.name}`);
+                continue;
+              }
+
+              const sameColor = current.color.toLowerCase() === label.color.toLowerCase();
+              const sameDescription = (current.description || '') === (label.description || '');
+
+              if (!sameColor || !sameDescription || current.name !== label.name) {
+                await github.rest.issues.updateLabel({
+                  owner,
+                  repo,
+                  name: current.name,
+                  new_name: label.name,
+                  color: label.color,
+                  description: label.description,
+                });
+                core.info(`Updated label: ${label.name}`);
+              }
+            }
+
+            core.info('Label sync complete.');

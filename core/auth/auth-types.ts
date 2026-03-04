@@ -164,6 +164,7 @@ export interface SignInCredentials {
   email: string;
   password: string;
   captchaToken?: string;
+  rememberMe?: boolean;
 }
 
 // Password reset

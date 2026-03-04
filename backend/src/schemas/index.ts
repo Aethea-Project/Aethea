@@ -17,6 +17,13 @@ import { z } from 'zod';
 export const verifyTokenSchema = z.object({}).strict();
 
 /**
+ * POST /api/auth/step-up/verify
+ */
+export const stepUpVerifySchema = z.object({
+  code: z.string().trim().regex(/^\d{6}$/, 'Code must be 6 digits'),
+}).strict();
+
+/**
  * PATCH /api/users/profile — update user profile
  * Only allows explicitly declared fields (prevents mass-assignment).
  */

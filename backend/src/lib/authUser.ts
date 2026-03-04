@@ -3,8 +3,9 @@ import prisma from './prisma.js';
 
 interface AuthenticatedUser {
   id: string;
-  email: string;
 }
+
+const toShadowEmail = (userId: string): string => `${userId}@shadow.local`;
 
 export const getAuthenticatedUser = (req: Request): AuthenticatedUser | null => {
   const user = (req as Request & { user?: { id?: unknown; email?: unknown } }).user;
@@ -13,24 +14,20 @@ export const getAuthenticatedUser = (req: Request): AuthenticatedUser | null => 
     return null;
   }
 
-  const fallbackEmail = `${user.id}@no-email.local`;
-  const email = typeof user.email === 'string' && user.email.trim().length > 0
-    ? user.email
-    : fallbackEmail;
-
   return {
     id: user.id,
-    email,
   };
 };
 
 export const ensureLocalUser = async (authUser: AuthenticatedUser) => {
+  const shadowEmail = toShadowEmail(authUser.id);
+
   return prisma.user.upsert({
     where: { id: authUser.id },
-    update: { email: authUser.email },
+    update: {},
     create: {
       id: authUser.id,
-      email: authUser.email,
+      email: shadowEmail,
     },
   });
 };

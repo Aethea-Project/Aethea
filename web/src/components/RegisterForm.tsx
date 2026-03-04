@@ -34,7 +34,7 @@ interface FieldErrors {
 }
 
 export const RegisterForm: React.FC = () => {
-  const { signUp, loading } = useAuth();
+  const { signUp, signInWithGoogle, loading } = useAuth();
   const navigate = useNavigate();
 
   // Form state
@@ -201,6 +201,12 @@ export const RegisterForm: React.FC = () => {
       setGlobalError(result.message || 'Registration failed. Please try again.');
       resetCaptcha();
     }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setGlobalError(null);
+    setSuccessMessage(null);
+    await signInWithGoogle();
   };
 
   // Compute max date for DOB (today)
@@ -508,6 +514,22 @@ export const RegisterForm: React.FC = () => {
           aria-busy={loading}
         >
           {loading ? 'Creating account...' : 'Create Account'}
+        </button>
+
+        <div className="auth-divider" role="separator" aria-label="Alternative sign up methods">
+          <span>or</span>
+        </div>
+
+        <button
+          type="button"
+          className="oauth-button"
+          onClick={() => void handleGoogleSignIn()}
+          disabled={loading}
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path fill="#EA4335" d="M12 10.2v3.9h5.4c-.2 1.3-1.6 3.9-5.4 3.9-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.5 14.6 2.6 12 2.6 6.9 2.6 2.8 6.7 2.8 11.8S6.9 21 12 21c6.9 0 9.1-4.8 9.1-7.3 0-.5 0-.8-.1-1.2H12z"/>
+          </svg>
+          Continue with Google
         </button>
 
         {/* Sign In Link */}
