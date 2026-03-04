@@ -548,8 +548,30 @@ const PageLayout = ({ children }: { children: React.ReactNode }) => (
 /* ───────── Dashboard ───────── */
 
 const Dashboard = () => {
-  const { user } = useAuth();
-  const userName = user?.email?.split('@')[0] || 'Patient';
+  const { user, profile } = useAuth();
+
+  const profileDerivedName = [profile?.firstName, profile?.lastName]
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+
+  const metadataFullName = typeof user?.user_metadata?.full_name === 'string'
+    ? user.user_metadata.full_name
+    : undefined;
+
+  const metadataName = typeof user?.user_metadata?.name === 'string'
+    ? user.user_metadata.name
+    : undefined;
+
+  const emailFallbackName = user?.email?.split('@')[0];
+
+  const userName =
+    profile?.fullName ??
+    (profileDerivedName || undefined) ??
+    metadataFullName ??
+    metadataName ??
+    emailFallbackName ??
+    'Patient';
 
   return (
     <div className="animate-fade-in dashboard">
