@@ -2,7 +2,8 @@ param(
   [switch]$Production = $false,
   [switch]$WithTools = $false,
   [switch]$DevMode = $false,
-  [switch]$StartTunnel = $false
+  [switch]$StartTunnel = $false,
+  [switch]$NoTunnel = $false
 )
 
 $ErrorActionPreference = 'Stop'
@@ -44,15 +45,54 @@ function Ensure-DockerReady {
   throw "Docker daemon did not become ready in time."
 }
 
+function Get-BooleanEnvValue {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Name
+  )
+
+  $rawValue = [Environment]::GetEnvironmentVariable($Name)
+  if ([string]::IsNullOrWhiteSpace($rawValue)) {
+    return $false
+  }
+
+  $normalized = $rawValue.Trim().ToLowerInvariant()
+  return @('1', 'true', 'yes', 'y', 'on') -contains $normalized
+}
+
+function Test-TunnelRunning {
+  $containerId = docker ps --filter "name=aethea-tunnel" --filter "status=running" -q
+  return ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($containerId))
+}
+
 Write-Host "Starting Aethea project..." -ForegroundColor Yellow
 
 $projectRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
+$autoStartTunnel = Get-BooleanEnvValue -Name "AUTO_START_TUNNEL"
+$shouldStartTunnel = (-not $DevMode) -and (-not $NoTunnel)
+
+if ($PSBoundParameters.ContainsKey('StartTunnel')) {
+  $shouldStartTunnel = $StartTunnel -and (-not $NoTunnel) -and (-not $DevMode)
+}
+
+if ($autoStartTunnel -and (-not $NoTunnel) -and (-not $DevMode)) {
+  $shouldStartTunnel = $true
+}
+
+if ($shouldStartTunnel -and -not $StartTunnel -and $autoStartTunnel) {
+  Write-Host "AUTO_START_TUNNEL is enabled. Cloudflare tunnel will be started." -ForegroundColor Cyan
+} elseif ($shouldStartTunnel -and -not $StartTunnel -and (-not $autoStartTunnel)) {
+  Write-Host "Cloudflare tunnel auto-start is ON by default. Use -NoTunnel to disable it for this run." -ForegroundColor Cyan
+} elseif ($NoTunnel) {
+  Write-Host "Cloudflare tunnel is disabled for this run (-NoTunnel)." -ForegroundColor Yellow
+}
+
 Push-Location $projectRoot
 
 try {
   Ensure-DockerReady
 
-  if ($StartTunnel) {
+  if ($shouldStartTunnel) {
     $defaultTunnelCredPath = Join-Path $projectRoot "cloudflared/credentials/de687480-54da-4632-a55e-b3d1b4a8575d.json"
     $configuredTunnelCredPath = $env:CLOUDFLARED_CREDENTIALS_FILE
     $tunnelCredPath = if ([string]::IsNullOrWhiteSpace($configuredTunnelCredPath)) {
@@ -98,13 +138,13 @@ try {
     $composeArgs = @("compose")
     if ($Production) { $composeArgs += @("--profile", "prod") }
     if ($WithTools) { $composeArgs += @("--profile", "tools") }
-    if ($StartTunnel) { $composeArgs += @("--profile", "tunnel") }
+    if ($shouldStartTunnel) { $composeArgs += @("--profile", "tunnel") }
     $composeArgs += @("up", "-d")
 
     # Explicitly name services to avoid starting dev+prod together
     if ($Production) {
       $composeArgs += @("postgres", "redis", "backend-prod", "web-prod")
-      if ($StartTunnel)  { $composeArgs += "cloudflared" }
+      if ($shouldStartTunnel)  { $composeArgs += "cloudflared" }
       if ($WithTools)    { $composeArgs += @("pgadmin", "redisinsight", "mailhog") }
     }
 
@@ -123,9 +163,22 @@ try {
     }
     Pop-Location
 
-    Write-Host "Frontend URL:  https://aethea.me" -ForegroundColor Green
-    Write-Host "Backend URL:   https://api.aethea.me" -ForegroundColor Green
-    Write-Host "Health URL:    https://api.aethea.me/health" -ForegroundColor Green
+    $tunnelIsRunning = if ($shouldStartTunnel) { $true } else { Test-TunnelRunning }
+
+    if ($tunnelIsRunning) {
+      Write-Host "Frontend URL:  https://aethea.me" -ForegroundColor Green
+      Write-Host "Backend URL:   https://api.aethea.me" -ForegroundColor Green
+      Write-Host "Health URL:    https://api.aethea.me/health" -ForegroundColor Green
+    } else {
+      if ($Production) {
+        Write-Host "Frontend URL:  http://localhost" -ForegroundColor Green
+      } else {
+        Write-Host "Frontend URL:  http://localhost:5173" -ForegroundColor Green
+      }
+      Write-Host "Backend URL:   http://localhost:3001" -ForegroundColor Green
+      Write-Host "Health URL:    http://localhost:3001/health" -ForegroundColor Green
+      Write-Host "Public tunnel is OFF. Use -StartTunnel or npm run start:server:tunnel to enable aethea.me." -ForegroundColor Yellow
+    }
   }
 
   Write-Host "Project started successfully." -ForegroundColor Green

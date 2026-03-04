@@ -201,6 +201,7 @@ export class AuthService {
       email: sanitizeInput(credentials.email.toLowerCase()),
       password: credentials.password,
       captchaToken: credentials.captchaToken,
+      rememberMe: credentials.rememberMe,
     };
 
     const response = await this.repository.signIn(sanitized);
@@ -211,6 +212,13 @@ export class AuthService {
     }
 
     return response;
+  }
+
+  /**
+   * Sign in with Google OAuth
+   */
+  async signInWithGoogle(): Promise<AuthResponse<void>> {
+    return this.repository.signInWithGoogle();
   }
 
   /**

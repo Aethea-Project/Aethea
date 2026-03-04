@@ -71,4 +71,19 @@ describe('Protected endpoints — fail-closed without Supabase', () => {
     const res = await request(app).get('/api/reservations');
     expect(res.status).toBe(503);
   });
+
+  it('GET /api/auth/step-up/status → 503 when auth not configured', async () => {
+    const res = await request(app).get('/api/auth/step-up/status');
+    expect(res.status).toBe(503);
+  });
+
+  it('POST /api/auth/step-up/challenge → 503 when auth not configured', async () => {
+    const res = await request(app).post('/api/auth/step-up/challenge').send({});
+    expect(res.status).toBe(503);
+  });
+
+  it('POST /api/auth/step-up/verify → 503 when auth not configured', async () => {
+    const res = await request(app).post('/api/auth/step-up/verify').send({ code: '123456' });
+    expect(res.status).toBe(503);
+  });
 });

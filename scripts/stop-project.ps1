@@ -12,6 +12,11 @@ $projectRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
 Push-Location $projectRoot
 if (Get-Command docker -ErrorAction SilentlyContinue) {
   docker compose down | Out-Host
+
+  if ($StopTunnel) {
+    docker compose --profile tunnel stop cloudflared *>$null
+    docker compose --profile tunnel rm -f cloudflared *>$null
+  }
 }
 Pop-Location
 

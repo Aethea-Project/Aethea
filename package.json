@@ -26,7 +26,7 @@
     "docker:logs": "docker compose logs -f",
     "docker:clean": "docker compose down -v --rmi local",
     "docker:restart": "docker compose down && docker compose up --build",
-    "docker:tunnel": "docker compose up cloudflared -d",
+    "docker:tunnel": "docker compose --profile tunnel up -d cloudflared",
     "docker:prisma:studio": "cd backend && npx prisma studio",
     "docker:prisma:migrate": "cd backend && npx prisma migrate dev",
     "start:server": "powershell -ExecutionPolicy Bypass -File ./scripts/start-project.ps1",

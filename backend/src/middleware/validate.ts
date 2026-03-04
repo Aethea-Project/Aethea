@@ -10,7 +10,6 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { ZodSchema, ZodError, ZodIssue } from 'zod';
-import type { ParsedQs } from 'qs';
 
 const formatZodIssues = (issues: ZodIssue[]) => {
   return issues.map((issue: ZodIssue) => ({
@@ -56,7 +55,7 @@ export const validateBody = (schema: ZodSchema) => {
 export const validateQuery = (schema: ZodSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
-      req.query = schema.parse(req.query) as ParsedQs;
+      schema.parse(req.query);
       next();
     } catch (err) {
       if (err instanceof ZodError) {

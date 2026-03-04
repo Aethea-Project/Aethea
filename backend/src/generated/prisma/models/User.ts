@@ -190,6 +190,7 @@ export type UserWhereInput = {
   lastName?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  sessions?: Prisma.UserSessionListRelationFilter
   labTests?: Prisma.LabTestListRelationFilter
   scans?: Prisma.ScanListRelationFilter
   reservations?: Prisma.ReservationListRelationFilter
@@ -202,6 +203,7 @@ export type UserOrderByWithRelationInput = {
   lastName?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  sessions?: Prisma.UserSessionOrderByRelationAggregateInput
   labTests?: Prisma.LabTestOrderByRelationAggregateInput
   scans?: Prisma.ScanOrderByRelationAggregateInput
   reservations?: Prisma.ReservationOrderByRelationAggregateInput
@@ -217,6 +219,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   lastName?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  sessions?: Prisma.UserSessionListRelationFilter
   labTests?: Prisma.LabTestListRelationFilter
   scans?: Prisma.ScanListRelationFilter
   reservations?: Prisma.ReservationListRelationFilter
@@ -253,6 +256,7 @@ export type UserCreateInput = {
   lastName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
   labTests?: Prisma.LabTestCreateNestedManyWithoutUserInput
   scans?: Prisma.ScanCreateNestedManyWithoutUserInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutUserInput
@@ -265,6 +269,7 @@ export type UserUncheckedCreateInput = {
   lastName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
   labTests?: Prisma.LabTestUncheckedCreateNestedManyWithoutUserInput
   scans?: Prisma.ScanUncheckedCreateNestedManyWithoutUserInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutUserInput
@@ -277,6 +282,7 @@ export type UserUpdateInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
   labTests?: Prisma.LabTestUpdateManyWithoutUserNestedInput
   scans?: Prisma.ScanUpdateManyWithoutUserNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutUserNestedInput
@@ -289,6 +295,7 @@ export type UserUncheckedUpdateInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
   labTests?: Prisma.LabTestUncheckedUpdateManyWithoutUserNestedInput
   scans?: Prisma.ScanUncheckedUpdateManyWithoutUserNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutUserNestedInput
@@ -365,6 +372,20 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
+export type UserCreateNestedOneWithoutSessionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSessionsInput, Prisma.UserUncheckedCreateWithoutSessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSessionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSessionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSessionsInput, Prisma.UserUncheckedCreateWithoutSessionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSessionsInput
+  upsert?: Prisma.UserUpsertWithoutSessionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSessionsInput, Prisma.UserUpdateWithoutSessionsInput>, Prisma.UserUncheckedUpdateWithoutSessionsInput>
+}
+
 export type UserCreateNestedOneWithoutLabTestsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutLabTestsInput, Prisma.UserUncheckedCreateWithoutLabTestsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutLabTestsInput
@@ -407,6 +428,70 @@ export type UserUpdateOneRequiredWithoutReservationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReservationsInput, Prisma.UserUpdateWithoutReservationsInput>, Prisma.UserUncheckedUpdateWithoutReservationsInput>
 }
 
+export type UserCreateWithoutSessionsInput = {
+  id: string
+  email: string
+  firstName?: string | null
+  lastName?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  labTests?: Prisma.LabTestCreateNestedManyWithoutUserInput
+  scans?: Prisma.ScanCreateNestedManyWithoutUserInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutSessionsInput = {
+  id: string
+  email: string
+  firstName?: string | null
+  lastName?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  labTests?: Prisma.LabTestUncheckedCreateNestedManyWithoutUserInput
+  scans?: Prisma.ScanUncheckedCreateNestedManyWithoutUserInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutSessionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSessionsInput, Prisma.UserUncheckedCreateWithoutSessionsInput>
+}
+
+export type UserUpsertWithoutSessionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSessionsInput, Prisma.UserUncheckedUpdateWithoutSessionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSessionsInput, Prisma.UserUncheckedCreateWithoutSessionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSessionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSessionsInput, Prisma.UserUncheckedUpdateWithoutSessionsInput>
+}
+
+export type UserUpdateWithoutSessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  labTests?: Prisma.LabTestUpdateManyWithoutUserNestedInput
+  scans?: Prisma.ScanUpdateManyWithoutUserNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  labTests?: Prisma.LabTestUncheckedUpdateManyWithoutUserNestedInput
+  scans?: Prisma.ScanUncheckedUpdateManyWithoutUserNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutUserNestedInput
+}
+
 export type UserCreateWithoutLabTestsInput = {
   id: string
   email: string
@@ -414,6 +499,7 @@ export type UserCreateWithoutLabTestsInput = {
   lastName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
   scans?: Prisma.ScanCreateNestedManyWithoutUserInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutUserInput
 }
@@ -425,6 +511,7 @@ export type UserUncheckedCreateWithoutLabTestsInput = {
   lastName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
   scans?: Prisma.ScanUncheckedCreateNestedManyWithoutUserInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutUserInput
 }
@@ -452,6 +539,7 @@ export type UserUpdateWithoutLabTestsInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
   scans?: Prisma.ScanUpdateManyWithoutUserNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutUserNestedInput
 }
@@ -463,6 +551,7 @@ export type UserUncheckedUpdateWithoutLabTestsInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
   scans?: Prisma.ScanUncheckedUpdateManyWithoutUserNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -474,6 +563,7 @@ export type UserCreateWithoutScansInput = {
   lastName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
   labTests?: Prisma.LabTestCreateNestedManyWithoutUserInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutUserInput
 }
@@ -485,6 +575,7 @@ export type UserUncheckedCreateWithoutScansInput = {
   lastName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
   labTests?: Prisma.LabTestUncheckedCreateNestedManyWithoutUserInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutUserInput
 }
@@ -512,6 +603,7 @@ export type UserUpdateWithoutScansInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
   labTests?: Prisma.LabTestUpdateManyWithoutUserNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutUserNestedInput
 }
@@ -523,6 +615,7 @@ export type UserUncheckedUpdateWithoutScansInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
   labTests?: Prisma.LabTestUncheckedUpdateManyWithoutUserNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -534,6 +627,7 @@ export type UserCreateWithoutReservationsInput = {
   lastName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
   labTests?: Prisma.LabTestCreateNestedManyWithoutUserInput
   scans?: Prisma.ScanCreateNestedManyWithoutUserInput
 }
@@ -545,6 +639,7 @@ export type UserUncheckedCreateWithoutReservationsInput = {
   lastName?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
   labTests?: Prisma.LabTestUncheckedCreateNestedManyWithoutUserInput
   scans?: Prisma.ScanUncheckedCreateNestedManyWithoutUserInput
 }
@@ -572,6 +667,7 @@ export type UserUpdateWithoutReservationsInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
   labTests?: Prisma.LabTestUpdateManyWithoutUserNestedInput
   scans?: Prisma.ScanUpdateManyWithoutUserNestedInput
 }
@@ -583,6 +679,7 @@ export type UserUncheckedUpdateWithoutReservationsInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
   labTests?: Prisma.LabTestUncheckedUpdateManyWithoutUserNestedInput
   scans?: Prisma.ScanUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -593,12 +690,14 @@ export type UserUncheckedUpdateWithoutReservationsInput = {
  */
 
 export type UserCountOutputType = {
+  sessions: number
   labTests: number
   scans: number
   reservations: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   labTests?: boolean | UserCountOutputTypeCountLabTestsArgs
   scans?: boolean | UserCountOutputTypeCountScansArgs
   reservations?: boolean | UserCountOutputTypeCountReservationsArgs
@@ -612,6 +711,13 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
    * Select specific fields to fetch from the UserCountOutputType
    */
   select?: Prisma.UserCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserSessionWhereInput
 }
 
 /**
@@ -643,6 +749,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   lastName?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   labTests?: boolean | Prisma.User$labTestsArgs<ExtArgs>
   scans?: boolean | Prisma.User$scansArgs<ExtArgs>
   reservations?: boolean | Prisma.User$reservationsArgs<ExtArgs>
@@ -678,6 +785,7 @@ export type UserSelectScalar = {
 
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "firstName" | "lastName" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   labTests?: boolean | Prisma.User$labTestsArgs<ExtArgs>
   scans?: boolean | Prisma.User$scansArgs<ExtArgs>
   reservations?: boolean | Prisma.User$reservationsArgs<ExtArgs>
@@ -689,6 +797,7 @@ export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
+    sessions: Prisma.$UserSessionPayload<ExtArgs>[]
     labTests: Prisma.$LabTestPayload<ExtArgs>[]
     scans: Prisma.$ScanPayload<ExtArgs>[]
     reservations: Prisma.$ReservationPayload<ExtArgs>[]
@@ -1094,6 +1203,7 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   labTests<T extends Prisma.User$labTestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$labTestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LabTestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   scans<T extends Prisma.User$scansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$scansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reservations<T extends Prisma.User$reservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1517,6 +1627,30 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Limit how many Users to delete.
    */
   limit?: number
+}
+
+/**
+ * User.sessions
+ */
+export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserSession
+   */
+  select?: Prisma.UserSessionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserSession
+   */
+  omit?: Prisma.UserSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserSessionInclude<ExtArgs> | null
+  where?: Prisma.UserSessionWhereInput
+  orderBy?: Prisma.UserSessionOrderByWithRelationInput | Prisma.UserSessionOrderByWithRelationInput[]
+  cursor?: Prisma.UserSessionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserSessionScalarFieldEnum | Prisma.UserSessionScalarFieldEnum[]
 }
 
 /**

@@ -63,6 +63,20 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, session, loading } = useAuth();
+
+  if (loading) {
+    return <PageLoader />;
+  }
+
+  if (user && session) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+};
+
 /* ── Loading Fallback ── */
 const PageLoader = () => (
   <div className="page-loader" role="status" aria-label="Loading page">
@@ -182,6 +196,10 @@ const HeroIllustration = () => (
 /* ───────── Landing Page ───────── */
 
 const LandingPage = () => {
+  const { user, session } = useAuth();
+  const signInPath = user && session ? '/dashboard' : '/login';
+  const signupPath = user && session ? '/dashboard' : '/register';
+
   const trustIndicators = [
     { label: 'HIPAA Compliant', detail: 'Security standard' },
     { label: 'End-to-End Encrypted', detail: 'Private by design' },
@@ -271,8 +289,8 @@ const LandingPage = () => {
             <a href="#about">About</a>
           </nav>
           <div className="landing-nav-auth">
-            <Link to="/login" className="landing-cta-btn-outline">Sign In</Link>
-            <Link to="/register" className="landing-cta-btn">Get Started</Link>
+            <Link to={signInPath} className="landing-cta-btn-outline">Sign In</Link>
+            <Link to={signupPath} className="landing-cta-btn">Get Started</Link>
           </div>
         </div>
       </header>
@@ -291,7 +309,7 @@ const LandingPage = () => {
             and doctor consultations into one beautiful, secure platform.
           </p>
           <div className="landing-hero-actions">
-            <Link to="/register" className="btn-primary-lg">
+            <Link to={signupPath} className="btn-primary-lg">
               Create Account
               <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
             </Link>
@@ -406,7 +424,7 @@ const LandingPage = () => {
       <section className="landing-footer-cta" aria-labelledby="cta-heading">
         <h2 id="cta-heading">Ready to Take Control<br/>of Your Health?</h2>
         <p>Create your free account to access all features and start managing your health today.</p>
-        <Link to="/register" className="btn-primary-lg">
+        <Link to={signupPath} className="btn-primary-lg">
           Create Free Account
           <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18" aria-hidden="true"><path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
         </Link>
@@ -443,50 +461,62 @@ const SidebarItem = ({ to, icon: Icon, label }: { to: string; icon: React.Compon
   );
 };
 
-const Sidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
-  <>
-    {isOpen && <div className="sidebar-overlay" onClick={onClose} aria-hidden="true" />}
-    <aside
-      className={`sidebar ${isOpen ? 'open' : ''}`}
-      role="navigation"
-      aria-label="Main navigation"
-    >
-      <Link to="/" className="brand" style={{ textDecoration: 'none' }}>
-        <div className="brand-logo" aria-hidden="true">A</div>
-        <span className="brand-name">Aethea</span>
-      </Link>
-      <nav className="sidebar-nav" aria-label="Dashboard navigation">
-        <div className="nav-group" role="group" aria-labelledby="nav-overview">
-          <span className="nav-label" id="nav-overview">Overview</span>
-          <SidebarItem to="/dashboard" icon={DashboardIcon} label="Dashboard" />
-        </div>
-        <div className="nav-group" role="group" aria-labelledby="nav-records">
-          <span className="nav-label" id="nav-records">Health Records</span>
-          <SidebarItem to="/lab-results" icon={LabIcon} label="Lab Results" />
-          <SidebarItem to="/scans" icon={ScanIcon} label="Medical Scans" />
-        </div>
-        <div className="nav-group" role="group" aria-labelledby="nav-care">
-          <span className="nav-label" id="nav-care">Care &amp; Wellness</span>
-          <SidebarItem to="/medicines" icon={MedicineIcon} label="Medicines" />
-          <SidebarItem to="/doctors" icon={DoctorIcon} label="Doctors" />
-          <SidebarItem to="/reservations" icon={CalendarIcon} label="Appointments" />
-          <SidebarItem to="/nutrition" icon={NutritionIcon} label="Nutrition" />
-          <SidebarItem to="/recovery" icon={RecoveryIcon} label="Recovery" />
-          <SidebarItem to="/chat" icon={ChatIcon} label="Consultations" />
-        </div>
-      </nav>
-      <div className="sidebar-footer">
-        <SidebarItem to="/profile" icon={ProfileIcon} label="My Profile" />
-        <Link to="/" className="nav-item" aria-label="Back to home page">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0v-6a1 1 0 011-1h2a1 1 0 011 1v6m-6 0h6"/>
-          </svg>
-          <span>Back to Home</span>
+const Sidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const { signOut } = useAuth();
+
+  return (
+    <>
+      {isOpen && <div className="sidebar-overlay" onClick={onClose} aria-hidden="true" />}
+      <aside
+        className={`sidebar ${isOpen ? 'open' : ''}`}
+        role="navigation"
+        aria-label="Main navigation"
+      >
+        <Link to="/" className="brand" style={{ textDecoration: 'none' }}>
+          <div className="brand-logo" aria-hidden="true">A</div>
+          <span className="brand-name">Aethea</span>
         </Link>
-      </div>
-    </aside>
-  </>
-);
+        <nav className="sidebar-nav" aria-label="Dashboard navigation">
+          <div className="nav-group" role="group" aria-labelledby="nav-overview">
+            <span className="nav-label" id="nav-overview">Overview</span>
+            <SidebarItem to="/dashboard" icon={DashboardIcon} label="Dashboard" />
+          </div>
+          <div className="nav-group" role="group" aria-labelledby="nav-records">
+            <span className="nav-label" id="nav-records">Health Records</span>
+            <SidebarItem to="/lab-results" icon={LabIcon} label="Lab Results" />
+            <SidebarItem to="/scans" icon={ScanIcon} label="Medical Scans" />
+          </div>
+          <div className="nav-group" role="group" aria-labelledby="nav-care">
+            <span className="nav-label" id="nav-care">Care &amp; Wellness</span>
+            <SidebarItem to="/medicines" icon={MedicineIcon} label="Medicines" />
+            <SidebarItem to="/doctors" icon={DoctorIcon} label="Doctors" />
+            <SidebarItem to="/reservations" icon={CalendarIcon} label="Appointments" />
+            <SidebarItem to="/nutrition" icon={NutritionIcon} label="Nutrition" />
+            <SidebarItem to="/recovery" icon={RecoveryIcon} label="Recovery" />
+            <SidebarItem to="/chat" icon={ChatIcon} label="Consultations" />
+          </div>
+        </nav>
+        <div className="sidebar-footer">
+          <SidebarItem to="/profile" icon={ProfileIcon} label="My Profile" />
+          <button type="button" className="nav-item" onClick={() => void signOut()} aria-label="Sign out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            <span>Sign Out</span>
+          </button>
+          <Link to="/" className="nav-item" aria-label="Back to home page">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0v-6a1 1 0 011-1h2a1 1 0 011 1v6m-6 0h6"/>
+            </svg>
+            <span>Back to Home</span>
+          </Link>
+        </div>
+      </aside>
+    </>
+  );
+};
 
 /* ───────── App Layout ───────── */
 
@@ -741,8 +771,8 @@ function AppRoutes() {
       <Routes>
         {/* ── Public routes ── */}
         <Route path="/" element={<RootRoute />} />
-        <Route path="/login" element={<LoginForm />} />
-        <Route path="/register" element={<RegisterForm />} />
+        <Route path="/login" element={<PublicOnlyRoute><LoginForm /></PublicOnlyRoute>} />
+        <Route path="/register" element={<PublicOnlyRoute><RegisterForm /></PublicOnlyRoute>} />
         <Route path="/forgot-password" element={<ForgotPasswordForm />} />
         <Route path="/auth/confirm" element={<AuthConfirmPage />} />
         <Route path="/test-message-email" element={<TestMessageEmailPage />} />

@@ -30,7 +30,7 @@ import pinoHttp from 'pino-http';
 import { initializeJWTVerifier } from './auth/jwt/verify.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
-import authRoutes from './routes/auth.routes.js';
+import { createAuthRoutes } from './routes/auth.routes.js';
 import { createUserRoutes } from './routes/users.routes.js';
 import { createScanRoutes } from './routes/scans.routes.js';
 import { createLabTestRoutes } from './routes/labTests.routes.js';
@@ -168,14 +168,14 @@ export function createApp(config: AppConfig = {}) {
 
   // ─── Mount route modules (Router Pattern) ───
   // API v1 — explicit versioning (REST best practice)
-  app.use('/api/v1/auth', authRoutes);
+  app.use('/api/v1/auth', createAuthRoutes(authMiddleware));
   app.use('/api/v1/users', createUserRoutes(authMiddleware));
   app.use('/api/v1/scans', createScanRoutes(authMiddleware));
   app.use('/api/v1/lab-tests', createLabTestRoutes(authMiddleware));
   app.use('/api/v1/reservations', createReservationRoutes(authMiddleware));
 
   // Backward-compatible aliases (non-versioned paths → v1)
-  app.use('/api/auth', authRoutes);
+  app.use('/api/auth', createAuthRoutes(authMiddleware));
   app.use('/api/users', createUserRoutes(authMiddleware));
   app.use('/api/scans', createScanRoutes(authMiddleware));
   app.use('/api/lab-tests', createLabTestRoutes(authMiddleware));

@@ -15,6 +15,7 @@
  */
 
 import { authService } from '../services/auth';
+import { STORAGE_KEYS } from '@core/auth/constants';
 
 /** Maximum time (ms) to wait for any backend request before aborting. */
 const REQUEST_TIMEOUT_MS = 15_000;
@@ -50,6 +51,7 @@ export const API_BASE = resolveApiBaseUrl();
 export async function authFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const sessionResponse = await authService.getSession();
   const token = sessionResponse.data?.access_token;
+  const rememberSession = typeof window !== 'undefined' && window.localStorage.getItem(STORAGE_KEYS.USER_SESSION) === 'remember-30d';
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -60,6 +62,7 @@ export async function authFetch<T>(path: string, init?: RequestInit): Promise<T>
       signal: init?.signal ?? controller.signal,
       headers: {
         'Content-Type': 'application/json',
+        'x-remember-me': rememberSession ? 'true' : 'false',
         ...(init?.headers ?? {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },

@@ -6,6 +6,7 @@
 
 import { Router, RequestHandler } from 'express';
 import { getProfile } from '../controllers/users.controller.js';
+import { requireLocalUser } from '../lib/authMiddleware.js';
 
 /**
  * Build user routes. Accepts authMiddleware as a parameter so it can be
@@ -15,7 +16,7 @@ export const createUserRoutes = (authMiddleware: RequestHandler): Router => {
   const router = Router();
 
   // GET /api/users/profile
-  router.get('/profile', authMiddleware, getProfile);
+  router.get('/profile', authMiddleware, requireLocalUser, getProfile);
 
   return router;
 };
