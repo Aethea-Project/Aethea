@@ -1,0 +1,32 @@
+export const imageAssets = {
+  landingHero: '/images/hero/landing-hero-main.webp',
+  aboutSection: '/images/about/about-team-care.webp',
+  dashboardHero: '/images/dashboard/dashboard-hero.webp',
+  bento: {
+    doctor:    '/images/bento/doctor-finder.webp',
+    lab:       '/images/bento/lab-results.webp',
+    scan:      '/images/bento/medical-scans.webp',
+    medicine:  '/images/bento/medicine-guide.webp',
+    nutrition: '/images/bento/nutrition-planner.webp',
+    recovery:  '/images/bento/recovery-assistant.webp',
+    chat:      '/images/bento/doctor-chat.webp',
+  },
+  features: {
+    lab: '/images/features/lab-results.webp',
+    scan: '/images/features/medical-scans.webp',
+    medicine: '/images/features/medicine-guide.webp',
+    doctor: '/images/features/doctor-finder.webp',
+    nutrition: '/images/features/nutrition-planner.webp',
+    recovery: '/images/features/recovery-assistant.webp',
+    chat: '/images/features/doctor-chat.webp',
+  },
+  headers: {
+    lab: '/images/headers/lab-results-header.webp',
+    scan: '/images/headers/medical-scans-header.webp',
+    medicine: '/images/headers/medicine-guide-header.webp',
+    doctor: '/images/headers/doctor-finder-header.webp',
+    nutrition: '/images/headers/nutrition-planner-header.webp',
+    recovery: '/images/headers/recovery-assistant-header.webp',
+    chat: '/images/headers/doctor-chat-header.webp',
+  },
+} as const;

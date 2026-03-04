@@ -1,0 +1,23 @@
+# =============================================
+# Cloudflare Tunnel Config — Docker version
+# Used inside the cloudflared container.
+#
+# DEV-ONLY: This tunnel exposes local dev services
+# via the public aethea.me domain. The ingress
+# rules below point to the Docker service hostnames
+# "web" and "backend", which resolve to whichever
+# services are running (dev or prod via network
+# aliases in docker-compose.yml).
+#
+# For real production, deploy behind a cloud load
+# balancer or Cloudflare Pages + Workers instead.
+# =============================================
+tunnel: de687480-54da-4632-a55e-b3d1b4a8575d
+credentials-file: /etc/cloudflared/creds/de687480-54da-4632-a55e-b3d1b4a8575d.json
+
+ingress:
+  - hostname: aethea.me
+    service: http://web:5173
+  - hostname: api.aethea.me
+    service: http://backend:3001
+  - service: http_status:404
