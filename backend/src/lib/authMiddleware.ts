@@ -31,10 +31,11 @@ export const requireLocalUser = async (req: Request, _res: Response, next: NextF
         throw AppError.unauthorized('Session revoked. Please sign in again');
       }
 
+      const rawUserAgent = req.headers['user-agent'];
       await upsertUserSession({
         userId: user.id,
         sessionId,
-        userAgent: req.headers['user-agent'],
+        userAgent: Array.isArray(rawUserAgent) ? rawUserAgent[0] : rawUserAgent,
         ipAddress: getClientIp(req.headers['x-forwarded-for'] ?? req.socket.remoteAddress),
         rememberMe,
       });

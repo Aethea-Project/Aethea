@@ -62,7 +62,7 @@ export async function createUploadUrl(
 }
 
 export async function getProfile(userId: string) {
-  return findStaffProfile(userId) ?? null;
+  return await findStaffProfile(userId) ?? null;
 }
 
 export interface SubmitProfileInput {

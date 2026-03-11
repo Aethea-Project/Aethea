@@ -193,35 +193,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const signInWithGoogle = useCallback(async () => {
-    setAuthState((prev) => ({ ...prev, loading: true, error: null }));
-
-    try {
-      const response = await authService.signInWithGoogle();
-
-      if (response.error) {
-        setAuthState((prev) => ({
-          ...prev,
-          loading: false,
-          error: response.error,
-        }));
-        return;
-      }
-
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(STORAGE_KEYS.USER_SESSION, 'session-only');
-      }
-
-      // OAuth redirects away; keep loading state until redirect occurs
-    } catch (error) {
-      setAuthState((prev) => ({
-        ...prev,
-        loading: false,
-        error: error instanceof Error ? { message: error.message } : null,
-      }));
-    }
-  }, []);
-
   // Sign up handler
   const signUp = useCallback(
     async (credentials: SignUpCredentials): Promise<{ success: boolean; message?: string }> => {

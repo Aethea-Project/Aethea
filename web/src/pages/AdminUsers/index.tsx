@@ -30,7 +30,8 @@ export default function AdminUsersPage() {
     firstName: '',
     lastName: '',
   });
-  const [reason, setReason] = useState<Record<string, string>>({});
+  const [statusReasons, setStatusReasons] = useState<Record<string, string>>({});
+  const [reviewNotes, setReviewNotes] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [queueStatus, setQueueStatus] = useState<VerificationStatus>('under_review');
   const [queueLoading, setQueueLoading] = useState(true);
@@ -89,12 +90,12 @@ export default function AdminUsersPage() {
   const onStatusUpdate = async (userId: string, nextStatus: AccountStatus) => {
     setSubmitting(true);
     try {
-      const message = reason[userId]?.trim();
+      const message = statusReasons[userId]?.trim();
       await updateUserStatus(userId, {
         accountStatus: nextStatus,
         reason: nextStatus === 'suspended' || nextStatus === 'rejected' ? message : undefined,
       });
-      setReason((prev) => ({ ...prev, [userId]: '' }));
+      setStatusReasons((prev) => ({ ...prev, [userId]: '' }));
     } finally {
       setSubmitting(false);
     }
@@ -103,7 +104,7 @@ export default function AdminUsersPage() {
   const onReview = async (userId: string, status: 'verified' | 'rejected') => {
     setSubmitting(true);
     try {
-      const notes = reason[userId]?.trim();
+      const notes = reviewNotes[userId]?.trim();
       await staffVerificationApi.reviewProfile(userId, status, notes || undefined);
       await Promise.all([fetchUsers(), loadQueue(queueStatus)]);
     } finally {
@@ -228,8 +229,8 @@ export default function AdminUsersPage() {
                     <div className="reason-block">
                       <label>Reason (required for suspend/reject)</label>
                       <textarea
-                        value={reason[user.id] ?? ''}
-                        onChange={(e) => setReason((prev) => ({ ...prev, [user.id]: e.target.value }))}
+                        value={statusReasons[user.id] ?? ''}
+                        onChange={(e) => setStatusReasons((prev) => ({ ...prev, [user.id]: e.target.value }))}
                         placeholder="Add reason"
                       />
                     </div>
@@ -294,8 +295,8 @@ export default function AdminUsersPage() {
                   <div className="reason-block">
                     <label>Review Notes</label>
                     <textarea
-                      value={reason[item.user_id] ?? ''}
-                      onChange={(e) => setReason((prev) => ({ ...prev, [item.user_id]: e.target.value }))}
+                      value={reviewNotes[item.user_id] ?? ''}
+                      onChange={(e) => setReviewNotes((prev) => ({ ...prev, [item.user_id]: e.target.value }))}
                       placeholder="Optional for approve, required for reject"
                     />
                   </div>

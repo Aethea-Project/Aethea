@@ -162,20 +162,6 @@ const RoleRoute = ({
   return <>{children}</>;
 };
 
-const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, session, loading } = useAuth();
-
-  if (loading) {
-    return <PageLoader />;
-  }
-
-  if (user && session) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return <>{children}</>;
-};
-
 /* ── Loading Fallback ── */
 const PageLoader = () => (
   <div className="page-loader" role="status" aria-label="Loading page">
