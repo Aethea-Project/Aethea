@@ -14,28 +14,32 @@ import { Router, RequestHandler } from 'express';
 import { authLimiter } from '../middleware/rateLimiter.js';
 import { asyncHandler } from '../middleware/asyncHandler.js';
 import {
+	completePasswordChange,
+	createVerifyTokenHandler,
 	getSessions,
 	getStepUpStatus,
 	issueStepUpChallenge,
 	revokeAllSessions,
 	revokeSession,
 	verifyStepUp,
-	verifyToken,
 } from '../controllers/auth.controller.js';
 import { requireLocalUser } from '../lib/authMiddleware.js';
 import { requireStepUp } from '../middleware/requireStepUp.js';
+import { requireTrustedClaims } from '../middleware/requireAccountType.js';
 import { validateBody } from '../middleware/validate.js';
 import { stepUpVerifySchema } from '../schemas/index.js';
+import type { JWTVerifier } from '../auth/jwt/verify.js';
 
-export const createAuthRoutes = (authMiddleware: RequestHandler): Router => {
+export const createAuthRoutes = (authMiddleware: RequestHandler, jwtVerifier: JWTVerifier | null): Router => {
 	const router = Router();
 
-	// POST /api/auth/verify — strict rate limit
-	router.post('/verify', authLimiter, asyncHandler(verifyToken));
+	// POST /api/auth/verify — strict rate limit, jwtVerifier injected via closure
+	router.post('/verify', authLimiter, asyncHandler(createVerifyTokenHandler(jwtVerifier)));
 
 	// Protected session registry endpoints
-	const sessionAuth = [authMiddleware, requireLocalUser];
+	const sessionAuth = [authMiddleware, requireTrustedClaims, requireLocalUser];
 	router.get('/sessions', sessionAuth, asyncHandler(getSessions));
+	router.post('/password/complete', sessionAuth, asyncHandler(completePasswordChange));
 	router.get('/step-up/status', sessionAuth, asyncHandler(getStepUpStatus));
 	router.post('/step-up/challenge', authLimiter, sessionAuth, asyncHandler(issueStepUpChallenge));
 	router.post('/step-up/verify', authLimiter, sessionAuth, validateBody(stepUpVerifySchema), asyncHandler(verifyStepUp));

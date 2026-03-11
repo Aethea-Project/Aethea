@@ -8,6 +8,12 @@ import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 // Blood type options
 export type BloodType = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
 
+// Account type — matches the account_type enum in Supabase user_accounts table
+export type AccountType = 'patient' | 'doctor' | 'pharmacist' | 'admin';
+
+// Account status — matches the account_status enum in Supabase user_accounts table
+export type AccountStatus = 'pending' | 'active' | 'suspended' | 'rejected';
+
 export const BLOOD_TYPE_OPTIONS: { value: BloodType; label: string }[] = [
   { value: 'A+', label: 'A+' },
   { value: 'A-', label: 'A−' },
@@ -74,6 +80,10 @@ export interface UserProfile {
   avatarUrl: string | null;
   createdAt: string;
   updatedAt: string;
+  // Authorization fields injected from JWT claims (custom_access_token_hook)
+  accountType: AccountType | null;
+  accountStatus: AccountStatus | null;
+  mustChangePassword: boolean;
 }
 
 // Auth state (immutable — always replace via setState, never mutate)

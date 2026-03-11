@@ -170,7 +170,7 @@ export const isValidPhone = (countryCode: string, phoneNumber: string): { valid:
   // Accept both ISO code (e.g. EG) and dialing code (e.g. +20)
   const rule =
     COUNTRY_PHONE_RULES[normalizedCountryInput] ||
-    Object.values(COUNTRY_PHONE_RULES).find(r => r.code === countryCode);
+    Object.values(COUNTRY_PHONE_RULES).find(r => r.code === normalizedCountryInput);
   
   if (!rule) {
     return { valid: false, error: 'Invalid country code' };

@@ -1,0 +1,56 @@
+.staff-verification-page {
+  display: grid;
+  gap: 16px;
+}
+
+.staff-verification-page .status-card,
+.staff-verification-page .form-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #fff;
+  padding: 16px;
+}
+
+.staff-verification-page .verification-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.staff-verification-page .form-control {
+  display: grid;
+  gap: 6px;
+}
+
+.staff-verification-page .form-control input,
+.staff-verification-page .form-control select {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.staff-verification-page .form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.staff-verification-page .status-chip {
+  text-transform: capitalize;
+  font-weight: 600;
+}
+
+.staff-verification-page .status-chip.unverified { color: #6b7280; }
+.staff-verification-page .status-chip.under_review { color: #b45309; }
+.staff-verification-page .status-chip.verified { color: #166534; }
+.staff-verification-page .status-chip.rejected { color: #9f1239; }
+
+.staff-verification-page .error-banner {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+  padding: 10px 12px;
+  border-radius: 12px;
+}
