@@ -35,6 +35,9 @@ import { createUserRoutes } from './routes/users.routes.js';
 import { createScanRoutes } from './routes/scans.routes.js';
 import { createLabTestRoutes } from './routes/labTests.routes.js';
 import { createReservationRoutes } from './routes/reservations.routes.js';
+import { createAdminRoutes } from './routes/admin.routes.js';
+import { createStaffVerificationRoutes } from './routes/staffVerification.routes.js';
+import { createAdminVerificationRoutes } from './routes/adminVerification.routes.js';
 import logger from './lib/logger.js';
 
 interface AppConfig {
@@ -128,9 +131,6 @@ export function createApp(config: AppConfig = {}) {
     ? initializeJWTVerifier(supabaseUrl, supabaseServiceKey)
     : null;
 
-  // Store on app for controllers to access
-  app.set('jwtVerifier', jwtVerifier);
-
   // Build auth middleware (fail-closed: rejects all if no verifier)
   const authMiddleware: RequestHandler = jwtVerifier
     ? jwtVerifier.authMiddleware()
@@ -162,24 +162,42 @@ export function createApp(config: AppConfig = {}) {
         scans: '/api/v1/scans/*',
         labTests: '/api/v1/lab-tests/*',
         reservations: '/api/v1/reservations/*',
+        admin: '/api/v1/admin/*',
+        staffVerification: '/api/v1/staff/verification/*',
       },
     });
   });
 
   // ─── Mount route modules (Router Pattern) ───
+  // Create each router once, mount at both versioned and non-versioned paths.
+  const authRoutes = createAuthRoutes(authMiddleware, jwtVerifier);
+  const userRoutes = createUserRoutes(authMiddleware);
+  const scanRoutes = createScanRoutes(authMiddleware);
+  const labTestRoutes = createLabTestRoutes(authMiddleware);
+  const reservationRoutes = createReservationRoutes(authMiddleware);
+  const adminRoutes = createAdminRoutes(authMiddleware);
+  const staffVerificationRoutes = createStaffVerificationRoutes(authMiddleware);
+  const adminVerificationRoutes = createAdminVerificationRoutes(authMiddleware);
+
   // API v1 — explicit versioning (REST best practice)
-  app.use('/api/v1/auth', createAuthRoutes(authMiddleware));
-  app.use('/api/v1/users', createUserRoutes(authMiddleware));
-  app.use('/api/v1/scans', createScanRoutes(authMiddleware));
-  app.use('/api/v1/lab-tests', createLabTestRoutes(authMiddleware));
-  app.use('/api/v1/reservations', createReservationRoutes(authMiddleware));
+  app.use('/api/v1/auth', authRoutes);
+  app.use('/api/v1/users', userRoutes);
+  app.use('/api/v1/scans', scanRoutes);
+  app.use('/api/v1/lab-tests', labTestRoutes);
+  app.use('/api/v1/reservations', reservationRoutes);
+  app.use('/api/v1/admin', adminRoutes);
+  app.use('/api/v1/staff/verification', staffVerificationRoutes);
+  app.use('/api/v1/admin', adminVerificationRoutes);
 
   // Backward-compatible aliases (non-versioned paths → v1)
-  app.use('/api/auth', createAuthRoutes(authMiddleware));
-  app.use('/api/users', createUserRoutes(authMiddleware));
-  app.use('/api/scans', createScanRoutes(authMiddleware));
-  app.use('/api/lab-tests', createLabTestRoutes(authMiddleware));
-  app.use('/api/reservations', createReservationRoutes(authMiddleware));
+  app.use('/api/auth', authRoutes);
+  app.use('/api/users', userRoutes);
+  app.use('/api/scans', scanRoutes);
+  app.use('/api/lab-tests', labTestRoutes);
+  app.use('/api/reservations', reservationRoutes);
+  app.use('/api/admin', adminRoutes);
+  app.use('/api/staff/verification', staffVerificationRoutes);
+  app.use('/api/admin', adminVerificationRoutes);
 
   // ─── Error handling (must be LAST) ───
   app.use(notFoundHandler);

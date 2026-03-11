@@ -16,7 +16,9 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@core/auth/useAuth';
+import { decodeJWT } from '@core/auth/token-manager';
 import { GENDER_OPTIONS, BLOOD_TYPE_OPTIONS, ALLERGY_OPTIONS, CHRONIC_CONDITION_OPTIONS } from '@core/auth/auth-types';
 import type { ProfileUpdateRequest, UserProfile, BloodType, Gender } from '@core/auth/auth-types';
 import { isValidName, isValidDateOfBirth, isValidPhone } from '@core/auth/auth-utils';
@@ -73,7 +75,16 @@ function validateForm(form: ProfileUpdateRequest): ValidationErrors {
 }
 
 const ProfilePage: React.FC = () => {
-  const { profile, loading, updateProfile, updatePassword, refreshProfile, user } = useAuth();
+  const { profile, loading, updateProfile, updatePassword, refreshProfile, user, session } = useAuth();
+  const navigate = useNavigate();
+
+  // Detect if admin is forced here to change password
+  const mustChangePassword = (() => {
+    if (!session?.access_token) return false;
+    const decoded = decodeJWT(session.access_token);
+    if (!decoded || typeof decoded !== 'object') return false;
+    return (decoded as { must_change_password?: unknown }).must_change_password === true;
+  })();
 
   // Edit mode toggle
   const [isEditing, setIsEditing] = useState(false);
@@ -84,11 +95,15 @@ const ProfilePage: React.FC = () => {
 
   // Password change
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
   const [passwordSaving, setPasswordSaving] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Track dirty state for unsaved changes warning
   const originalFormRef = useRef<ProfileUpdateRequest>({});
@@ -181,6 +196,10 @@ const ProfilePage: React.FC = () => {
     setPasswordError('');
     setPasswordSuccess('');
 
+    if (!currentPassword) {
+      setPasswordError('Please enter your current password.');
+      return;
+    }
     if (!newPassword || !confirmNewPassword) {
       setPasswordError('Please fill in all fields.');
       return;
@@ -197,11 +216,33 @@ const ProfilePage: React.FC = () => {
 
     setPasswordSaving(true);
     try {
+      // Verify current password by re-authenticating
+      const email = user?.email;
+      if (!email) {
+        setPasswordError('Unable to verify identity. Please sign in again.');
+        setPasswordSaving(false);
+        return;
+      }
+      const { authService: svc } = await import('../../services/auth');
+      const verifyResult = await svc.signIn({ email, password: currentPassword });
+      if (verifyResult.error) {
+        setPasswordError('Current password is incorrect.');
+        setPasswordSaving(false);
+        return;
+      }
+
       await updatePassword(newPassword);
       setPasswordSuccess('Password updated successfully!');
+      setCurrentPassword('');
       setNewPassword('');
       setConfirmNewPassword('');
-      setTimeout(() => setShowPasswordModal(false), 2000);
+      setTimeout(() => {
+        setShowPasswordModal(false);
+        // If admin was forced here to change password, redirect to dashboard
+        if (mustChangePassword) {
+          navigate('/dashboard', { replace: true });
+        }
+      }, 1500);
     } catch {
       setPasswordError('Failed to update password. Please try again.');
     }
@@ -288,6 +329,30 @@ const ProfilePage: React.FC = () => {
             </button>
           )}
         </div>
+
+        {/* Forced password change banner for new admin accounts */}
+        {mustChangePassword && (
+          <div className="profile-toast profile-toast-warning" role="alert">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <path d="M9 1L1 16h16L9 1z" stroke="#92400e" strokeWidth="1.5" strokeLinejoin="round"/>
+              <path d="M9 7v4M9 13h.01" stroke="#92400e" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            You must change your temporary password before accessing the platform.
+            <button className="btn btn-account-action" style={{ marginLeft: 'auto' }}
+              onClick={() => {
+                setShowPasswordModal(true);
+                setPasswordError('');
+                setPasswordSuccess('');
+                setCurrentPassword('');
+                setNewPassword('');
+                setConfirmNewPassword('');
+                setShowCurrentPassword(false);
+                setShowNewPassword(false);
+                setShowConfirmPassword(false);
+              }}
+            >Change Password Now</button>
+          </div>
+        )}
 
         {/* Feedback messages */}
         {successMsg && (
@@ -501,8 +566,12 @@ const ProfilePage: React.FC = () => {
                 setShowPasswordModal(true);
                 setPasswordError('');
                 setPasswordSuccess('');
+                setCurrentPassword('');
                 setNewPassword('');
                 setConfirmNewPassword('');
+                setShowCurrentPassword(false);
+                setShowNewPassword(false);
+                setShowConfirmPassword(false);
               }}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -548,26 +617,77 @@ const ProfilePage: React.FC = () => {
               {passwordSuccess && <div className="profile-toast profile-toast-success">{passwordSuccess}</div>}
               {passwordError && <div className="profile-toast profile-toast-error">{passwordError}</div>}
               <div className="modal-field">
+                <label htmlFor="current-password">Current Password</label>
+                <div className="modal-input-row">
+                  <input
+                    id="current-password"
+                    type={showCurrentPassword ? 'text' : 'password'}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    autoComplete="current-password"
+                    placeholder="Enter current password"
+                  />
+                  <button type="button" className="modal-toggle-pw" onClick={() => setShowCurrentPassword(v => !v)} aria-label={showCurrentPassword ? 'Hide' : 'Show'}>
+                    {showCurrentPassword ? '🙈' : '👁'}
+                  </button>
+                </div>
+              </div>
+              <div className="modal-field">
                 <label htmlFor="new-password">New Password</label>
-                <input
-                  id="new-password"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  autoComplete="new-password"
-                  placeholder="Min 8 characters"
-                />
+                <div className="modal-input-row">
+                  <input
+                    id="new-password"
+                    type={showNewPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    autoComplete="new-password"
+                    placeholder="Min 8 characters"
+                  />
+                  <button type="button" className="modal-toggle-pw" onClick={() => setShowNewPassword(v => !v)} aria-label={showNewPassword ? 'Hide' : 'Show'}>
+                    {showNewPassword ? '🙈' : '👁'}
+                  </button>
+                </div>
+                <ul className="password-checklist" aria-label="Password requirements">
+                  <li className={newPassword.length >= 8 ? 'met' : ''}>
+                    <span className="check-icon" aria-hidden="true">{newPassword.length >= 8 ? '✓' : '✗'}</span>
+                    At least 8 characters
+                  </li>
+                  <li className={/[A-Z]/.test(newPassword) ? 'met' : ''}>
+                    <span className="check-icon" aria-hidden="true">{/[A-Z]/.test(newPassword) ? '✓' : '✗'}</span>
+                    One uppercase letter
+                  </li>
+                  <li className={/[a-z]/.test(newPassword) ? 'met' : ''}>
+                    <span className="check-icon" aria-hidden="true">{/[a-z]/.test(newPassword) ? '✓' : '✗'}</span>
+                    One lowercase letter
+                  </li>
+                  <li className={/\d/.test(newPassword) ? 'met' : ''}>
+                    <span className="check-icon" aria-hidden="true">{/\d/.test(newPassword) ? '✓' : '✗'}</span>
+                    One number
+                  </li>
+                  <li className={/[^a-zA-Z0-9]/.test(newPassword) ? 'met' : ''}>
+                    <span className="check-icon" aria-hidden="true">{/[^a-zA-Z0-9]/.test(newPassword) ? '✓' : '✗'}</span>
+                    One special character
+                  </li>
+                </ul>
               </div>
               <div className="modal-field">
                 <label htmlFor="confirm-new-password">Confirm New Password</label>
-                <input
-                  id="confirm-new-password"
-                  type="password"
-                  value={confirmNewPassword}
-                  onChange={(e) => setConfirmNewPassword(e.target.value)}
-                  autoComplete="new-password"
-                  placeholder="Re-enter new password"
-                />
+                <div className="modal-input-row">
+                  <input
+                    id="confirm-new-password"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    autoComplete="new-password"
+                    placeholder="Re-enter new password"
+                  />
+                  <button type="button" className="modal-toggle-pw" onClick={() => setShowConfirmPassword(v => !v)} aria-label={showConfirmPassword ? 'Hide' : 'Show'}>
+                    {showConfirmPassword ? '🙈' : '👁'}
+                  </button>
+                </div>
+                {confirmNewPassword && !doPasswordsMatch(newPassword, confirmNewPassword) && (
+                  <span className="field-error" role="alert">Passwords do not match</span>
+                )}
               </div>
             </div>
             <div className="modal-footer">

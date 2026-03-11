@@ -1,49 +1,88 @@
-# Environment variables
+# ── Environment variables ────────────────────────────────────────
 .env
 .env.local
+.env.development
 .env.development.local
+.env.test
 .env.test.local
+.env.production
 .env.production.local
+.env*.local
+# Also catch env files in any sub-package
+**/.env
+**/.env.local
+**/.env*.local
+# Keep example files
+!**/.env.example
+!**/.env.docker.example
 
-# Dependencies
+# ── Dependencies ─────────────────────────────────────────────────
 node_modules/
 .pnp
 .pnp.js
+.pnp.cjs
 
-# Testing
-coverage/
-
-# Production builds
+# ── Build outputs ────────────────────────────────────────────────
 dist/
 build/
-*.log
+out/
 
-# Misc
-.DS_Store
-*.pem
-
-# Debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Local env files
-.env*.local
-
-# TypeScript
+# ── TypeScript build cache ───────────────────────────────────────
 *.tsbuildinfo
 next-env.d.ts
 
-# IDE
+# ── Test & coverage artifacts ────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ── Logs ─────────────────────────────────────────────────────────
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ── OS generated files ───────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# ── IDE & editor ─────────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
 *.swo
+*.suo
 *~
+*.orig
+*.code-workspace
 
-# OS
-Thumbs.db
+# ── Prisma generated client (regenerated via prisma generate) ────
+backend/src/generated/
 
-# Cloudflare tunnel credentials (local only)
+# ── Certificates & keys ──────────────────────────────────────────
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+
+# ── Docker local data volumes ────────────────────────────────────
+.docker/
+docker-data/
+pgdata/
+redisdata/
+
+# ── Generated documentation (local build artifacts) ──────────────
+documentation/
+V5 DOC/
+
+# ── Cloudflare tunnel credentials (local only) ───────────────────
 cloudflared/credentials/*.json
 !cloudflared/credentials/.gitkeep

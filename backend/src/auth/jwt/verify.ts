@@ -17,6 +17,9 @@ export interface JWTPayload {
   aud?: string;
   exp?: number;
   session_id?: string;
+  account_type?: 'patient' | 'doctor' | 'pharmacist' | 'admin';
+  account_status?: 'pending' | 'active' | 'suspended' | 'rejected';
+  must_change_password?: boolean;
 }
 
 const decodePayload = (token: string): JWTPayload | null => {
@@ -113,6 +116,9 @@ export class JWTVerifier {
           id: verification.user.id,
           email: verification.user.email ?? undefined,
           sessionId: verification.payload?.session_id,
+          account_type: verification.payload?.account_type,
+          account_status: verification.payload?.account_status,
+          must_change_password: verification.payload?.must_change_password,
         };
         next();
       } catch (error) {

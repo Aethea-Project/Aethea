@@ -72,6 +72,11 @@ function mapRowToUserProfile(row: Record<string, any>): UserProfile {
     avatarUrl: row.avatar_url,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    // Authorization claims — sourced from JWT (custom_access_token_hook).
+    // Profiles table does not store these; they are enriched via the session.
+    accountType: row.account_type ?? null,
+    accountStatus: row.account_status ?? null,
+    mustChangePassword: row.must_change_password ?? false,
   };
 }
 
@@ -376,7 +381,7 @@ export class AuthRepository {
    */
   async resetPassword(request: PasswordResetRequest): Promise<AuthResponse<void>> {
     try {
-      // Build redirect URL safely for any environment (web / mobile / server)
+      // Build redirect URL safely for browser and server contexts.
       const origin =
         typeof window !== 'undefined' && window.location?.origin
           ? window.location.origin

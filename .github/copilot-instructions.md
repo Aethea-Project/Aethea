@@ -20,13 +20,27 @@ Pages (UI state, JSX only)
 - **`apiClient` owns**: `authFetch<T>(path, init?)`, `API_BASE` resolution, 15s `AbortController` timeout on every request.
 - Never put `useEffect`/`useState` for data fetching directly in a page component.
 
+## Backend 3-layer architecture
+Every backend feature must follow this layering — never put business logic in controllers or SQL in services:
+```
+Controllers  (HTTP only: extract params, call one service fn, format response)
+  -> Services  backend/src/services/  (business logic, orchestrates repos + external APIs)
+    -> Repositories  backend/src/repositories/  (raw SQL via prisma.$queryRaw / $executeRaw)
+      -> Prisma / PostgreSQL
+```
+- **Controllers own**: parsing `req.body`/`req.params`/`req.query`, calling one service function, returning `paginatedResult()`. ~10 lines per endpoint.
+- **Services own**: business rules (e.g. lockout prevention in `adminUserService`), orchestrating multiple repos, calling Supabase Admin API / Storage, audit logging via `auditService.writeAuditLog()`.
+- **Repositories own**: all SQL — parameterized `Prisma.sql` template tags only (no string interpolation), typed row interfaces, dynamic WHERE builders.
+- **`auditService`** (`backend/src/services/auditService.ts`) is a cross-cutting service — call it from any service that mutates data, never from a controller.
+
 ## Backend patterns
-- Route modules use DI: `createScanRoutes(authMiddleware)` pattern, mounted in `app.ts` under both `/api/v1/` (canonical) and `/api/` (backward-compat alias).
+- Route modules use DI factory: `createAuthRoutes(authMiddleware, jwtVerifier)` pattern — **no Service Locator** (`req.app.get(...)` is banned). Mount in `app.ts` under both `/api/v1/` (canonical) and `/api/` (backward-compat alias).
 - All list endpoints are paginated: use `parsePagination(req)` + `paginatedResult(data, total, page, limit)` from `backend/src/lib/pagination.ts`. Default page size 20, max 100. Response envelope: `{ data: T[], pagination: { page, limit, total, totalPages } }`.
 - Controllers use `asyncHandler` wrapper (`backend/src/middleware/asyncHandler.ts`) — no try/catch in controllers.
 - Errors use `AppError` factory (`backend/src/lib/AppError.ts`); centralized handler in `backend/src/middleware/errorHandler.ts` never leaks stack traces.
 - Backend validation: Zod middleware `validateBody`/`validateQuery` from `backend/src/middleware/validate.ts`; schemas live in `backend/src/schemas/index.ts`. All schemas use `.strict()` to block mass-assignment.
 - `backend/src/auth/jwt/verify.ts` wraps `supabase.auth.getUser()` in an 8s `Promise.race()` timeout — returns 503 instead of hanging.
+- Controllers that need injected dependencies use closure factories: `export function createVerifyTokenHandler(jwtVerifier: JWTVerifier) { return async (req, res) => { ... }; }`.
 
 ## Cross-component flow
 - Auth lifecycle: `web/src/contexts/AuthProvider.tsx` -> `core/auth/auth-service.ts` -> `core/auth/auth-repository.ts` -> Supabase.
@@ -48,7 +62,7 @@ Pages (UI state, JSX only)
 - Fresh install: `npm run install:all` (single workspace-aware `npm install` from root — no `--legacy-peer-deps` needed).
 - Web loop: `cd web && npm run dev` -> `npm run type-check` -> `npm run lint` -> `npm run build`.
 - Backend loop: `cd backend && npm run dev` -> `npm run type-check` -> `npm run build`.
-- Backend tests: `cd backend && npx jest` (config: `backend/jest.config.ts`). 5 suites, 65 tests. `app.ts` factory pattern enables Supertest without a live server.
+- Backend tests: `cd backend && npx jest` (config: `backend/jest.config.ts`). 7 suites, 79 tests. `app.ts` factory pattern enables Supertest without a live server.
 - DB ops: `npm run docker:prisma:migrate`, `npm run docker:prisma:studio`.
 - Generate audit report: `npm run docs:generate` (outputs HTML + PDF to `documentation/`).
 - After any `core/` or `backend/` change, run both `web` and `backend` type-checks — `web/tsconfig.json` includes `../core` so `core` type errors surface from web.
@@ -69,6 +83,7 @@ Pages (UI state, JSX only)
 ## Testing patterns
 - `backend/tests/__mocks__/prismaClient.ts` mocks all Prisma model methods as `jest.fn()`. Mapped via `moduleNameMapper` in `jest.config.ts` — **required because Prisma 7 generated client uses `import.meta.url` which breaks Jest CJS mode**.
 - New tests go in `backend/tests/`. Use `supertest(createApp())` for HTTP tests, import schemas directly for unit-level validation tests.
+- When testing routes that use DI factories, pass mock implementations directly: `createApp({ jwtVerifier: mockJwtVerifier })`.
 
 ## Gotchas
 - `web/tsconfig.json` includes `../core`; strict checks from `web` can surface `core` issues — fix them in `core/`.
@@ -76,3 +91,7 @@ Pages (UI state, JSX only)
 - `package-lock.json` root workspaces are `web`, `core`, `backend` — no `mobile` entry. If a stale `mobile` block reappears, delete it manually.
 - `medicalApi.ts` response unwrapping must handle both `{ data }` (paginated) and legacy `{ tests }`/`{ scans }`/`{ reservations }` shapes.
 - All dependency upgrade phases (Node 24, Supabase 2.98, TS 5.9, ESLint 9, Express 5, React 19, Prisma 7) are **complete**. Do not suggest patterns that conflict with these versions: no `defaultProps` on function components, no `next(err)` in Express route handlers.
+- **Storage preference race condition**: In `AuthProvider.tsx`, always set `localStorage.setItem(STORAGE_KEYS.USER_SESSION, ...)` **before** calling `authService.signIn()` or `signInWithGoogle()`. The Supabase SDK writes tokens during the call via the custom storage adapter; if the preference isn't set yet, it defaults to `localStorage`. Always `removeItem` the preference in all error/catch paths as rollback.
+- **`PublicOnlyRoute` storage check**: Only read `localStorage`/`sessionStorage` for a stored session token while `loading === true` (during initial auth hydration). Do NOT move the check outside the `if (loading)` block — that causes an infinite loader when a stale token remains after auth failure.
+- **`authService` singleton import in web pages**: Use `import('../../services/auth')` (the instantiated singleton), never `import('@core/auth/auth-service')` (that exports the class constructor). The path is relative to the page file's location.
+- **Service Locator is banned**: Never use `req.app.get('anyKey')` to retrieve dependencies at runtime. All dependencies must be injected at construction time via factory function parameters.

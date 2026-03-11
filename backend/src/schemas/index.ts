@@ -108,3 +108,97 @@ export const createReservationSchema = z.object({
 }).strict();
 
 export const updateReservationSchema = createReservationSchema.partial();
+
+/**
+ * Admin user management
+ */
+const accountTypeEnum = z.enum(['patient', 'doctor', 'pharmacist', 'admin']);
+const accountStatusEnum = z.enum(['pending', 'active', 'suspended', 'rejected']);
+
+export const adminListUsersQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20).optional(),
+  accountType: accountTypeEnum.optional(),
+  accountStatus: accountStatusEnum.optional(),
+  search: z.string().trim().min(1).max(120).optional(),
+}).strict();
+
+export const adminCreateUserSchema = z.object({
+  email: z.string().trim().email().max(254),
+  temporaryPassword: z.string().min(12).max(128),
+  accountType: z.enum(['doctor', 'pharmacist']),
+  firstName: z.string().trim().min(2).max(50),
+  lastName: z.string().trim().min(2).max(50),
+}).strict();
+
+export const adminUpdateUserStatusSchema = z.object({
+  accountStatus: accountStatusEnum,
+  reason: z.string().trim().min(3).max(500).optional(),
+}).strict().superRefine((value, ctx) => {
+  const reasonRequired = value.accountStatus === 'rejected' || value.accountStatus === 'suspended';
+  if (reasonRequired && !value.reason) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['reason'],
+      message: 'reason is required when status is rejected or suspended',
+    });
+  }
+});
+
+const auditActionEnum = z.enum([
+  'user.approve',
+  'user.suspend',
+  'user.reject',
+  'user.create',
+  'staff.review_approve',
+  'staff.review_reject',
+]);
+
+export const adminAuditLogQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20).optional(),
+  actorId: z.string().uuid().optional(),
+  action: auditActionEnum.optional(),
+  targetId: z.string().uuid().optional(),
+  from: z.string().datetime({ offset: true }).optional(),
+  to: z.string().datetime({ offset: true }).optional(),
+}).strict();
+
+/**
+ * Staff verification flow
+ */
+const storageBucketEnum = z.enum(['staff-documents', 'staff-selfies']);
+const verificationStatusEnum = z.enum(['unverified', 'under_review', 'verified', 'rejected']);
+
+export const staffVerificationUploadUrlSchema = z.object({
+  bucket: storageBucketEnum,
+  fileName: z.string().trim().min(3).max(140),
+}).strict();
+
+export const staffVerificationSubmitSchema = z.object({
+  governmentIdPath: z.string().trim().min(3).max(255),
+  certificateFilePath: z.string().trim().min(3).max(255),
+  selfieFilePath: z.string().trim().min(3).max(255),
+  specialty: z.string().trim().min(2).max(120),
+  affiliationName: z.string().trim().min(2).max(180),
+  affiliationType: z.enum(['hospital', 'clinic', 'pharmacy', 'other']),
+}).strict();
+
+export const adminVerificationQueueQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20).optional(),
+  status: verificationStatusEnum.default('under_review').optional(),
+}).strict();
+
+export const adminReviewVerificationSchema = z.object({
+  verificationStatus: z.enum(['verified', 'rejected']),
+  notes: z.string().trim().min(3).max(500).optional(),
+}).strict().superRefine((value, ctx) => {
+  if (value.verificationStatus === 'rejected' && !value.notes) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['notes'],
+      message: 'notes is required when rejecting verification',
+    });
+  }
+});

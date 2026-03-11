@@ -1,0 +1,56 @@
+.staff-verification-page {
+  display: grid;
+  gap: 16px;
+
+  .status-card,
+  .form-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    background: #fff;
+    padding: 16px;
+  }
+
+  .verification-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+  }
+
+  .form-control {
+    display: grid;
+    gap: 6px;
+  }
+
+  .form-control input,
+  .form-control select {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font: inherit;
+  }
+
+  .form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .status-chip {
+    text-transform: capitalize;
+    font-weight: 600;
+  }
+
+  .status-chip.unverified { color: #6b7280; }
+  .status-chip.under_review { color: #b45309; }
+  .status-chip.verified { color: #166534; }
+  .status-chip.rejected { color: #9f1239; }
+
+  .error-banner {
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+    color: #991b1b;
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+}

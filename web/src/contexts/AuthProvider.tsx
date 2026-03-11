@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext, defaultAuthState } from '@core/auth/auth-context';
 import { STORAGE_KEYS } from '@core/auth/constants';
 import { authService } from '../services/auth';
+import { completePasswordChange as completePasswordChangeApi } from '../services/authApi';
 import type { AuthState, SignUpCredentials, ProfileUpdateRequest } from '@core/auth/auth-types';
 
 interface AuthProviderProps {
@@ -29,9 +30,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (!mounted) return;
 
         if (sessionResponse.data) {
+          // Server-validate the user — catches deleted/banned accounts
           const userResponse = await authService.getUser();
+
+          if (!mounted) return;
+
+          if (userResponse.error || !userResponse.data) {
+            // The session token exists in storage but the server rejected it
+            // (user deleted, banned, or token revoked). Force a clean sign-out.
+            await authService.getSupabaseClient().auth.signOut();
+            if (mounted) {
+              setAuthState({ ...defaultAuthState, loading: false });
+            }
+            return;
+          }
+
           const profileResponse = await authService.getUserProfile(
-            sessionResponse.data.user.id
+            userResponse.data.id
           );
 
           if (mounted) {
@@ -53,6 +68,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       } catch (error) {
         if (mounted) {
+          // On any unexpected error, clear state so the UI doesn't show a
+          // phantom session from localStorage.
+          try {
+            await authService.getSupabaseClient().auth.signOut();
+          } catch { /* best-effort cleanup */ }
+
           setAuthState({
             ...defaultAuthState,
             loading: false,
@@ -97,23 +118,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setAuthState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
+      // Set storage preference BEFORE signIn so the Supabase SDK writes
+      // tokens to the correct store (sessionStorage vs localStorage).
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(STORAGE_KEYS.USER_SESSION, rememberMe ? 'remember-30d' : 'session-only');
+      }
+
       const response = await authService.signIn({ email, password, captchaToken, rememberMe });
 
       if (response.error) {
+        // Undo preference on failure so a stale value doesn't affect the next attempt
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem(STORAGE_KEYS.USER_SESSION);
+        }
         setAuthState((prev) => ({
           ...prev,
           loading: false,
           error: response.error,
         }));
       } else {
-        if (typeof window !== 'undefined') {
-          window.localStorage.setItem(STORAGE_KEYS.USER_SESSION, rememberMe ? 'remember-30d' : 'session-only');
-        }
         // Clear loading — session state will be updated by onAuthStateChange
         setAuthState((prev) => ({ ...prev, loading: false }));
       }
       // State will be updated by onAuthStateChange
     } catch (error) {
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(STORAGE_KEYS.USER_SESSION);
+      }
       setAuthState((prev) => ({
         ...prev,
         loading: false,
@@ -126,9 +157,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setAuthState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
+      // Set preference before the OAuth redirect so the returning callback
+      // writes tokens to sessionStorage (session-only by default).
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(STORAGE_KEYS.USER_SESSION, 'session-only');
+      }
+
       const response = await authService.signInWithGoogle();
 
       if (response.error) {
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem(STORAGE_KEYS.USER_SESSION);
+        }
         setAuthState((prev) => ({
           ...prev,
           loading: false,
@@ -137,12 +177,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(STORAGE_KEYS.USER_SESSION, 'session-only');
-      }
-
       // OAuth redirects away; keep loading state until redirect occurs
     } catch (error) {
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem(STORAGE_KEYS.USER_SESSION);
+      }
       setAuthState((prev) => ({
         ...prev,
         loading: false,
@@ -245,6 +284,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       const response = await authService.updatePassword({ newPassword });
+
+      if (!response.error) {
+        await completePasswordChangeApi();
+
+        // Force refresh to fetch JWT claims with must_change_password=false.
+        const { data: refreshed, error: refreshError } = await authService
+          .getSupabaseClient()
+          .auth.refreshSession();
+
+        if (refreshError) {
+          throw refreshError;
+        }
+
+        const refreshedUser = refreshed.session?.user ?? response.data;
+        const refreshedSession = refreshed.session;
+
+        let refreshedProfile = null;
+        if (refreshedUser) {
+          const profileResponse = await authService.getUserProfile(refreshedUser.id);
+          refreshedProfile = profileResponse.data;
+        }
+
+        setAuthState((prev) => ({
+          ...prev,
+          user: refreshedUser,
+          session: refreshedSession,
+          profile: refreshedProfile,
+          loading: false,
+          error: null,
+        }));
+        return;
+      }
 
       setAuthState((prev) => ({
         ...prev,

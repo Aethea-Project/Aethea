@@ -7,6 +7,7 @@
 import { Router, RequestHandler } from 'express';
 import { getProfile } from '../controllers/users.controller.js';
 import { requireLocalUser } from '../lib/authMiddleware.js';
+import { requireActiveAccount, requirePasswordChanged, requireTrustedClaims } from '../middleware/requireAccountType.js';
 
 /**
  * Build user routes. Accepts authMiddleware as a parameter so it can be
@@ -14,9 +15,10 @@ import { requireLocalUser } from '../lib/authMiddleware.js';
  */
 export const createUserRoutes = (authMiddleware: RequestHandler): Router => {
   const router = Router();
+  const protectedAuth = [authMiddleware, requireTrustedClaims, requireActiveAccount, requirePasswordChanged, requireLocalUser];
 
   // GET /api/users/profile
-  router.get('/profile', authMiddleware, requireLocalUser, getProfile);
+  router.get('/profile', protectedAuth, getProfile);
 
   return router;
 };

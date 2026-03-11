@@ -7,13 +7,14 @@ import { createReservation, listReservations, updateReservation } from '../contr
 import { validateBody, validateQuery } from '../middleware/validate.js';
 import { asyncHandler } from '../middleware/asyncHandler.js';
 import { requireLocalUser } from '../lib/authMiddleware.js';
+import { requireActiveAccount, requirePasswordChanged, requireTrustedClaims } from '../middleware/requireAccountType.js';
 import { createReservationSchema, updateReservationSchema, paginationSchema } from '../schemas/index.js';
 
 export const createReservationRoutes = (authMiddleware: RequestHandler): Router => {
   const router = Router();
 
-  // All routes: JWT auth → local user resolution → handler
-  const auth = [authMiddleware, requireLocalUser];
+  // Fail fast on auth claims/status before touching Prisma.
+  const auth = [authMiddleware, requireTrustedClaims, requireActiveAccount, requirePasswordChanged, requireLocalUser];
 
   router.get('/', auth, validateQuery(paginationSchema), asyncHandler(listReservations));
   router.post('/', auth, validateBody(createReservationSchema), asyncHandler(createReservation));
