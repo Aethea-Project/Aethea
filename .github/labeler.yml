@@ -14,13 +14,13 @@
   - changed-files:
       - any-glob-to-any-file: '.github/**'
       - any-glob-to-any-file: 'docker-compose.yml'
-  - any-glob-to-any-file: 'scripts/**'
+      - any-glob-to-any-file: 'scripts/**'
 
 'type: chore':
   - changed-files:
       - any-glob-to-any-file: '**/package.json'
       - any-glob-to-any-file: '**/package-lock.json'
-  - any-glob-to-any-file: 'scripts/**'
+      - any-glob-to-any-file: 'scripts/**'
 
 'area: database':
   - changed-files:
@@ -36,6 +36,6 @@
 
 'type: documentation':
   - changed-files:
-  - any-glob-to-any-file: '**/*.md'
-  - any-glob-to-any-file: 'docs/**'
-  - any-glob-to-any-file: '.github/**/*.md'
+      - any-glob-to-any-file: '**/*.md'
+      - any-glob-to-any-file: 'docs/**'
+      - any-glob-to-any-file: '.github/**/*.md'

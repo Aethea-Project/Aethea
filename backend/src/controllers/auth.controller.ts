@@ -9,6 +9,7 @@
 import { Request, Response } from 'express';
 import { AppError } from '../lib/AppError.js';
 import logger from '../lib/logger.js';
+import prisma from '../lib/prisma.js';
 import {
   createStepUpChallenge,
   getSessionStatus,
@@ -17,39 +18,43 @@ import {
   revokeUserSession,
   verifyStepUpChallenge,
 } from '../lib/sessionRegistry.js';
+import type { JWTVerifier } from '../auth/jwt/verify.js';
 
 /**
- * POST /api/auth/verify
- * Verifies JWT token from Authorization header using Supabase
+ * Creates a verifyToken handler with the jwtVerifier injected via closure,
+ * eliminating the Service Locator (req.app.get) anti-pattern.
  */
-export const verifyToken = async (req: Request, res: Response): Promise<void> => {
-  const jwtVerifier = req.app.get('jwtVerifier');
+export const createVerifyTokenHandler = (jwtVerifier: JWTVerifier | null) => {
+  return async (req: Request, res: Response): Promise<void> => {
+    if (!jwtVerifier) {
+      throw AppError.unauthorized('Authentication service unavailable');
+    }
 
-  if (!jwtVerifier) {
-    throw AppError.unauthorized('Authentication service unavailable');
-  }
+    const token = jwtVerifier.extractTokenFromHeader(req.headers.authorization);
 
-  const token = jwtVerifier.extractTokenFromHeader(req.headers.authorization);
+    if (!token) {
+      throw AppError.unauthorized('No authorization token provided');
+    }
 
-  if (!token) {
-    throw AppError.unauthorized('No authorization token provided');
-  }
+    const verification = await jwtVerifier.verifyToken(token);
 
-  const verification = await jwtVerifier.verifyToken(token);
+    if (!verification.valid) {
+      logger.warn({ error: verification.error }, 'Token verification failed');
+      throw AppError.unauthorized(verification.error || 'Invalid token');
+    }
 
-  if (!verification.valid) {
-    logger.warn({ error: verification.error }, 'Token verification failed');
-    throw AppError.unauthorized(verification.error || 'Invalid token');
-  }
-
-  res.json({
-    valid: true,
-    user: {
-      id: verification.user.id,
-      email: verification.user.email ?? undefined,
-      sessionId: verification.payload?.session_id,
-    },
-  });
+    res.json({
+      valid: true,
+      user: {
+        id: verification.user.id,
+        email: verification.user.email ?? undefined,
+        sessionId: verification.payload?.session_id,
+        accountType: verification.payload?.account_type,
+        accountStatus: verification.payload?.account_status,
+        mustChangePassword: verification.payload?.must_change_password,
+      },
+    });
+  };
 };
 
 /**
@@ -197,4 +202,25 @@ export const verifyStepUp = async (req: Request, res: Response): Promise<void> =
   res.json({
     verified: true,
   });
+};
+
+/**
+ * POST /api/auth/password/complete
+ * Clears must_change_password after the user has successfully updated
+ * their password through Supabase Auth.
+ */
+export const completePasswordChange = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.user?.id;
+  if (!userId) {
+    throw AppError.unauthorized('No authenticated user');
+  }
+
+  await prisma.$executeRaw`
+    UPDATE public.user_accounts
+    SET must_change_password = FALSE,
+        updated_at = now()
+    WHERE id = ${userId}::uuid
+  `;
+
+  res.json({ success: true });
 };

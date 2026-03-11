@@ -8,6 +8,8 @@ import React, { useState, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthProvider';
 import { useAuth } from '@core/auth/useAuth';
+import { decodeJWT } from '@core/auth/token-manager';
+import type { AccountType, AccountStatus } from '@core/auth/auth-types';
 import { LoginForm } from './components/LoginForm';
 import { RegisterForm } from './components/RegisterForm';
 import { ForgotPasswordForm } from './components/ForgotPasswordForm';
@@ -31,6 +33,35 @@ const DoctorChatPage = lazy(() => import('./pages/DoctorChat'));
 const ProfilePage = lazy(() => import('./pages/Profile'));
 const TestMessageEmailPage = lazy(() => import('./pages/TestMessageEmail'));
 const AuthConfirmPage = lazy(() => import('./pages/AuthConfirm'));
+const AdminUsersPage = lazy(() => import('./pages/AdminUsers'));
+const StaffVerificationPage = lazy(() => import('./pages/StaffVerification'));
+
+const getAccountTypeFromSession = (accessToken?: string): AccountType | null => {
+  if (!accessToken) return null;
+  const decoded = decodeJWT(accessToken);
+  if (!decoded || typeof decoded !== 'object') return null;
+  const claim = (decoded as { account_type?: unknown }).account_type;
+  return claim === 'patient' || claim === 'doctor' || claim === 'pharmacist' || claim === 'admin'
+    ? claim
+    : null;
+};
+
+const getAccountStatusFromSession = (accessToken?: string): AccountStatus | null => {
+  if (!accessToken) return null;
+  const decoded = decodeJWT(accessToken);
+  if (!decoded || typeof decoded !== 'object') return null;
+  const claim = (decoded as { account_status?: unknown }).account_status;
+  return claim === 'pending' || claim === 'active' || claim === 'suspended' || claim === 'rejected'
+    ? claim
+    : null;
+};
+
+const getMustChangePasswordFromSession = (accessToken?: string): boolean => {
+  if (!accessToken) return false;
+  const decoded = decodeJWT(accessToken);
+  if (!decoded || typeof decoded !== 'object') return false;
+  return (decoded as { must_change_password?: unknown }).must_change_password === true;
+};
 
 const RootRoute = () => {
   const location = useLocation();
@@ -51,6 +82,7 @@ const RootRoute = () => {
 /* ── Protected Route — redirects to /login if not authenticated ── */
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, session, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return <PageLoader />;
@@ -60,17 +92,70 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/login" replace />;
   }
 
+  const accountType = getAccountTypeFromSession(session.access_token);
+  const accountStatus = getAccountStatusFromSession(session.access_token);
+  const mustChangePassword = getMustChangePasswordFromSession(session.access_token);
+
+  const isPendingStaff =
+    (accountType === 'doctor' || accountType === 'pharmacist') && accountStatus === 'pending';
+
+  if (isPendingStaff && location.pathname !== '/staff-verification') {
+    return <Navigate to="/staff-verification" replace />;
+  }
+
+  // Admin accounts with must_change_password=true are locked out of all routes
+  // until they change their password on the Profile page.
+  if (accountType === 'admin' && mustChangePassword && location.pathname !== '/profile') {
+    return <Navigate to="/profile" replace />;
+  }
+
   return <>{children}</>;
 };
 
 const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, session, loading } = useAuth();
 
+  // While AuthProvider is still initializing (loading=true), check storage
+  // synchronously to decide whether to show a loader or the public page.
+  // This prevents the login form from flashing during back/forward navigation
+  // when a valid session exists but hasn't hydrated yet.
+  if (loading) {
+    const hasStoredSession = typeof window !== 'undefined' &&
+      (window.localStorage.getItem('medical-platform-auth') != null ||
+       window.sessionStorage.getItem('medical-platform-auth') != null);
+    // Only block with loader if there's actually a token to hydrate;
+    // otherwise fall through so first-time visitors see the form immediately.
+    if (hasStoredSession) {
+      return <PageLoader />;
+    }
+  }
+
+  if (user && session) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+const RoleRoute = ({
+  children,
+  allowed,
+}: {
+  children: React.ReactNode;
+  allowed: AccountType[];
+}) => {
+  const { user, session, loading } = useAuth();
+
   if (loading) {
     return <PageLoader />;
   }
 
-  if (user && session) {
+  if (!user || !session) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const accountType = getAccountTypeFromSession(session.access_token);
+  if (!accountType || !allowed.includes(accountType)) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -197,7 +282,6 @@ const HeroIllustration = () => (
 
 const LandingPage = () => {
   const { user, session } = useAuth();
-  const signInPath = user && session ? '/dashboard' : '/login';
   const signupPath = user && session ? '/dashboard' : '/register';
 
   const trustIndicators = [
@@ -289,8 +373,21 @@ const LandingPage = () => {
             <a href="#about">About</a>
           </nav>
           <div className="landing-nav-auth">
-            <Link to={signInPath} className="landing-cta-btn-outline">Sign In</Link>
-            <Link to={signupPath} className="landing-cta-btn">Get Started</Link>
+            {user && session ? (
+              <>
+                <Link to="/dashboard" className="landing-cta-btn">Go to Dashboard</Link>
+                <Link to="/profile" className="landing-profile-link" aria-label="Your profile">
+                  <div className="landing-profile-avatar">
+                    {user.email?.[0]?.toUpperCase() ?? 'U'}
+                  </div>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="landing-cta-btn-outline">Sign In</Link>
+                <Link to="/register" className="landing-cta-btn">Get Started</Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -462,7 +559,9 @@ const SidebarItem = ({ to, icon: Icon, label }: { to: string; icon: React.Compon
 };
 
 const Sidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  const { signOut } = useAuth();
+  const { signOut, session } = useAuth();
+  const accountType = getAccountTypeFromSession(session?.access_token);
+  const isAdmin = accountType === 'admin';
 
   return (
     <>
@@ -495,6 +594,18 @@ const Sidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
             <SidebarItem to="/recovery" icon={RecoveryIcon} label="Recovery" />
             <SidebarItem to="/chat" icon={ChatIcon} label="Consultations" />
           </div>
+          {(accountType === 'doctor' || accountType === 'pharmacist') && (
+            <div className="nav-group" role="group" aria-labelledby="nav-staff">
+              <span className="nav-label" id="nav-staff">Staff</span>
+              <SidebarItem to="/staff-verification" icon={ProfileIcon} label="Verification" />
+            </div>
+          )}
+          {isAdmin && (
+            <div className="nav-group" role="group" aria-labelledby="nav-admin">
+              <span className="nav-label" id="nav-admin">Administration</span>
+              <SidebarItem to="/admin/users" icon={DoctorIcon} label="Staff Console" />
+            </div>
+          )}
         </nav>
         <div className="sidebar-footer">
           <SidebarItem to="/profile" icon={ProfileIcon} label="My Profile" />
@@ -810,6 +921,14 @@ function AppRoutes() {
         <Route path="/recovery" element={<ProtectedRoute><PageLayout><RecoveryAssistantPage /></PageLayout></ProtectedRoute>} />
         <Route path="/chat" element={<ProtectedRoute><PageLayout><DoctorChatPage /></PageLayout></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><PageLayout><ProfilePage /></PageLayout></ProtectedRoute>} />
+        <Route
+          path="/admin/users"
+          element={<RoleRoute allowed={['admin']}><PageLayout><AdminUsersPage /></PageLayout></RoleRoute>}
+        />
+        <Route
+          path="/staff-verification"
+          element={<RoleRoute allowed={['doctor', 'pharmacist']}><PageLayout><StaffVerificationPage /></PageLayout></RoleRoute>}
+        />
 
         {/* ── Fallback ── */}
         <Route path="*" element={<Navigate to="/" replace />} />

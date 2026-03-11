@@ -9,7 +9,14 @@ declare global {
   namespace Express {
     interface Request {
       /** Supabase user from JWT verification (set by authMiddleware) */
-      user?: { id: string; email?: string; sessionId?: string };
+      user?: {
+        id: string;
+        email?: string;
+        sessionId?: string;
+        account_type?: 'patient' | 'doctor' | 'pharmacist' | 'admin';
+        account_status?: 'pending' | 'active' | 'suspended' | 'rejected';
+        must_change_password?: boolean;
+      };
       /** Local Prisma user record (set by requireLocalUser middleware) */
       localUser?: User;
     }

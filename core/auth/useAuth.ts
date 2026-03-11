@@ -1,6 +1,6 @@
 /**
- * Custom Auth Hook - Shared across mobile and web
- * Provides easy access to auth context
+ * Custom auth hook for the web app.
+ * Provides easy access to auth context.
  */
 
 import { useContext } from 'react';

@@ -355,6 +355,12 @@
   border: 1px solid #fecaca;
 }
 
+.profile-toast-warning {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
 /* ── Skeleton Loading ────────────────────── */
 
 .profile-skeleton-header {
@@ -512,6 +518,79 @@
   justify-content: flex-end;
   padding: 1rem 1.5rem 1.25rem;
   border-top: 1px solid #f1f5f9;
+}
+
+/* ── Password input row with toggle ──────── */
+
+.modal-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  position: relative;
+}
+
+.modal-input-row input {
+  flex: 1;
+  padding-right: 2.5rem;
+}
+
+.modal-toggle-pw {
+  position: absolute;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.6;
+  transition: opacity 150ms;
+}
+
+.modal-toggle-pw:hover {
+  opacity: 1;
+}
+
+/* ── Password strength checklist ─────────── */
+
+.modal-body .password-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0.4rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.modal-body .password-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  font-weight: 500;
+  line-height: 1.4;
+  transition: color 200ms ease;
+}
+
+.modal-body .password-checklist li.met {
+  color: #059669;
+}
+
+.modal-body .password-checklist .check-icon {
+  font-size: 0.72rem;
+  width: 1rem;
+  text-align: center;
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.modal-body .password-checklist li:not(.met) .check-icon {
+  color: #cbd5e1;
+}
+
+.modal-body .password-checklist li.met .check-icon {
+  color: #059669;
 }
 
 /* ── Responsive ──────────────────────────── */
