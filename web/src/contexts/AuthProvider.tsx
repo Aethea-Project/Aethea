@@ -137,6 +137,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           error: response.error,
         }));
       } else {
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(STORAGE_KEYS.USER_SESSION, rememberMe ? 'remember-30d' : 'session-only');
+        }
         // Clear loading — session state will be updated by onAuthStateChange
         setAuthState((prev) => ({ ...prev, loading: false }));
       }
@@ -182,6 +185,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (typeof window !== 'undefined') {
         window.localStorage.removeItem(STORAGE_KEYS.USER_SESSION);
       }
+      setAuthState((prev) => ({
+        ...prev,
+        loading: false,
+        error: error instanceof Error ? { message: error.message } : null,
+      }));
+    }
+  }, []);
+
+  const signInWithGoogle = useCallback(async () => {
+    setAuthState((prev) => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const response = await authService.signInWithGoogle();
+
+      if (response.error) {
+        setAuthState((prev) => ({
+          ...prev,
+          loading: false,
+          error: response.error,
+        }));
+        return;
+      }
+
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(STORAGE_KEYS.USER_SESSION, 'session-only');
+      }
+
+      // OAuth redirects away; keep loading state until redirect occurs
+    } catch (error) {
       setAuthState((prev) => ({
         ...prev,
         loading: false,
