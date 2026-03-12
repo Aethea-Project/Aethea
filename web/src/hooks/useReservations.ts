@@ -1,25 +1,25 @@
-/**
- * useReservations — Use-case hook for reservation data and mutations
+﻿/**
+ * useReservations - Use-case hook for reservation data and mutations
  *
  * Owns:
  *   - fetch lifecycle (loading, error, data)
- *   - createReservation mutation (calls API then auto-refetches)
- *   - updateStatus mutation (calls API then auto-refetches)
+ *   - book mutation (calls API then auto-refetches)
+ *   - cancel mutation (calls API then auto-refetches)
  *
  * Does NOT own: form state, sorted/filtered views, UI selection (those stay in the page)
  *
- * Architecture layer: Pages → [this hook] → medicalApi → apiClient
+ * Architecture layer: Pages -> [this hook] -> medicalApi -> apiClient
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { medicalApi, Reservation, ReservationPayload, ReservationStatus } from '../services/medicalApi';
+import { medicalApi, Reservation, BookReservationPayload } from '../services/medicalApi';
 
 export interface UseReservationsResult {
   reservations: Reservation[];
   loading: boolean;
   error: string | null;
-  createReservation: (payload: ReservationPayload) => Promise<void>;
-  updateStatus: (id: string, status: ReservationStatus) => Promise<void>;
+  book: (payload: BookReservationPayload) => Promise<void>;
+  cancel: (id: string) => Promise<void>;
 }
 
 export function useReservations(): UseReservationsResult {
@@ -44,15 +44,15 @@ export function useReservations(): UseReservationsResult {
     fetchData();
   }, [fetchData]);
 
-  const createReservation = useCallback(async (payload: ReservationPayload): Promise<void> => {
-    await medicalApi.createReservation(payload);
+  const book = useCallback(async (payload: BookReservationPayload): Promise<void> => {
+    await medicalApi.bookReservation(payload);
     await fetchData();
   }, [fetchData]);
 
-  const updateStatus = useCallback(async (id: string, status: ReservationStatus): Promise<void> => {
-    await medicalApi.updateReservation(id, { status });
+  const cancel = useCallback(async (id: string): Promise<void> => {
+    await medicalApi.cancelReservation(id);
     await fetchData();
   }, [fetchData]);
 
-  return { reservations, loading, error, createReservation, updateStatus };
+  return { reservations, loading, error, book, cancel };
 }

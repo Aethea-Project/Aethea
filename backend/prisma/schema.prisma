@@ -36,17 +36,33 @@ enum ReservationStatus {
   no_show
 }
 
+enum AccountType {
+  patient
+  doctor
+  pharmacist
+  admin
+}
+
+enum NotificationType {
+  slot_available
+  reservation_confirmed
+  reservation_cancelled
+}
+
 model User {
-  id           String        @id @db.Uuid
-  email        String        @unique @db.Text
-  firstName    String?       @db.VarChar(50)
-  lastName     String?       @db.VarChar(50)
-  createdAt    DateTime      @default(now()) @db.Timestamptz(6)
-  updatedAt    DateTime      @updatedAt @db.Timestamptz(6)
-  sessions     UserSession[]
-  labTests     LabTest[]
-  scans        Scan[]
-  reservations Reservation[]
+  id            String         @id @db.Uuid
+  email         String         @unique @db.Text
+  firstName     String?        @db.VarChar(50)
+  lastName      String?        @db.VarChar(50)
+  accountType   AccountType    @default(patient)
+  createdAt     DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime       @updatedAt @db.Timestamptz(6)
+  sessions      UserSession[]
+  labTests      LabTest[]
+  scans         Scan[]
+  reservations  Reservation[]
+  doctorProfile DoctorProfile?
+  notifications Notification[]
 
   @@map("users")
 }
@@ -117,20 +133,80 @@ model Scan {
 }
 
 model Reservation {
-  id          String            @id @default(uuid()) @db.Uuid
-  userId      String            @db.Uuid
-  doctorName  String            @db.VarChar(120)
-  specialty   String            @db.VarChar(120)
-  reason      String
-  location    String            @db.VarChar(180)
-  startAt     DateTime          @db.Timestamptz(6)
-  endAt       DateTime?         @db.Timestamptz(6)
-  status      ReservationStatus @default(scheduled)
-  notes       String?
-  createdAt   DateTime          @default(now()) @db.Timestamptz(6)
-  updatedAt   DateTime          @updatedAt @db.Timestamptz(6)
-  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String            @id @default(uuid()) @db.Uuid
+  userId           String            @db.Uuid
+  doctorScheduleId String            @db.Uuid
+  slotIndex        Int
+  startAt          DateTime          @db.Timestamptz(6)
+  endAt            DateTime          @db.Timestamptz(6)
+  reason           String
+  status           ReservationStatus @default(scheduled)
+  notes            String?
+  shareHealthData  Boolean           @default(false)
+  notifyOnCancel   Boolean           @default(false)
+  cancelDeadlineAt DateTime          @db.Timestamptz(6)
+  createdAt        DateTime          @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime          @updatedAt @db.Timestamptz(6)
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  doctorSchedule   DoctorSchedule    @relation(fields: [doctorScheduleId], references: [id], onDelete: Cascade)
 
+  @@unique([doctorScheduleId, slotIndex])
   @@index([userId, startAt])
   @@map("reservations")
+}
+
+model DoctorProfile {
+  id          String           @id @default(uuid()) @db.Uuid
+  userId      String           @unique @db.Uuid
+  firstName   String           @db.VarChar(50)
+  lastName    String           @db.VarChar(50)
+  specialty   String           @db.VarChar(120)
+  bio         String?
+  clinicName  String?          @db.VarChar(200)
+  address     String?          @db.VarChar(300)
+  city        String?          @db.VarChar(100)
+  photoUrl    String?          @db.Text
+  consultFee  Int?
+  languages   String[]
+  verified    Boolean          @default(false)
+  createdAt   DateTime         @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime         @updatedAt @db.Timestamptz(6)
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schedules   DoctorSchedule[]
+
+  @@map("doctor_profiles")
+}
+
+model DoctorSchedule {
+  id               String        @id @default(uuid()) @db.Uuid
+  doctorProfileId  String        @db.Uuid
+  scheduleDate     DateTime      @db.Date
+  startAt          DateTime      @db.Timestamptz(6)
+  endAt            DateTime      @db.Timestamptz(6)
+  slotDurationMins Int
+  maxPatients      Int
+  isPublished      Boolean       @default(true)
+  createdAt        DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime      @updatedAt @db.Timestamptz(6)
+  doctorProfile    DoctorProfile @relation(fields: [doctorProfileId], references: [id], onDelete: Cascade)
+  reservations     Reservation[]
+
+  @@index([scheduleDate])
+  @@index([doctorProfileId, scheduleDate])
+  @@map("doctor_schedules")
+}
+
+model Notification {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @db.Uuid
+  type      NotificationType
+  title     String           @db.VarChar(200)
+  body      String
+  isRead    Boolean          @default(false)
+  metadata  Json?
+  createdAt DateTime         @default(now()) @db.Timestamptz(6)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+  @@map("notifications")
 }

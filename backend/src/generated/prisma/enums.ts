@@ -48,3 +48,22 @@ export const ReservationStatus = {
 } as const
 
 export type ReservationStatus = (typeof ReservationStatus)[keyof typeof ReservationStatus]
+
+
+export const AccountType = {
+  patient: 'patient',
+  doctor: 'doctor',
+  pharmacist: 'pharmacist',
+  admin: 'admin'
+} as const
+
+export type AccountType = (typeof AccountType)[keyof typeof AccountType]
+
+
+export const NotificationType = {
+  slot_available: 'slot_available',
+  reservation_confirmed: 'reservation_confirmed',
+  reservation_cancelled: 'reservation_cancelled'
+} as const
+
+export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]

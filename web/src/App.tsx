@@ -35,6 +35,7 @@ const TestMessageEmailPage = lazy(() => import('./pages/TestMessageEmail'));
 const AuthConfirmPage = lazy(() => import('./pages/AuthConfirm'));
 const AdminUsersPage = lazy(() => import('./pages/AdminUsers'));
 const StaffVerificationPage = lazy(() => import('./pages/StaffVerification'));
+const DoctorReservationsPage = lazy(() => import('./pages/DoctorReservations'));
 
 const getAccountTypeFromSession = (accessToken?: string): AccountType | null => {
   if (!accessToken) return null;
@@ -598,6 +599,9 @@ const Sidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
             <div className="nav-group" role="group" aria-labelledby="nav-staff">
               <span className="nav-label" id="nav-staff">Staff</span>
               <SidebarItem to="/staff-verification" icon={ProfileIcon} label="Verification" />
+              {accountType === 'doctor' && (
+                <SidebarItem to="/doctor-reservations" icon={CalendarIcon} label="My Schedule" />
+              )}
             </div>
           )}
           {isAdmin && (
@@ -928,6 +932,10 @@ function AppRoutes() {
         <Route
           path="/staff-verification"
           element={<RoleRoute allowed={['doctor', 'pharmacist']}><PageLayout><StaffVerificationPage /></PageLayout></RoleRoute>}
+        />
+        <Route
+          path="/doctor-reservations"
+          element={<RoleRoute allowed={['doctor', 'admin']}><PageLayout><DoctorReservationsPage /></PageLayout></RoleRoute>}
         />
 
         {/* ── Fallback ── */}
