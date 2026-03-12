@@ -51,11 +51,16 @@ export const validateBody = (schema: ZodSchema) => {
 
 /**
  * Validate query params against a Zod schema.
+ *
+ * NOTE: Express 5 defines `req.query` as a getter-only property — direct
+ * assignment (`req.query = ...`) throws a TypeError at runtime. We use
+ * Object.assign to mutate the existing query object in-place instead.
  */
 export const validateQuery = (schema: ZodSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
-      req.query = schema.parse(req.query) as typeof req.query;
+      const parsed = schema.parse(req.query);
+      Object.assign(req.query, parsed);
       next();
     } catch (err) {
       if (err instanceof ZodError) {
