@@ -97,17 +97,73 @@ export const updateScanSchema = createScanSchema.partial();
 const reservationStatusEnum = z.enum(['scheduled', 'confirmed', 'in_progress', 'completed', 'cancelled', 'no_show']);
 
 export const createReservationSchema = z.object({
-  doctorName: z.string().min(2).max(120),
-  specialty: z.string().min(2).max(120),
-  reason: z.string().min(2),
-  location: z.string().min(2).max(180),
-  startAt: z.string().datetime(),
-  endAt: z.string().datetime().optional(),
-  status: reservationStatusEnum.default('scheduled').optional(),
+  doctorScheduleId: z.string().uuid(),
+  slotIndex: z.number().int().min(0),
+  reason: z.string().min(2).max(500),
+  notes: z.string().max(500).optional(),
+  shareHealthData: z.boolean().default(false),
+  notifyOnCancel: z.boolean().default(false),
+}).strict();
+
+export const updateReservationStatusSchema = z.object({
+  status: reservationStatusEnum,
   notes: z.string().max(500).optional(),
 }).strict();
 
-export const updateReservationSchema = createReservationSchema.partial();
+/**
+ * Doctor discovery query
+ */
+export const doctorListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20).optional(),
+  specialty: z.string().trim().min(1).max(120).optional(),
+  city: z.string().trim().min(1).max(100).optional(),
+  search: z.string().trim().min(1).max(120).optional(),
+}).strict();
+
+/**
+ * Doctor schedule query (list open slots for a doctor)
+ */
+export const scheduleQuerySchema = z.object({
+  from: z.string().datetime({ offset: true }).optional(),
+  to: z.string().datetime({ offset: true }).optional(),
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20).optional(),
+}).strict();
+
+/**
+ * Doctor profile — create / update (doctor-side)
+ */
+export const upsertDoctorProfileSchema = z.object({
+  firstName: z.string().trim().min(2).max(50),
+  lastName: z.string().trim().min(2).max(50),
+  specialty: z.string().trim().min(2).max(120),
+  bio: z.string().trim().max(1000).optional(),
+  clinicName: z.string().trim().max(200).optional(),
+  address: z.string().trim().max(300).optional(),
+  city: z.string().trim().max(100).optional(),
+  consultFee: z.number().int().min(0).max(100_000).optional(),
+  languages: z.array(z.string().trim().min(1).max(40)).max(10).optional(),
+}).strict();
+
+/**
+ * Doctor schedule — create
+ */
+export const createDoctorScheduleSchema = z.object({
+  scheduleDate: z.string().date(),  // 'YYYY-MM-DD'
+  startAt: z.string().datetime({ offset: true }),
+  endAt: z.string().datetime({ offset: true }),
+  slotDurationMins: z.number().int().min(10).max(120),
+  maxPatients: z.number().int().min(1).max(50),
+  isPublished: z.boolean().default(true).optional(),
+}).strict();
+
+/**
+ * Notifications — mark as read
+ */
+export const markNotificationsReadSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(100),
+}).strict();
 
 /**
  * Admin user management
