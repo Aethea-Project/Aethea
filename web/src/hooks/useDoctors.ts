@@ -56,6 +56,7 @@ export interface UseDoctorSchedulesResult {
   total: number;
   loading: boolean;
   error: string | null;
+  refresh: () => void;
 }
 
 export function useDoctorSchedules(doctorId: string): UseDoctorSchedulesResult {
@@ -64,31 +65,29 @@ export function useDoctorSchedules(doctorId: string): UseDoctorSchedulesResult {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     if (!doctorId) return;
-    let cancelled = false;
     setLoading(true);
     medicalApi
       .fetchDoctorSchedules(doctorId)
       .then((result) => {
-        if (!cancelled) {
-          setSchedules(result.schedules);
-          setTotal(result.total);
-          setError(null);
-        }
+        setSchedules(result.schedules);
+        setTotal(result.total);
+        setError(null);
       })
       .catch((err) => {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Failed to load schedules');
-        }
+        setError(err instanceof Error ? err.message : 'Failed to load schedules');
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       });
-    return () => { cancelled = true; };
   }, [doctorId]);
 
-  return { schedules, total, loading, error };
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return { schedules, total, loading, error, refresh: load };
 }
 
 /* ─── Doctor's own schedule-slots view hook ─── */

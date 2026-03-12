@@ -14,27 +14,21 @@ export const BookingModal: React.FC<BookingModalProps> = ({ doctor, onClose, onB
   const { book } = useReservations();
 
   const [selectedSchedule, setSelectedSchedule] = useState<DoctorSchedule | null>(null);
-  const [slotIndex, setSlotIndex] = useState<number | null>(null);
   const [reason, setReason] = useState('');
   const [shareHealthData, setShareHealthData] = useState(false);
   const [notifyOnCancel, setNotifyOnCancel] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const availableSlots = selectedSchedule
-    ? Array.from({ length: selectedSchedule.maxPatients }, (_, i) => i)
-    : [];
-  const bookedCount = selectedSchedule?.bookedCount ?? 0;
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedSchedule || slotIndex === null || !reason.trim()) return;
+    if (!selectedSchedule || !reason.trim()) return;
     setSubmitting(true);
     setSubmitError(null);
     try {
       await book({
         doctorScheduleId: selectedSchedule.id,
-        slotIndex,
+        slotIndex: selectedSchedule.bookedCount,
         reason: reason.trim(),
         shareHealthData,
         notifyOnCancel,
@@ -79,7 +73,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({ doctor, onClose, onB
                   type="button"
                   className={`schedule-option${selectedSchedule?.id === sch.id ? ' active' : ''}`}
                   disabled={full}
-                  onClick={() => { setSelectedSchedule(sch); setSlotIndex(null); }}
+                  onClick={() => { setSelectedSchedule(sch); }}
                 >
                   {formatDate(sch.scheduleDate)} — {formatTime(sch.startAt)} to {formatTime(sch.endAt)}
                   <span className="slot-count">
@@ -92,27 +86,18 @@ export const BookingModal: React.FC<BookingModalProps> = ({ doctor, onClose, onB
 
           {selectedSchedule && (
             <div className="slot-selection">
-              <h4>Select Slot ({selectedSchedule.slotDurationMins} min each)</h4>
-              <div className="slots-grid">
-                {availableSlots.map((idx) => {
-                  const booked = idx < bookedCount;
-                  return (
-                    <button
-                      key={idx}
-                      type="button"
-                      className={`slot-btn ${slotIndex === idx ? 'active' : ''} ${booked ? 'booked' : ''}`}
-                      disabled={booked}
-                      onClick={() => setSlotIndex(idx)}
-                    >
-                      Slot {idx + 1}
-                    </button>
-                  );
-                })}
-              </div>
+              <h4>Availability ({selectedSchedule.slotDurationMins} min per slot)</h4>
+              {selectedSchedule.bookedCount >= selectedSchedule.maxPatients ? (
+                <p className="slot-full">This schedule is fully booked.</p>
+              ) : (
+                <p className="slot-available">
+                  {selectedSchedule.maxPatients - selectedSchedule.bookedCount} slot(s) available — tap "Confirm Booking" to reserve yours.
+                </p>
+              )}
             </div>
           )}
 
-          {selectedSchedule && slotIndex !== null && (
+          {selectedSchedule && selectedSchedule.bookedCount < selectedSchedule.maxPatients && (
             <form onSubmit={handleSubmit} className="booking-fields">
               <label>
                 Reason for visit *

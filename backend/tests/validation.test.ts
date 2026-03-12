@@ -15,7 +15,7 @@ import {
   createScanSchema,
   updateScanSchema,
   createReservationSchema,
-  updateReservationSchema,
+  updateReservationStatusSchema,
   updateProfileSchema,
   paginationSchema,
 } from '../src/schemas/index.js';
@@ -151,12 +151,11 @@ describe('updateScanSchema (partial)', () => {
 
 describe('createReservationSchema', () => {
   const validPayload = {
-    doctorName: 'Dr. Ahmed',
-    specialty: 'Cardiology',
+    doctorScheduleId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    slotIndex: 0,
     reason: 'Annual heart checkup',
-    location: 'Aethea Medical Center - Building A',
-    startAt: '2026-03-15T09:00:00.000Z',
-    status: 'scheduled',
+    shareHealthData: false,
+    notifyOnCancel: true,
   };
 
   it('accepts a valid payload', () => {
@@ -165,19 +164,19 @@ describe('createReservationSchema', () => {
   });
 
   it('rejects missing required fields', () => {
-    const result = createReservationSchema.safeParse({ doctorName: 'Dr. X' });
+    const result = createReservationSchema.safeParse({ reason: 'Checkup' });
     expect(result.success).toBe(false);
   });
 
-  it('rejects invalid status enum', () => {
-    const result = createReservationSchema.safeParse({ ...validPayload, status: 'unknown' });
+  it('rejects invalid doctorScheduleId (not UUID)', () => {
+    const result = createReservationSchema.safeParse({ ...validPayload, doctorScheduleId: 'not-a-uuid' });
     expect(result.success).toBe(false);
   });
 
-  it('accepts optional endAt', () => {
+  it('accepts optional notes', () => {
     const result = createReservationSchema.safeParse({
       ...validPayload,
-      endAt: '2026-03-15T10:00:00.000Z',
+      notes: 'Please check my blood pressure too',
     });
     expect(result.success).toBe(true);
   });
@@ -188,14 +187,14 @@ describe('createReservationSchema', () => {
   });
 });
 
-describe('updateReservationSchema (partial)', () => {
+describe('updateReservationStatusSchema', () => {
   it('accepts single-field update', () => {
-    const result = updateReservationSchema.safeParse({ status: 'cancelled' });
+    const result = updateReservationStatusSchema.safeParse({ status: 'cancelled' });
     expect(result.success).toBe(true);
   });
 
   it('rejects invalid fields', () => {
-    const result = updateReservationSchema.safeParse({ role: 'admin' });
+    const result = updateReservationStatusSchema.safeParse({ role: 'admin' });
     expect(result.success).toBe(false);
   });
 });
