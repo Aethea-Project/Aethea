@@ -8,12 +8,12 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-function Ensure-DockerReady {
+function Assert-DockerReady {
   if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     throw "Docker CLI was not found. Install Docker Desktop and retry."
   }
 
-  $dockerInfo = docker info 2>&1
+  docker info 2>&1 | Out-Null
   if ($LASTEXITCODE -eq 0) {
     return
   }
@@ -90,7 +90,7 @@ if ($shouldStartTunnel -and -not $StartTunnel -and $autoStartTunnel) {
 Push-Location $projectRoot
 
 try {
-  Ensure-DockerReady
+  Assert-DockerReady
 
   if ($shouldStartTunnel) {
     $defaultTunnelCredPath = Join-Path $projectRoot "cloudflared/credentials/de687480-54da-4632-a55e-b3d1b4a8575d.json"

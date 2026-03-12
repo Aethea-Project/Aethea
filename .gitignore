@@ -12,9 +12,12 @@
 **/.env
 **/.env.local
 **/.env*.local
-# Keep example files
+# Keep generic example files (but not docker-specific ones which contain machine-local paths)
 !**/.env.example
-!**/.env.docker.example
+
+# ── Project planning / audit documents (local working docs, not for repo) ──────
+*_PLAN.md
+BUGS_AND_FIXES_PLAN.md
 
 # ── Dependencies ─────────────────────────────────────────────────
 node_modules/

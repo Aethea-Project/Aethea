@@ -27,15 +27,15 @@ export const createDoctorRoutes = (authMiddleware: RequestHandler): Router => {
 
   const auth = [authMiddleware, requireTrustedClaims, requireActiveAccount, requirePasswordChanged, requireLocalUser];
 
+  // Doctor-only: manage own profile and schedules (MUST be before /:id)
+  router.get('/me/profile', auth, asyncHandler(getMyDoctorProfile));
+  router.put('/me/profile', auth, validateBody(upsertDoctorProfileSchema), asyncHandler(upsertDoctorProfile));
+  router.post('/me/schedules', auth, validateBody(createDoctorScheduleSchema), asyncHandler(createMySchedule));
+
   // Public (but authenticated): browse doctors
   router.get('/', auth, validateQuery(doctorListQuerySchema), asyncHandler(listDoctors));
   router.get('/:id', auth, asyncHandler(getDoctorById));
   router.get('/:id/schedules', auth, validateQuery(scheduleQuerySchema), asyncHandler(getDoctorSchedules));
-
-  // Doctor-only: manage own profile and schedules
-  router.get('/me/profile', auth, asyncHandler(getMyDoctorProfile));
-  router.put('/me/profile', auth, validateBody(upsertDoctorProfileSchema), asyncHandler(upsertDoctorProfile));
-  router.post('/me/schedules', auth, validateBody(createDoctorScheduleSchema), asyncHandler(createMySchedule));
 
   return router;
 };

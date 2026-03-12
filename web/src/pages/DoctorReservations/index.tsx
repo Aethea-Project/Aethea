@@ -164,7 +164,7 @@ export default function DoctorReservationsPage() {
       .catch((err) => { setProfileError(err instanceof Error ? err.message : 'Could not load your doctor profile.'); setProfileLoading(false); });
   }, []);
 
-  const { schedules, loading: schedulesLoading, error: schedulesError } = useDoctorSchedules(profileId ?? '');
+  const { schedules, loading: schedulesLoading, error: schedulesError, refresh } = useDoctorSchedules(profileId ?? '');
 
   if (profileLoading) return <div className="dr-reservations-page"><p className="loading">Loading profile...</p></div>;
   if (profileError) return (
@@ -200,7 +200,7 @@ export default function DoctorReservationsPage() {
 
       {showCreate && (
         <CreateScheduleForm
-          onCreated={() => { setShowCreate(false); location.reload(); }}
+          onCreated={() => { setShowCreate(false); refresh(); }}
           onCancel={() => setShowCreate(false)}
         />
       )}

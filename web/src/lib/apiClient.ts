@@ -70,7 +70,14 @@ export async function authFetch<T>(path: string, init?: RequestInit): Promise<T>
 
     if (!res.ok) {
       const text = await res.text();
-      throw new Error(text || `Request failed (${res.status})`);
+      let message = text || `Request failed (${res.status})`;
+      try {
+        const json = JSON.parse(text);
+        if (json.error) message = json.error;
+      } catch {
+        // Response body is not JSON — use raw text as-is
+      }
+      throw new Error(message);
     }
 
     return res.json() as Promise<T>;

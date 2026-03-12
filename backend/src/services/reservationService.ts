@@ -195,7 +195,7 @@ export async function updateSlotStatus(
 
   // Authorization: verify this slot belongs to the doctor
   const profile = await getDoctorProfileByUserId(doctorUserId);
-  if (!profile || profile.id !== reservation.doctorSchedule.doctorProfile.userId) {
+  if (!profile || profile.id !== reservation.doctorSchedule.doctorProfileId) {
     throw AppError.forbidden('Not authorized to update this reservation');
   }
 
