@@ -38,6 +38,8 @@ import { createReservationRoutes } from './routes/reservations.routes.js';
 import { createAdminRoutes } from './routes/admin.routes.js';
 import { createStaffVerificationRoutes } from './routes/staffVerification.routes.js';
 import { createAdminVerificationRoutes } from './routes/adminVerification.routes.js';
+import { createDoctorRoutes } from './routes/doctors.routes.js';
+import { createNotificationRoutes } from './routes/notifications.routes.js';
 import logger from './lib/logger.js';
 
 interface AppConfig {
@@ -178,6 +180,8 @@ export function createApp(config: AppConfig = {}) {
   const adminRoutes = createAdminRoutes(authMiddleware);
   const staffVerificationRoutes = createStaffVerificationRoutes(authMiddleware);
   const adminVerificationRoutes = createAdminVerificationRoutes(authMiddleware);
+  const doctorRoutes = createDoctorRoutes(authMiddleware);
+  const notificationRoutes = createNotificationRoutes(authMiddleware);
 
   // API v1 — explicit versioning (REST best practice)
   app.use('/api/v1/auth', authRoutes);
@@ -188,6 +192,8 @@ export function createApp(config: AppConfig = {}) {
   app.use('/api/v1/admin', adminRoutes);
   app.use('/api/v1/staff/verification', staffVerificationRoutes);
   app.use('/api/v1/admin', adminVerificationRoutes);
+  app.use('/api/v1/doctors', doctorRoutes);
+  app.use('/api/v1/notifications', notificationRoutes);
 
   // Backward-compatible aliases (non-versioned paths → v1)
   app.use('/api/auth', authRoutes);
@@ -198,6 +204,8 @@ export function createApp(config: AppConfig = {}) {
   app.use('/api/admin', adminRoutes);
   app.use('/api/staff/verification', staffVerificationRoutes);
   app.use('/api/admin', adminVerificationRoutes);
+  app.use('/api/doctors', doctorRoutes);
+  app.use('/api/notifications', notificationRoutes);
 
   // ─── Error handling (must be LAST) ───
   app.use(notFoundHandler);

@@ -1,0 +1,126 @@
+/**
+ * useDoctors - Use-case hook for doctor discovery and schedule browsing
+ *
+ * Architecture layer: Pages -> [this hook] -> medicalApi -> apiClient
+ */
+
+import { useCallback, useEffect, useState } from 'react';
+import {
+  medicalApi,
+  DoctorProfile,
+  DoctorSchedule,
+  ScheduleSlotView,
+  DoctorListParams,
+} from '../services/medicalApi';
+
+export interface UseDoctorsResult {
+  doctors: DoctorProfile[];
+  total: number;
+  loading: boolean;
+  error: string | null;
+  search: (params: DoctorListParams) => Promise<void>;
+}
+
+export function useDoctors(initialParams?: DoctorListParams): UseDoctorsResult {
+  const [doctors, setDoctors] = useState<DoctorProfile[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const search = useCallback(async (params: DoctorListParams) => {
+    setLoading(true);
+    try {
+      const result = await medicalApi.fetchDoctors(params);
+      setDoctors(result.doctors);
+      setTotal(result.total);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load doctors');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    search(initialParams ?? {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return { doctors, total, loading, error, search };
+}
+
+/* ─── Doctor schedule hook ─── */
+
+export interface UseDoctorSchedulesResult {
+  schedules: DoctorSchedule[];
+  total: number;
+  loading: boolean;
+  error: string | null;
+}
+
+export function useDoctorSchedules(doctorId: string): UseDoctorSchedulesResult {
+  const [schedules, setSchedules] = useState<DoctorSchedule[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!doctorId) return;
+    let cancelled = false;
+    setLoading(true);
+    medicalApi
+      .fetchDoctorSchedules(doctorId)
+      .then((result) => {
+        if (!cancelled) {
+          setSchedules(result.schedules);
+          setTotal(result.total);
+          setError(null);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Failed to load schedules');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [doctorId]);
+
+  return { schedules, total, loading, error };
+}
+
+/* ─── Doctor's own schedule-slots view hook ─── */
+
+export interface UseScheduleSlotsResult {
+  slotView: ScheduleSlotView | null;
+  loading: boolean;
+  error: string | null;
+  refresh: () => void;
+}
+
+export function useScheduleSlots(scheduleId: string): UseScheduleSlotsResult {
+  const [slotView, setSlotView] = useState<ScheduleSlotView | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await medicalApi.fetchScheduleSlots(scheduleId);
+      setSlotView(data);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load slots');
+    } finally {
+      setLoading(false);
+    }
+  }, [scheduleId]);
+
+  useEffect(() => {
+    if (scheduleId) load();
+  }, [scheduleId, load]);
+
+  return { slotView, loading, error, refresh: load };
+}

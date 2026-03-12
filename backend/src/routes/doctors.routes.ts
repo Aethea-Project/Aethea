@@ -1,0 +1,41 @@
+/**
+ * Doctors Routes
+ */
+
+import { Router, RequestHandler } from 'express';
+import {
+  listDoctors,
+  getDoctorById,
+  getDoctorSchedules,
+  getMyDoctorProfile,
+  upsertDoctorProfile,
+  createMySchedule,
+} from '../controllers/doctors.controller.js';
+import { validateBody, validateQuery } from '../middleware/validate.js';
+import { asyncHandler } from '../middleware/asyncHandler.js';
+import { requireLocalUser } from '../lib/authMiddleware.js';
+import { requireActiveAccount, requirePasswordChanged, requireTrustedClaims } from '../middleware/requireAccountType.js';
+import {
+  doctorListQuerySchema,
+  scheduleQuerySchema,
+  upsertDoctorProfileSchema,
+  createDoctorScheduleSchema,
+} from '../schemas/index.js';
+
+export const createDoctorRoutes = (authMiddleware: RequestHandler): Router => {
+  const router = Router();
+
+  const auth = [authMiddleware, requireTrustedClaims, requireActiveAccount, requirePasswordChanged, requireLocalUser];
+
+  // Public (but authenticated): browse doctors
+  router.get('/', auth, validateQuery(doctorListQuerySchema), asyncHandler(listDoctors));
+  router.get('/:id', auth, asyncHandler(getDoctorById));
+  router.get('/:id/schedules', auth, validateQuery(scheduleQuerySchema), asyncHandler(getDoctorSchedules));
+
+  // Doctor-only: manage own profile and schedules
+  router.get('/me/profile', auth, asyncHandler(getMyDoctorProfile));
+  router.put('/me/profile', auth, validateBody(upsertDoctorProfileSchema), asyncHandler(upsertDoctorProfile));
+  router.post('/me/schedules', auth, validateBody(createDoctorScheduleSchema), asyncHandler(createMySchedule));
+
+  return router;
+};

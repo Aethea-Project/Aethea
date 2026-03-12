@@ -44,4 +44,8 @@ export class AppError extends Error {
   static tooMany(message = 'Too many requests', code = 'RATE_LIMITED') {
     return new AppError(message, 429, code);
   }
+
+  static conflict(message = 'Conflict', code = 'CONFLICT') {
+    return new AppError(message, 409, code);
+  }
 }

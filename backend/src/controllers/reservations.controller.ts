@@ -1,79 +1,66 @@
 /**
- * Reservations Controller
+ * Reservations Controller — patient booking and doctor slot management
  *
- * Auth is handled by `requireLocalUser` middleware in the route layer.
- * Each handler receives `req.localUser` (the Prisma User record).
+ * Uses reservationService for all business logic.
+ * Controllers only: parse params, call one service fn, return response.
  */
 
 import { Request, Response } from 'express';
-import prisma from '../lib/prisma.js';
 import { AppError } from '../lib/AppError.js';
 import { parsePagination, paginatedResult } from '../lib/pagination.js';
+import {
+  bookReservation,
+  getMyReservations,
+  cancelMyReservation,
+  getDoctorScheduleSlots,
+  updateSlotStatus,
+} from '../services/reservationService.js';
 
+/** GET /reservations — patient's own reservations */
 export const listReservations = async (req: Request, res: Response): Promise<void> => {
   const user = req.localUser!;
-  const { page, limit, skip } = parsePagination(req);
-
-  const [reservations, total] = await Promise.all([
-    prisma.reservation.findMany({
-      where: { userId: user.id },
-      orderBy: { startAt: 'asc' },
-      skip,
-      take: limit,
-    }),
-    prisma.reservation.count({ where: { userId: user.id } }),
-  ]);
-
+  const { page, limit } = parsePagination(req);
+  const { reservations, total } = await getMyReservations(user.id, page, limit);
   res.json(paginatedResult(reservations, total, page, limit));
 };
 
+/** POST /reservations — patient books a slot */
 export const createReservation = async (req: Request, res: Response): Promise<void> => {
   const user = req.localUser!;
-
-  const reservation = await prisma.reservation.create({
-    data: {
-      userId: user.id,
-      doctorName: req.body.doctorName,
-      specialty: req.body.specialty,
-      reason: req.body.reason,
-      location: req.body.location,
-      startAt: new Date(req.body.startAt),
-      endAt: req.body.endAt ? new Date(req.body.endAt) : null,
-      status: req.body.status,
-      notes: req.body.notes,
-    },
+  const reservation = await bookReservation(user.id, {
+    doctorScheduleId: req.body.doctorScheduleId,
+    slotIndex: req.body.slotIndex,
+    reason: req.body.reason,
+    notes: req.body.notes,
+    shareHealthData: req.body.shareHealthData ?? false,
+    notifyOnCancel: req.body.notifyOnCancel ?? false,
   });
-
   res.status(201).json({ reservation });
 };
 
-export const updateReservation = async (req: Request, res: Response): Promise<void> => {
+/** DELETE /reservations/:id — patient cancels their own reservation */
+export const cancelReservation = async (req: Request, res: Response): Promise<void> => {
   const user = req.localUser!;
+  const id = req.params.id as string;
+  if (!id) throw AppError.badRequest('Missing reservation id');
+  await cancelMyReservation(id, user.id);
+  res.status(204).send();
+};
 
-  const idParam = req.params.id;
-  const id = Array.isArray(idParam) ? idParam[0] : idParam;
-  if (!id) {
-    throw AppError.badRequest('Missing reservation id');
-  }
+/** GET /reservations/schedule/:scheduleId/slots — doctor views anonymized slots */
+export const getScheduleSlots = async (req: Request, res: Response): Promise<void> => {
+  const user = req.localUser!;
+  const scheduleId = req.params.scheduleId as string;
+  if (!scheduleId) throw AppError.badRequest('Missing scheduleId');
+  const slots = await getDoctorScheduleSlots(scheduleId, user.id);
+  res.json(slots);
+};
 
-  const existing = await prisma.reservation.findFirst({ where: { id, userId: user.id } });
-  if (!existing) {
-    throw AppError.notFound('Reservation not found');
-  }
-
-  const reservation = await prisma.reservation.update({
-    where: { id },
-    data: {
-      doctorName: req.body.doctorName ?? existing.doctorName,
-      specialty: req.body.specialty ?? existing.specialty,
-      reason: req.body.reason ?? existing.reason,
-      location: req.body.location ?? existing.location,
-      startAt: req.body.startAt ? new Date(req.body.startAt) : existing.startAt,
-      endAt: req.body.endAt ? new Date(req.body.endAt) : existing.endAt,
-      status: req.body.status ?? existing.status,
-      notes: req.body.notes ?? existing.notes,
-    },
-  });
-
+/** PATCH /reservations/:id/status — doctor updates a slot's status */
+export const patchReservationStatus = async (req: Request, res: Response): Promise<void> => {
+  const user = req.localUser!;
+  const id = req.params.id as string;
+  if (!id) throw AppError.badRequest('Missing reservation id');
+  const reservation = await updateSlotStatus(id, user.id, req.body.status, req.body.notes);
   res.json({ reservation });
 };
