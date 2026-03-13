@@ -27,6 +27,9 @@ export const listReservations = async (req: Request, res: Response): Promise<voi
 /** POST /reservations — patient books a slot */
 export const createReservation = async (req: Request, res: Response): Promise<void> => {
   const user = req.localUser!;
+  if (user.accountType === 'admin') {
+    throw AppError.forbidden('Admin accounts cannot book appointments. Use a non-admin account.');
+  }
   const reservation = await bookReservation(user.id, {
     doctorScheduleId: req.body.doctorScheduleId,
     slotIndex: req.body.slotIndex,

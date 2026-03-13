@@ -14,24 +14,23 @@ export const BookingModal: React.FC<BookingModalProps> = ({ doctor, onClose, onB
   const { book } = useReservations();
 
   const [selectedSchedule, setSelectedSchedule] = useState<DoctorSchedule | null>(null);
+  const [selectedSlotIndex, setSelectedSlotIndex] = useState<number | null>(null);
   const [reason, setReason] = useState('');
   const [shareHealthData, setShareHealthData] = useState(false);
-  const [notifyOnCancel, setNotifyOnCancel] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedSchedule || !reason.trim()) return;
+    if (!selectedSchedule || selectedSlotIndex === null || !reason.trim()) return;
     setSubmitting(true);
     setSubmitError(null);
     try {
       await book({
         doctorScheduleId: selectedSchedule.id,
-        slotIndex: selectedSchedule.bookedCount,
+        slotIndex: selectedSlotIndex,
         reason: reason.trim(),
         shareHealthData,
-        notifyOnCancel,
       });
       onBooked();
     } catch (err) {
@@ -66,18 +65,21 @@ export const BookingModal: React.FC<BookingModalProps> = ({ doctor, onClose, onB
           <div className="schedule-list">
             <h4>Select a Date</h4>
             {schedules.map((sch) => {
-              const full = sch.bookedCount >= sch.maxPatients;
+              const full = sch.bookedSlotIndexes.length >= sch.maxPatients;
               return (
                 <button
                   key={sch.id}
                   type="button"
                   className={`schedule-option${selectedSchedule?.id === sch.id ? ' active' : ''}`}
                   disabled={full}
-                  onClick={() => { setSelectedSchedule(sch); }}
+                  onClick={() => {
+                    setSelectedSchedule(sch);
+                    setSelectedSlotIndex(null);
+                  }}
                 >
                   {formatDate(sch.scheduleDate)} — {formatTime(sch.startAt)} to {formatTime(sch.endAt)}
                   <span className="slot-count">
-                    {full ? ' (Full)' : ` (${sch.maxPatients - sch.bookedCount} slots left)`}
+                    {full ? ' (Full)' : ` (${sch.maxPatients - sch.bookedSlotIndexes.length} slots left)`}
                   </span>
                 </button>
               );
@@ -87,17 +89,42 @@ export const BookingModal: React.FC<BookingModalProps> = ({ doctor, onClose, onB
           {selectedSchedule && (
             <div className="slot-selection">
               <h4>Availability ({selectedSchedule.slotDurationMins} min per slot)</h4>
-              {selectedSchedule.bookedCount >= selectedSchedule.maxPatients ? (
+              {selectedSchedule.bookedSlotIndexes.length >= selectedSchedule.maxPatients ? (
                 <p className="slot-full">This schedule is fully booked.</p>
               ) : (
-                <p className="slot-available">
-                  {selectedSchedule.maxPatients - selectedSchedule.bookedCount} slot(s) available — tap "Confirm Booking" to reserve yours.
-                </p>
+                <>
+                  <p className="slot-available">
+                    {selectedSchedule.maxPatients - selectedSchedule.bookedSlotIndexes.length} slot(s) available — select a time below.
+                  </p>
+                  <div className="time-slots">
+                    {Array.from({ length: selectedSchedule.maxPatients }, (_, slotIndex) => {
+                      const slotStart = new Date(new Date(selectedSchedule.startAt).getTime() + slotIndex * selectedSchedule.slotDurationMins * 60_000);
+                      const slotEnd = new Date(slotStart.getTime() + selectedSchedule.slotDurationMins * 60_000);
+                      const isBooked = selectedSchedule.bookedSlotIndexes.includes(slotIndex);
+                      const isSelected = selectedSlotIndex === slotIndex;
+                      return (
+                        <button
+                          key={slotIndex}
+                          type="button"
+                          className={`time-slot-btn${isSelected ? ' selected' : ''}`}
+                          disabled={isBooked}
+                          onClick={() => setSelectedSlotIndex(slotIndex)}
+                          title={isBooked ? 'Booked' : 'Available'}
+                        >
+                          {slotStart.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                          {' - '}
+                          {slotEnd.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                          {isBooked ? ' (Booked)' : ''}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
               )}
             </div>
           )}
 
-          {selectedSchedule && selectedSchedule.bookedCount < selectedSchedule.maxPatients && (
+          {selectedSchedule && selectedSchedule.bookedSlotIndexes.length < selectedSchedule.maxPatients && (
             <form onSubmit={handleSubmit} className="booking-fields">
               <label>
                 Reason for visit *
@@ -119,20 +146,13 @@ export const BookingModal: React.FC<BookingModalProps> = ({ doctor, onClose, onB
                 Share my health records with this doctor
               </label>
 
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={notifyOnCancel}
-                  onChange={(e) => setNotifyOnCancel(e.target.checked)}
-                />
-                Notify me if appointment is cancelled
-              </label>
-
               {submitError && <p className="error">{submitError}</p>}
+
+              {selectedSlotIndex === null && <p className="error">Select a slot time before confirming booking.</p>}
 
               <div className="modal-actions">
                 <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
-                <button type="submit" className="book-btn" disabled={submitting || !reason.trim()}>
+                <button type="submit" className="book-btn" disabled={submitting || !reason.trim() || selectedSlotIndex === null}>
                   {submitting ? 'Booking...' : 'Confirm Booking'}
                 </button>
               </div>

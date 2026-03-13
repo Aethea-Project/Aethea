@@ -11,6 +11,7 @@ import {
   getMyProfile,
   upsertMyProfile,
   getPublishedSchedules,
+  getMarketplacePosts,
   createDoctorSchedule,
 } from '../services/doctorService.js';
 import type { CreateScheduleInput } from '../repositories/scheduleRepository.js';
@@ -41,6 +42,25 @@ export const getDoctorSchedules = async (req: Request, res: Response): Promise<v
   const to   = toStr   ? new Date(toStr)   : undefined;
 
   const { schedules, total } = await getPublishedSchedules(id, from, to, page, limit);
+  res.json(paginatedResult(schedules, total, page, limit));
+};
+
+/** GET /doctors/marketplace/posts — list published schedule posts globally */
+export const listMarketplaceSchedulePosts = async (req: Request, res: Response): Promise<void> => {
+  const { page, limit } = parsePagination(req);
+  const {
+    specialty,
+    city,
+    search,
+    date: dateStr,
+  } = req.query as Record<string, string | undefined>;
+
+  const date = dateStr ? new Date(dateStr) : undefined;
+  const { schedules, total } = await getMarketplacePosts(
+    { specialty, city, search, date },
+    page,
+    limit,
+  );
   res.json(paginatedResult(schedules, total, page, limit));
 };
 

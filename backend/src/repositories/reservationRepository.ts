@@ -81,9 +81,8 @@ export async function getReservationById(id: string) {
 }
 
 export async function cancelReservation(id: string) {
-  return prisma.reservation.update({
+  return prisma.reservation.delete({
     where: { id },
-    data: { status: 'cancelled' },
   });
 }
 
@@ -92,4 +91,15 @@ export async function updateReservationStatus(id: string, status: string, notes?
     where: { id },
     data: { status: status as never, ...(notes !== undefined ? { notes } : {}) },
   });
+}
+
+export async function hasPatientBookedSchedule(userId: string, doctorScheduleId: string): Promise<boolean> {
+  const existing = await prisma.reservation.findFirst({
+    where: {
+      userId,
+      doctorScheduleId,
+      status: { not: 'cancelled' },
+    },
+  });
+  return !!existing;
 }

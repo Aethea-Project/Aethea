@@ -51,7 +51,7 @@ export default function ReservationsPage() {
       {loading ? (
         <p className="loading">Loading appointments...</p>
       ) : sorted.length === 0 ? (
-        <p className="loading">No appointments yet. Use Doctor Finder to book one.</p>
+        <p className="loading">No appointments yet. Use Appointments Marketplace to book one.</p>
       ) : (
         sorted.map((res) => {
           const doctorName = res.doctor

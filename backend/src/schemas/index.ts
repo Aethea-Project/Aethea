@@ -132,6 +132,18 @@ export const scheduleQuerySchema = z.object({
 }).strict();
 
 /**
+ * Marketplace schedule posts query
+ */
+export const marketplaceScheduleQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20).optional(),
+  specialty: z.string().trim().min(1).max(120).optional(),
+  city: z.string().trim().min(1).max(100).optional(),
+  search: z.string().trim().min(1).max(120).optional(),
+  date: z.string().date().optional(),
+}).strict();
+
+/**
  * Doctor profile — create / update (doctor-side)
  */
 export const upsertDoctorProfileSchema = z.object({

@@ -3,10 +3,9 @@ import type { DoctorProfile } from '../../services/medicalApi';
 
 interface DoctorCardProps {
   doctor: DoctorProfile;
-  onBook: (doctor: DoctorProfile) => void;
 }
 
-export const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onBook }) => {
+export const DoctorCard: React.FC<DoctorCardProps> = ({ doctor }) => {
   const name = `Dr. ${doctor.firstName} ${doctor.lastName}`;
   const location = [doctor.clinicName, doctor.city].filter(Boolean).join(', ') || 'Location unknown';
 
@@ -53,8 +52,8 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({ doctor, onBook }) => {
       </div>
 
       <div className="doctor-actions">
-        <button className="book-btn" onClick={() => onBook(doctor)}>
-          Book Now
+        <button className="book-btn" type="button" disabled>
+          View In Marketplace
         </button>
       </div>
     </div>

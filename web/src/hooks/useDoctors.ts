@@ -11,6 +11,8 @@ import {
   DoctorSchedule,
   ScheduleSlotView,
   DoctorListParams,
+  MarketplaceSchedulePost,
+  MarketplaceScheduleQuery,
 } from '../services/medicalApi';
 
 export interface UseDoctorsResult {
@@ -122,4 +124,46 @@ export function useScheduleSlots(scheduleId: string): UseScheduleSlotsResult {
   }, [scheduleId, load]);
 
   return { slotView, loading, error, refresh: load };
+}
+
+/* ─── Marketplace schedule posts hook ─── */
+
+export interface UseMarketplaceSchedulesResult {
+  posts: MarketplaceSchedulePost[];
+  total: number;
+  loading: boolean;
+  error: string | null;
+  search: (params: MarketplaceScheduleQuery) => Promise<void>;
+}
+
+export function useMarketplaceSchedules(initialParams?: MarketplaceScheduleQuery, enabled = true): UseMarketplaceSchedulesResult {
+  const [posts, setPosts] = useState<MarketplaceSchedulePost[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const search = useCallback(async (params: MarketplaceScheduleQuery) => {
+    setLoading(true);
+    try {
+      const result = await medicalApi.fetchMarketplaceSchedules(params);
+      setPosts(result.posts);
+      setTotal(result.total);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load marketplace posts');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!enabled) {
+      setLoading(false);
+      return;
+    }
+    void search(initialParams ?? {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled]);
+
+  return { posts, total, loading, error, search };
 }
