@@ -49,10 +49,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             userResponse.data.id
           );
 
+          if (!mounted) return;
+
+          // Hydration / Sync Check:
+          // If the postgres public profile differs from the Supabase JWT metadata,
+          // instantly refresh the local token to resolve "split-brain" states.
+          let finalSession = sessionResponse.data;
+          let finalUser = userResponse.data;
+          const tokenType = finalSession.user?.app_metadata?.account_type 
+                         || finalSession.user?.user_metadata?.account_type;
+          
+          if (profileResponse.data?.accountType && tokenType !== profileResponse.data.accountType) {
+            console.warn('[Auth] JWT out of sync with DB. Refreshing session...');
+            const refreshResult = await authService.getSupabaseClient().auth.refreshSession();
+            if (refreshResult.data?.session) {
+              finalSession = refreshResult.data.session;
+              // Also update the user to reflect the new metadata
+              finalUser = refreshResult.data.user ?? finalUser;
+            }
+          }
+
           if (mounted) {
             setAuthState({
-              user: userResponse.data,
-              session: sessionResponse.data,
+              user: finalUser,
+              session: finalSession,
               profile: profileResponse.data,
               loading: false,
               error: null,

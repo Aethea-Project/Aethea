@@ -13,6 +13,13 @@ export interface CreateScheduleInput {
   isPublished?: boolean;
 }
 
+export interface MarketplaceScheduleFilters {
+  specialty?: string;
+  city?: string;
+  search?: string;
+  date?: Date;
+}
+
 export async function listDoctorSchedules(
   doctorProfileId: string,
   from: Date | undefined,
@@ -35,8 +42,83 @@ export async function listDoctorSchedules(
       where,
       include: {
         _count: { select: { reservations: true } },
+        reservations: {
+          where: { status: { not: 'cancelled' } },
+          select: { slotIndex: true },
+        },
       },
       orderBy: { scheduleDate: 'asc' },
+      skip,
+      take,
+    }),
+    prisma.doctorSchedule.count({ where }),
+  ]);
+
+  return { schedules, total };
+}
+
+export async function listMarketplaceSchedules(
+  filters: MarketplaceScheduleFilters,
+  skip: number,
+  take: number,
+) {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const where = {
+    isPublished: true,
+    scheduleDate: filters.date
+      ? {
+          gte: new Date(new Date(filters.date).setHours(0, 0, 0, 0)),
+          lte: new Date(new Date(filters.date).setHours(23, 59, 59, 999)),
+        }
+      : { gte: startOfToday },
+    doctorProfile: {
+      verified: true,
+      ...(filters.specialty
+        ? { specialty: { contains: filters.specialty, mode: 'insensitive' as const } }
+        : {}),
+      ...(filters.city
+        ? { city: { contains: filters.city, mode: 'insensitive' as const } }
+        : {}),
+      ...(filters.search
+        ? {
+            OR: [
+              { firstName: { contains: filters.search, mode: 'insensitive' as const } },
+              { lastName: { contains: filters.search, mode: 'insensitive' as const } },
+              { specialty: { contains: filters.search, mode: 'insensitive' as const } },
+              { clinicName: { contains: filters.search, mode: 'insensitive' as const } },
+              { city: { contains: filters.search, mode: 'insensitive' as const } },
+            ],
+          }
+        : {}),
+    },
+  };
+
+  const [schedules, total] = await Promise.all([
+    prisma.doctorSchedule.findMany({
+      where,
+      include: {
+        doctorProfile: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            specialty: true,
+            clinicName: true,
+            city: true,
+            photoUrl: true,
+            consultFee: true,
+            languages: true,
+            verified: true,
+          },
+        },
+        reservations: {
+          where: { status: { not: 'cancelled' } },
+          select: { slotIndex: true },
+        },
+      },
+      orderBy: [{ scheduleDate: 'asc' }, { startAt: 'asc' }],
       skip,
       take,
     }),
@@ -100,8 +182,12 @@ export async function createSchedule(doctorProfileId: string, data: CreateSchedu
 }
 
 export async function isSlotBooked(scheduleId: string, slotIndex: number): Promise<boolean> {
-  const existing = await prisma.reservation.findUnique({
-    where: { doctorScheduleId_slotIndex: { doctorScheduleId: scheduleId, slotIndex } },
+  const existing = await prisma.reservation.findFirst({
+    where: {
+      doctorScheduleId: scheduleId,
+      slotIndex,
+      status: { not: 'cancelled' },
+    },
     select: { id: true },
   });
   return existing !== null;

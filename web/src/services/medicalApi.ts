@@ -108,6 +108,11 @@ type RawDoctorSchedule = {
   maxPatients: number;
   isPublished: boolean;
   _count?: { reservations: number };
+  reservations?: Array<{ slotIndex: number }>;
+};
+
+type RawMarketplaceSchedulePost = RawDoctorSchedule & {
+  doctorProfile: RawDoctorProfile;
 };
 
 type RawNotification = {
@@ -212,7 +217,8 @@ const toDoctorSchedule = (item: RawDoctorSchedule): DoctorSchedule => ({
   slotDurationMins: item.slotDurationMins,
   maxPatients: item.maxPatients,
   isPublished: item.isPublished,
-  bookedCount: item._count?.reservations ?? 0,
+  bookedCount: item.reservations?.length ?? item._count?.reservations ?? 0,
+  bookedSlotIndexes: (item.reservations ?? []).map((reservation) => reservation.slotIndex),
 });
 
 const toNotification = (item: RawNotification): Notification => ({
@@ -292,6 +298,25 @@ export const medicalApi = {
     const data = await authFetch<{ data?: RawDoctorSchedule[]; pagination?: { total: number } }>(`/doctors/${doctorId}/schedules${query}`);
     return {
       schedules: (data.data ?? []).map(toDoctorSchedule),
+      total: data.pagination?.total ?? 0,
+    };
+  },
+
+  async fetchMarketplaceSchedules(params?: MarketplaceScheduleQuery): Promise<{ posts: MarketplaceSchedulePost[]; total: number }> {
+    const qs = new URLSearchParams();
+    if (params?.specialty) qs.set('specialty', params.specialty);
+    if (params?.city) qs.set('city', params.city);
+    if (params?.search) qs.set('search', params.search);
+    if (params?.date) qs.set('date', params.date);
+    if (params?.page) qs.set('page', String(params.page));
+    if (params?.limit) qs.set('limit', String(params.limit));
+    const query = qs.toString() ? `?${qs.toString()}` : '';
+    const data = await authFetch<{ data?: RawMarketplaceSchedulePost[]; pagination?: { total: number } }>(`/doctors/marketplace/posts${query}`);
+    return {
+      posts: (data.data ?? []).map((post) => ({
+        doctor: toDoctorProfile(post.doctorProfile),
+        schedule: toDoctorSchedule(post),
+      })),
       total: data.pagination?.total ?? 0,
     };
   },
@@ -408,6 +433,12 @@ export interface DoctorSchedule {
   maxPatients: number;
   isPublished: boolean;
   bookedCount: number;
+  bookedSlotIndexes: number[];
+}
+
+export interface MarketplaceSchedulePost {
+  doctor: DoctorProfile;
+  schedule: DoctorSchedule;
 }
 
 export interface ScheduleSlot {
@@ -453,6 +484,15 @@ export interface ScheduleQueryParams {
   from?: string;
   to?: string;
   page?: number;
+}
+
+export interface MarketplaceScheduleQuery {
+  specialty?: string;
+  city?: string;
+  search?: string;
+  date?: string;
+  page?: number;
+  limit?: number;
 }
 
 export interface UpsertProfilePayload {

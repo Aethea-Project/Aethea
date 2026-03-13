@@ -9,25 +9,7 @@
 services:
   # ============ DATA STORES ============
 
-  postgres:
-    image: postgres:16-alpine
-    container_name: aethea-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-aethea_local}
-    ports:
-      - "127.0.0.1:${DB_PORT:-5432}:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - aethea-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  # postgres block removed - using Supabase Cloud DB
 
   redis:
     image: redis:7.4-alpine
@@ -60,14 +42,11 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-aethea_local}
       REDIS_URL: redis://:${REDIS_PASSWORD:-redispass}@redis:6379
     volumes:
       - ./backend/src:/app/src
       - ./backend/prisma:/app/prisma
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
@@ -134,11 +113,8 @@ services:
       - ./backend/.env
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-aethea_local}
       REDIS_URL: redis://:${REDIS_PASSWORD:-redispass}@redis:6379
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
@@ -193,9 +169,6 @@ services:
       - pgadmin_data:/var/lib/pgadmin
     networks:
       - aethea-network
-    depends_on:
-      postgres:
-        condition: service_healthy
     profiles:
       - tools
 
@@ -227,7 +200,6 @@ services:
 
 # ============ VOLUMES ============
 volumes:
-  postgres_data:
   redis_data:
   pgadmin_data:
 

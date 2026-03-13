@@ -2,10 +2,21 @@
 import { FeatureHeader } from '../../components/FeatureHeader';
 import { imageAssets } from '../../constants/imageAssets';
 import type { DoctorSchedule, ScheduleSlot } from '../../services/medicalApi';
-import { useDoctorSchedules } from '../../hooks/useDoctors';
+import { useDoctorSchedules, useMarketplaceSchedules } from '../../hooks/useDoctors';
 import { useScheduleSlots } from '../../hooks/useDoctors';
 import { medicalApi } from '../../services/medicalApi';
+import { useAuth } from '@core/auth/useAuth';
+import { decodeJWT } from '@core/auth/token-manager';
+import type { AccountType } from '@core/auth/auth-types';
 import './styles.css';
+
+function getAccountType(accessToken?: string): AccountType | null {
+  if (!accessToken) return null;
+  const decoded = decodeJWT(accessToken);
+  if (!decoded || typeof decoded !== 'object') return null;
+  const claim = (decoded as { account_type?: unknown }).account_type;
+  return claim === 'patient' || claim === 'doctor' || claim === 'pharmacist' || claim === 'admin' ? claim : null;
+}
 
 function SlotRow({ slot }: { slot: ScheduleSlot }) {
   const label = slot.patientLabel ?? 'Available';
@@ -147,12 +158,29 @@ function ScheduleCard({ schedule, onView }: { schedule: DoctorSchedule; onView: 
 }
 
 export default function DoctorReservationsPage() {
+  const { session, user, profile } = useAuth();
+  
+  // Create a naive resolution for the page level to match App.tsx so it stays consistent
+  const tokenType = session?.user?.app_metadata?.account_type 
+                 || session?.user?.user_metadata?.account_type 
+                 || undefined;
+  const accountType = profile?.accountType || tokenType;
+  
+  const isAdminReadonly = accountType === 'admin';
+
+  const {
+    posts: adminPosts,
+    loading: adminLoading,
+    error: adminError,
+  } = useMarketplaceSchedules({ page: 1, limit: 100 }, isAdminReadonly);
+
   // Hack: use '0' as placeholder before we know the real doctor profile id;
   // The backend resolves doctor profile from the authenticated user's JWT.
   // We fetch the doctor's own schedules via GET /doctors/me/profile then use that id.
   const [profileId, setProfileId] = useState<string | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
+  const [creatingProfile, setCreatingProfile] = useState(false);
 
   const [viewingScheduleId, setViewingScheduleId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -164,21 +192,91 @@ export default function DoctorReservationsPage() {
       .catch((err) => { setProfileError(err instanceof Error ? err.message : 'Could not load your doctor profile.'); setProfileLoading(false); });
   }, []);
 
+  const handleCreateProfile = async () => {
+    const emailPrefix = user?.email?.split('@')[0] ?? 'doctor';
+    const safeName = emailPrefix.replace(/[^a-zA-Z]/g, ' ').trim() || 'Doctor';
+    const [first = 'Doctor', ...rest] = safeName.split(/\s+/);
+    const last = rest.length > 0 ? rest.join(' ') : 'Account';
+
+    setCreatingProfile(true);
+    setProfileError(null);
+    try {
+      const profile = await medicalApi.upsertMyDoctorProfile({
+        firstName: first.slice(0, 50),
+        lastName: last.slice(0, 50),
+        specialty: 'General Practice',
+        bio: 'Auto-created profile for schedule posting.',
+        clinicName: 'Aethea Clinic',
+        city: 'Cairo',
+        consultFee: 0,
+        languages: ['Arabic', 'English'],
+      });
+      setProfileId(profile.id);
+    } catch (err) {
+      setProfileError(err instanceof Error ? err.message : 'Could not create your doctor profile.');
+    } finally {
+      setCreatingProfile(false);
+    }
+  };
+
   const { schedules, loading: schedulesLoading, error: schedulesError, refresh } = useDoctorSchedules(profileId ?? '');
+
+  if (isAdminReadonly) {
+    return (
+      <div className="dr-reservations-page">
+        <FeatureHeader
+          title="Availability Manager"
+          subtitle="Read-only view of published doctor availability posts"
+          variant="doc"
+          imageSrc={imageAssets.headers.doctor}
+          imageAlt="Availability Manager"
+        />
+        {adminError && <p className="error">{adminError}</p>}
+        {adminLoading ? (
+          <p className="loading">Loading availability posts...</p>
+        ) : adminPosts.length === 0 ? (
+          <p className="loading">No published availability posts yet.</p>
+        ) : (
+          <div className="dr-schedule-list">
+            {adminPosts.map((post) => (
+              <div className="dr-schedule-card" key={post.schedule.id}>
+                <div className="dr-schedule-info">
+                  <span className="dr-schedule-date">
+                    {new Date(post.schedule.scheduleDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+                  </span>
+                  <span className="dr-schedule-time">
+                    Dr. {post.doctor.firstName} {post.doctor.lastName} · {post.doctor.specialty}
+                  </span>
+                  <span className="dr-schedule-slots">
+                    {post.schedule.maxPatients - post.schedule.bookedCount}/{post.schedule.maxPatients} slots available
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   if (profileLoading) return <div className="dr-reservations-page"><p className="loading">Loading profile...</p></div>;
   if (profileError) return (
     <div className="dr-reservations-page">
-      <FeatureHeader title="My Schedule" subtitle="Manage your clinic schedule" variant="doc" imageSrc={imageAssets.headers.doctor} imageAlt="My Schedule" />
+      <FeatureHeader title="Availability Manager" subtitle="Manage your doctor availability posts" variant="doc" imageSrc={imageAssets.headers.doctor} imageAlt="Availability Manager" />
       <p className="error">{profileError}</p>
       <p>Make sure your doctor profile is set up before managing schedules.</p>
+      <div className="dr-toolbar">
+        <button className="book-btn" onClick={() => void handleCreateProfile()} disabled={creatingProfile}>
+          {creatingProfile ? 'Creating profile...' : 'Create Doctor Profile'}
+        </button>
+      </div>
     </div>
   );
 
   if (viewingScheduleId) {
     return (
       <div className="dr-reservations-page">
-        <FeatureHeader title="My Schedule" subtitle="Manage your clinic schedule" variant="doc" imageSrc={imageAssets.headers.doctor} imageAlt="My Schedule" />
+        <FeatureHeader title="Availability Manager" subtitle="Manage your doctor availability posts" variant="doc" imageSrc={imageAssets.headers.doctor} imageAlt="Availability Manager" />
         <ScheduleDetail scheduleId={viewingScheduleId} onBack={() => setViewingScheduleId(null)} />
       </div>
     );
@@ -187,11 +285,11 @@ export default function DoctorReservationsPage() {
   return (
     <div className="dr-reservations-page">
       <FeatureHeader
-        title="My Schedule"
-        subtitle="View and manage your published clinic schedules"
+        title="Availability Manager"
+        subtitle="Create and manage your published availability posts"
         variant="doc"
         imageSrc={imageAssets.headers.doctor}
-        imageAlt="My Schedule"
+        imageAlt="Availability Manager"
       />
 
       <div className="dr-toolbar">

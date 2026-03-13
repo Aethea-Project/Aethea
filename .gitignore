@@ -89,3 +89,5 @@ V5 DOC/
 # ── Cloudflare tunnel credentials (local only) ───────────────────
 cloudflared/credentials/*.json
 !cloudflared/credentials/.gitkeep
+
+chat.md

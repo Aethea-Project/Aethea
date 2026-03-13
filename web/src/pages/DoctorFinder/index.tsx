@@ -1,12 +1,9 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FeatureHeader } from '../../components/FeatureHeader';
-import { Modal } from '../../components/Modal';
 import { imageAssets } from '../../constants/imageAssets';
-import type { DoctorProfile } from '../../services/medicalApi';
 import { useDoctors } from '../../hooks/useDoctors';
 import { DoctorMap } from './DoctorMap';
 import { DoctorCard } from './DoctorCard';
-import { BookingModal } from './BookingModal';
 import './styles.css';
 
 interface LatLng {
@@ -66,14 +63,12 @@ const SPECIALTIES = [
 export default function DoctorFinderPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState('All Specialties');
-  const [selectedDoctor, setSelectedDoctor] = useState<DoctorProfile | null>(null);
-  const [showBooking, setShowBooking] = useState(false);
-  const [bookingSuccess, setBookingSuccess] = useState(false);
 
   const [mapError, setMapError] = useState('');
   const [mapReady, setMapReady] = useState(false);
   const [nearbyPharmacies, setNearbyPharmacies] = useState<NearbyPlace[]>([]);
   const [nearbyDoctors, setNearbyDoctors] = useState<NearbyPlace[]>([]);
+  const [nearbyMedicalBuildings, setNearbyMedicalBuildings] = useState<NearbyPlace[]>([]);
 
   const userLocationRef = useRef<LatLng>(DEFAULT_CENTER);
   const googleMapsRef = useRef<any | null>(null);
@@ -122,7 +117,11 @@ export default function DoctorFinderPage() {
             });
           });
 
-        await Promise.all([searchNearby('pharmacy', setNearbyPharmacies), searchNearby('doctor', setNearbyDoctors)]);
+        await Promise.all([
+          searchNearby('pharmacy', setNearbyPharmacies),
+          searchNearby('doctor', setNearbyDoctors),
+          searchNearby('hospital', setNearbyMedicalBuildings),
+        ]);
         if (!cancelled) { setMapReady(true); setMapError(''); }
       } catch {
         if (!cancelled) { setMapReady(false); setMapError('Could not load Google Maps right now.'); }
@@ -132,25 +131,14 @@ export default function DoctorFinderPage() {
     return () => { cancelled = true; };
   }, [googleMapsApiKey]);
 
-  const handleBook = (doctor: DoctorProfile) => {
-    setSelectedDoctor(doctor);
-    setBookingSuccess(false);
-    setShowBooking(true);
-  };
-
-  const handleBooked = () => {
-    setBookingSuccess(true);
-    setTimeout(() => setShowBooking(false), 1500);
-  };
-
   return (
     <div className="doctor-finder-page">
       <FeatureHeader
-        title="Doctor Finder"
-        subtitle="Find verified doctors and book appointments"
+        title="Care Locator"
+        subtitle="Find doctors, nearby pharmacies, and medical buildings"
         variant="doc"
         imageSrc={imageAssets.headers.doctor}
-        imageAlt="Doctor Finder"
+        imageAlt="Care Locator"
       />
 
       <div className="finder-controls">
@@ -179,38 +167,23 @@ export default function DoctorFinderPage() {
       ) : (
         <div className="doctors-grid">
           {doctors.map((doc) => (
-            <DoctorCard key={doc.id} doctor={doc} onBook={handleBook} />
+            <DoctorCard key={doc.id} doctor={doc} />
           ))}
         </div>
       )}
 
       <section className="map-section">
-        <h2>Nearby Clinics & Pharmacies</h2>
+        <h2>Nearby Doctors, Pharmacies, and Medical Buildings</h2>
         <DoctorMap
           mapReady={mapReady}
           mapError={mapError}
           userLocation={userLocationRef.current}
           nearbyDoctors={nearbyDoctors}
           nearbyPharmacies={nearbyPharmacies}
+          nearbyMedicalBuildings={nearbyMedicalBuildings}
           googleMapsApiKey={googleMapsApiKey}
         />
       </section>
-
-      {showBooking && selectedDoctor && (
-        <Modal isOpen={showBooking} onClose={() => setShowBooking(false)}>
-          {bookingSuccess ? (
-            <div className="booking-success">
-              <p>✓ Appointment booked successfully! Check My Appointments to view it.</p>
-            </div>
-          ) : (
-            <BookingModal
-              doctor={selectedDoctor}
-              onClose={() => setShowBooking(false)}
-              onBooked={handleBooked}
-            />
-          )}
-        </Modal>
-      )}
     </div>
   );
 }
