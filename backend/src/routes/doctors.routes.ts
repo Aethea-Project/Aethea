@@ -5,6 +5,7 @@
 import { Router, RequestHandler } from 'express';
 import {
   listDoctors,
+  listMarketplaceSchedulePosts,
   getDoctorById,
   getDoctorSchedules,
   getMyDoctorProfile,
@@ -17,6 +18,7 @@ import { requireLocalUser } from '../lib/authMiddleware.js';
 import { requireActiveAccount, requirePasswordChanged, requireTrustedClaims } from '../middleware/requireAccountType.js';
 import {
   doctorListQuerySchema,
+  marketplaceScheduleQuerySchema,
   scheduleQuerySchema,
   upsertDoctorProfileSchema,
   createDoctorScheduleSchema,
@@ -34,6 +36,7 @@ export const createDoctorRoutes = (authMiddleware: RequestHandler): Router => {
 
   // Public (but authenticated): browse doctors
   router.get('/', auth, validateQuery(doctorListQuerySchema), asyncHandler(listDoctors));
+  router.get('/marketplace/posts', auth, validateQuery(marketplaceScheduleQuerySchema), asyncHandler(listMarketplaceSchedulePosts));
   router.get('/:id', auth, asyncHandler(getDoctorById));
   router.get('/:id/schedules', auth, validateQuery(scheduleQuerySchema), asyncHandler(getDoctorSchedules));
 

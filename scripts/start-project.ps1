@@ -143,7 +143,7 @@ try {
 
     # Explicitly name services to avoid starting dev+prod together
     if ($Production) {
-      $composeArgs += @("postgres", "redis", "backend-prod", "web-prod")
+      $composeArgs += @("redis", "backend-prod", "web-prod")
       if ($shouldStartTunnel)  { $composeArgs += "cloudflared" }
       if ($WithTools)    { $composeArgs += @("pgadmin", "redisinsight", "mailhog") }
     }
@@ -157,9 +157,20 @@ try {
     Start-Sleep -Seconds 15
 
     Push-Location backend
-    npx prisma migrate deploy
-    if ($LASTEXITCODE -ne 0) {
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    $migrationOutput = npx prisma migrate deploy 2>&1
+    $migrationExitCode = $LASTEXITCODE
+    $ErrorActionPreference = $previousErrorActionPreference
+    if ($migrationExitCode -ne 0) {
+      Write-Host $migrationOutput -ForegroundColor Red
       throw "Prisma migrate deploy failed."
+    }
+    $migrationText = ($migrationOutput | Out-String)
+    if ($migrationText -match 'No pending migrations to apply') {
+      Write-Host "Database migrations are up to date." -ForegroundColor DarkGray
+    } else {
+      Write-Host "Database migrations applied successfully." -ForegroundColor Green
     }
     Pop-Location
 

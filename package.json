@@ -20,7 +20,7 @@
     "lint": "cd web && npm run lint",
     "docker:up": "docker compose up --build",
     "docker:down": "docker compose down",
-    "docker:db": "docker compose up postgres redis -d",
+    "docker:db": "docker compose up redis -d",
     "docker:prod": "docker compose --profile prod up --build -d",
     "docker:tools": "docker compose --profile tools up -d",
     "docker:logs": "docker compose logs -f",

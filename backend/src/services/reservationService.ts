@@ -14,6 +14,7 @@ import {
   getReservationById,
   cancelReservation as repoCancelReservation,
   updateReservationStatus as repoUpdateStatus,
+  hasPatientBookedSchedule,
 } from '../repositories/reservationRepository.js';
 import {
   getScheduleById,
@@ -42,10 +43,19 @@ export async function bookReservation(patientUserId: string, input: BookReservat
     throw AppError.notFound('Schedule not found or not available');
   }
 
+  if (schedule.doctorProfile.userId === patientUserId) {
+    throw AppError.badRequest('Doctors cannot book reservations with themselves');
+  }
+
   if (input.slotIndex < 0 || input.slotIndex >= schedule.maxPatients) {
     throw AppError.badRequest(
       `slotIndex must be between 0 and ${schedule.maxPatients - 1}`,
     );
+  }
+
+  const hasBooked = await hasPatientBookedSchedule(patientUserId, schedule.id);
+  if (hasBooked) {
+    throw AppError.conflict('You have already booked a slot on this schedule.');
   }
 
   const alreadyBooked = await isSlotBooked(schedule.id, input.slotIndex);

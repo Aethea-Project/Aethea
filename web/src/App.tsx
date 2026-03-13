@@ -18,7 +18,7 @@ import './App.css';
 
 import {
   DashboardIcon, LabIcon, ScanIcon, MedicineIcon, DoctorIcon,
-  NutritionIcon, RecoveryIcon, ChatIcon, ProfileIcon, MenuIcon, CalendarIcon
+  NutritionIcon, RecoveryIcon, ProfileIcon, MenuIcon, CalendarIcon
 } from './components/Icons';
 
 /* ── Lazy-loaded page components (code splitting for performance) ── */
@@ -27,9 +27,9 @@ const ScansPage = lazy(() => import('./pages/Scans'));
 const MedicineGuidePage = lazy(() => import('./pages/MedicineGuide'));
 const DoctorFinderPage = lazy(() => import('./pages/DoctorFinder'));
 const ReservationsPage = lazy(() => import('./pages/Reservations'));
+const AppointmentsMarketplacePage = lazy(() => import('./pages/AppointmentsMarketplace'));
 const NutritionPlannerPage = lazy(() => import('./pages/NutritionPlanner'));
 const RecoveryAssistantPage = lazy(() => import('./pages/RecoveryAssistant'));
-const DoctorChatPage = lazy(() => import('./pages/DoctorChat'));
 const ProfilePage = lazy(() => import('./pages/Profile'));
 const TestMessageEmailPage = lazy(() => import('./pages/TestMessageEmail'));
 const AuthConfirmPage = lazy(() => import('./pages/AuthConfirm'));
@@ -37,24 +37,30 @@ const AdminUsersPage = lazy(() => import('./pages/AdminUsers'));
 const StaffVerificationPage = lazy(() => import('./pages/StaffVerification'));
 const DoctorReservationsPage = lazy(() => import('./pages/DoctorReservations'));
 
+const parseAccountType = (value: unknown): AccountType | null => {
+  return value === 'patient' || value === 'doctor' || value === 'pharmacist' || value === 'admin'
+    ? value
+    : null;
+};
+
+const parseAccountStatus = (value: unknown): AccountStatus | null => {
+  return value === 'pending' || value === 'active' || value === 'suspended' || value === 'rejected'
+    ? value
+    : null;
+};
+
 const getAccountTypeFromSession = (accessToken?: string): AccountType | null => {
   if (!accessToken) return null;
   const decoded = decodeJWT(accessToken);
   if (!decoded || typeof decoded !== 'object') return null;
-  const claim = (decoded as { account_type?: unknown }).account_type;
-  return claim === 'patient' || claim === 'doctor' || claim === 'pharmacist' || claim === 'admin'
-    ? claim
-    : null;
+  return parseAccountType((decoded as { account_type?: unknown }).account_type);
 };
 
 const getAccountStatusFromSession = (accessToken?: string): AccountStatus | null => {
   if (!accessToken) return null;
   const decoded = decodeJWT(accessToken);
   if (!decoded || typeof decoded !== 'object') return null;
-  const claim = (decoded as { account_status?: unknown }).account_status;
-  return claim === 'pending' || claim === 'active' || claim === 'suspended' || claim === 'rejected'
-    ? claim
-    : null;
+  return parseAccountStatus((decoded as { account_status?: unknown }).account_status);
 };
 
 const getMustChangePasswordFromSession = (accessToken?: string): boolean => {
@@ -62,6 +68,49 @@ const getMustChangePasswordFromSession = (accessToken?: string): boolean => {
   const decoded = decodeJWT(accessToken);
   if (!decoded || typeof decoded !== 'object') return false;
   return (decoded as { must_change_password?: unknown }).must_change_password === true;
+};
+
+const getAccountTypeFromMetadata = (session: { user?: { app_metadata?: Record<string, unknown>; user_metadata?: Record<string, unknown> } } | null | undefined): AccountType | null => {
+  const appType = parseAccountType(session?.user?.app_metadata?.account_type);
+  if (appType) return appType;
+  const userTypeSnake = parseAccountType(session?.user?.user_metadata?.account_type);
+  if (userTypeSnake) return userTypeSnake;
+  return parseAccountType(session?.user?.user_metadata?.accountType);
+};
+
+const getAccountStatusFromMetadata = (session: { user?: { app_metadata?: Record<string, unknown>; user_metadata?: Record<string, unknown> } } | null | undefined): AccountStatus | null => {
+  const appStatus = parseAccountStatus(session?.user?.app_metadata?.account_status);
+  if (appStatus) return appStatus;
+  const userStatusSnake = parseAccountStatus(session?.user?.user_metadata?.account_status);
+  if (userStatusSnake) return userStatusSnake;
+  return parseAccountStatus(session?.user?.user_metadata?.accountStatus);
+};
+
+const getMustChangePasswordFromMetadata = (session: { user?: { app_metadata?: Record<string, unknown>; user_metadata?: Record<string, unknown> } } | null | undefined): boolean => {
+  return session?.user?.app_metadata?.must_change_password === true ||
+    session?.user?.user_metadata?.must_change_password === true ||
+    session?.user?.user_metadata?.mustChangePassword === true;
+};
+
+const resolveAccountType = (
+  session: { access_token?: string; user?: { app_metadata?: Record<string, unknown>; user_metadata?: Record<string, unknown> } } | null | undefined,
+  profileAccountType: AccountType | null | undefined,
+): AccountType | null => {
+  return getAccountTypeFromSession(session?.access_token) ?? getAccountTypeFromMetadata(session) ?? profileAccountType ?? null;
+};
+
+const resolveAccountStatus = (
+  session: { access_token?: string; user?: { app_metadata?: Record<string, unknown>; user_metadata?: Record<string, unknown> } } | null | undefined,
+  profileAccountStatus: AccountStatus | null | undefined,
+): AccountStatus | null => {
+  return getAccountStatusFromSession(session?.access_token) ?? getAccountStatusFromMetadata(session) ?? profileAccountStatus ?? null;
+};
+
+const resolveMustChangePassword = (
+  session: { access_token?: string; user?: { app_metadata?: Record<string, unknown>; user_metadata?: Record<string, unknown> } } | null | undefined,
+  profileMustChangePassword: boolean | undefined,
+): boolean => {
+  return getMustChangePasswordFromSession(session?.access_token) || getMustChangePasswordFromMetadata(session) || profileMustChangePassword === true;
 };
 
 const RootRoute = () => {
@@ -82,7 +131,7 @@ const RootRoute = () => {
 
 /* ── Protected Route — redirects to /login if not authenticated ── */
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, session, loading } = useAuth();
+  const { user, session, profile, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -93,9 +142,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/login" replace />;
   }
 
-  const accountType = getAccountTypeFromSession(session.access_token);
-  const accountStatus = getAccountStatusFromSession(session.access_token);
-  const mustChangePassword = getMustChangePasswordFromSession(session.access_token);
+  const accountType = resolveAccountType(session, profile?.accountType);
+  const accountStatus = resolveAccountStatus(session, profile?.accountStatus);
+  const mustChangePassword = resolveMustChangePassword(session, profile?.mustChangePassword);
 
   const isPendingStaff =
     (accountType === 'doctor' || accountType === 'pharmacist') && accountStatus === 'pending';
@@ -145,7 +194,7 @@ const RoleRoute = ({
   children: React.ReactNode;
   allowed: AccountType[];
 }) => {
-  const { user, session, loading } = useAuth();
+  const { user, session, profile, loading } = useAuth();
 
   if (loading) {
     return <PageLoader />;
@@ -155,7 +204,7 @@ const RoleRoute = ({
     return <Navigate to="/login" replace />;
   }
 
-  const accountType = getAccountTypeFromSession(session.access_token);
+  const accountType = resolveAccountType(session, profile?.accountType);
   if (!accountType || !allowed.includes(accountType)) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -321,10 +370,10 @@ const LandingPage = () => {
     },
     {
       icon: <DoctorIcon />,
-      title: 'Doctor Finder',
-      desc: 'Search specialists, read reviews, and book appointments instantly.',
+      title: 'Care Locator',
+      desc: 'Find providers and care locations near you with map-assisted discovery.',
       type: 'doctor',
-      path: '/doctors',
+      path: '/care-locator',
       imageSrc: imageAssets.features.doctor,
       imageAlt: 'Preview of doctor search and booking',
     },
@@ -345,15 +394,6 @@ const LandingPage = () => {
       path: '/recovery',
       imageSrc: imageAssets.features.recovery,
       imageAlt: 'Preview of recovery progress and exercise plan',
-    },
-    {
-      icon: <ChatIcon />,
-      title: 'Doctor Chat',
-      desc: 'Secure real-time messaging and video consultations.',
-      type: 'chat',
-      path: '/chat',
-      imageSrc: imageAssets.features.chat,
-      imageAlt: 'Preview of secure doctor chat interface',
     },
   ] as const;
 
@@ -404,7 +444,7 @@ const LandingPage = () => {
           <h1 id="hero-heading">Your Complete<br/><span className="text-gradient">Medical Companion</span></h1>
           <p>
             Aethea brings all your health records, lab results, medical scans,
-            and doctor consultations into one beautiful, secure platform.
+            and smart care support into one beautiful, secure platform.
           </p>
           <div className="landing-hero-actions">
             <Link to={signupPath} className="btn-primary-lg">
@@ -441,7 +481,7 @@ const LandingPage = () => {
         <div className="landing-section-header">
           <span className="section-badge">Platform Features</span>
           <h2 id="features-heading">Everything You Need<br/>In One Place</h2>
-          <p>From lab results to doctor consultations — your entire health journey, organized.</p>
+          <p>From lab results to appointments — your entire health journey, organized.</p>
         </div>
         <div className="features-grid">
           {featureCards.map((f) => (
@@ -476,7 +516,7 @@ const LandingPage = () => {
             </p>
             <p>
               Our platform combines clean design with practical medical tools — from viewing
-              lab results and scans to checking medicine safety and consulting with doctors.
+              lab results and scans to checking medicine safety and booking appointments.
             </p>
             <div className="about-stats">
               {[
@@ -560,8 +600,8 @@ const SidebarItem = ({ to, icon: Icon, label }: { to: string; icon: React.Compon
 };
 
 const Sidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  const { signOut, session } = useAuth();
-  const accountType = getAccountTypeFromSession(session?.access_token);
+  const { signOut, session, profile } = useAuth();
+  const accountType = resolveAccountType(session, profile?.accountType);
   const isAdmin = accountType === 'admin';
 
   return (
@@ -589,18 +629,17 @@ const Sidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
           <div className="nav-group" role="group" aria-labelledby="nav-care">
             <span className="nav-label" id="nav-care">Care &amp; Wellness</span>
             <SidebarItem to="/medicines" icon={MedicineIcon} label="Medicines" />
-            <SidebarItem to="/doctors" icon={DoctorIcon} label="Doctors" />
-            <SidebarItem to="/reservations" icon={CalendarIcon} label="Appointments" />
+            <SidebarItem to="/care-locator" icon={DoctorIcon} label="Care Locator" />
+            <SidebarItem to="/appointments-marketplace" icon={CalendarIcon} label="Appointments Marketplace" />
             <SidebarItem to="/nutrition" icon={NutritionIcon} label="Nutrition" />
             <SidebarItem to="/recovery" icon={RecoveryIcon} label="Recovery" />
-            <SidebarItem to="/chat" icon={ChatIcon} label="Consultations" />
           </div>
           {(accountType === 'doctor' || accountType === 'pharmacist') && (
             <div className="nav-group" role="group" aria-labelledby="nav-staff">
               <span className="nav-label" id="nav-staff">Staff</span>
               <SidebarItem to="/staff-verification" icon={ProfileIcon} label="Verification" />
               {accountType === 'doctor' && (
-                <SidebarItem to="/doctor-reservations" icon={CalendarIcon} label="My Schedule" />
+                <SidebarItem to="/availability-manager" icon={CalendarIcon} label="Availability Manager" />
               )}
             </div>
           )}
@@ -753,7 +792,7 @@ const Dashboard = () => {
       <div className="bento-grid" role="list" aria-label="Quick access features">
 
         {/* Doctor — spans 2 rows, has live appointment preview */}
-        <Link to="/doctors" className="bento-card theme-doc bento-span-row" role="listitem">
+        <Link to="/care-locator" className="bento-card theme-doc bento-span-row" role="listitem">
           <div className="bento-img-wrap" aria-hidden="true">
             <ImageWithFallback
               src={imageAssets.bento.doctor}
@@ -767,7 +806,7 @@ const Dashboard = () => {
             <div className="card-icon-wrapper" aria-hidden="true"><DoctorIcon /></div>
             <div>
               <h3 className="card-title">Find a Doctor</h3>
-              <p className="card-desc">Book appointments with top specialists near you.</p>
+              <p className="card-desc">Locate providers, pharmacies, and medical buildings nearby.</p>
             </div>
             <div className="card-mini-info">
               <div className="card-mini-label">Next Appointment</div>
@@ -876,25 +915,6 @@ const Dashboard = () => {
           </div>
         </Link>
 
-        <Link to="/chat" className="bento-card theme-chat" role="listitem">
-          <div className="bento-img-wrap" aria-hidden="true">
-            <ImageWithFallback
-              src={imageAssets.bento.chat}
-              alt="Doctor chat preview"
-              className="bento-img"
-              fallback={<div className="bento-img-fallback theme-chat-bg" />}
-            />
-          </div>
-          <div className="card-decoration"></div>
-          <div className="bento-body">
-            <div className="card-icon-wrapper"><ChatIcon /></div>
-            <div>
-              <h3 className="card-title">Doctor Chat</h3>
-              <p className="card-desc">Secure real-time consultations.</p>
-            </div>
-          </div>
-        </Link>
-
       </div>
     </div>
   );
@@ -919,11 +939,11 @@ function AppRoutes() {
         <Route path="/lab-results" element={<ProtectedRoute><PageLayout><LabResultsPage /></PageLayout></ProtectedRoute>} />
         <Route path="/scans" element={<ProtectedRoute><PageLayout><ScansPage /></PageLayout></ProtectedRoute>} />
         <Route path="/medicines" element={<ProtectedRoute><PageLayout><MedicineGuidePage /></PageLayout></ProtectedRoute>} />
-        <Route path="/doctors" element={<ProtectedRoute><PageLayout><DoctorFinderPage /></PageLayout></ProtectedRoute>} />
-        <Route path="/reservations" element={<ProtectedRoute><PageLayout><ReservationsPage /></PageLayout></ProtectedRoute>} />
+        <Route path="/care-locator" element={<ProtectedRoute><PageLayout><DoctorFinderPage /></PageLayout></ProtectedRoute>} />
+        <Route path="/appointments-marketplace" element={<ProtectedRoute><PageLayout><AppointmentsMarketplacePage /></PageLayout></ProtectedRoute>} />
+        <Route path="/my-appointments" element={<ProtectedRoute><PageLayout><ReservationsPage /></PageLayout></ProtectedRoute>} />
         <Route path="/nutrition" element={<ProtectedRoute><PageLayout><NutritionPlannerPage /></PageLayout></ProtectedRoute>} />
         <Route path="/recovery" element={<ProtectedRoute><PageLayout><RecoveryAssistantPage /></PageLayout></ProtectedRoute>} />
-        <Route path="/chat" element={<ProtectedRoute><PageLayout><DoctorChatPage /></PageLayout></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><PageLayout><ProfilePage /></PageLayout></ProtectedRoute>} />
         <Route
           path="/admin/users"
@@ -934,9 +954,14 @@ function AppRoutes() {
           element={<RoleRoute allowed={['doctor', 'pharmacist']}><PageLayout><StaffVerificationPage /></PageLayout></RoleRoute>}
         />
         <Route
-          path="/doctor-reservations"
+          path="/availability-manager"
           element={<RoleRoute allowed={['doctor', 'admin']}><PageLayout><DoctorReservationsPage /></PageLayout></RoleRoute>}
         />
+
+        {/* Legacy route aliases during migration */}
+        <Route path="/doctors" element={<Navigate to="/care-locator" replace />} />
+        <Route path="/reservations" element={<Navigate to="/appointments-marketplace" replace />} />
+        <Route path="/doctor-reservations" element={<Navigate to="/availability-manager" replace />} />
 
         {/* ── Fallback ── */}
         <Route path="*" element={<Navigate to="/" replace />} />

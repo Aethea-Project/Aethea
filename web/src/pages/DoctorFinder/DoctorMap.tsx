@@ -17,6 +17,7 @@ interface DoctorMapProps {
   mapError: string;
   nearbyPharmacies: NearbyPlace[];
   nearbyDoctors: NearbyPlace[];
+  nearbyMedicalBuildings: NearbyPlace[];
   userLocation: LatLng;
   googleMapsApiKey?: string;
 }
@@ -26,6 +27,7 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
   mapError,
   nearbyPharmacies,
   nearbyDoctors,
+  nearbyMedicalBuildings,
   userLocation,
   googleMapsApiKey,
 }) => {
@@ -123,6 +125,7 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
     const places = [
       ...nearbyPharmacies.map((p) => ({ ...p, icon: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png' })),
       ...nearbyDoctors.map((p) => ({ ...p, icon: 'https://maps.google.com/mapfiles/ms/icons/purple-dot.png' })),
+      ...nearbyMedicalBuildings.map((p) => ({ ...p, icon: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png' })),
     ];
 
     placeMarkersRef.current = places.map((place) => {
@@ -148,7 +151,7 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
 
       return marker;
     });
-  }, [mapReady, nearbyPharmacies, nearbyDoctors]);
+  }, [mapReady, nearbyPharmacies, nearbyDoctors, nearbyMedicalBuildings]);
 
   return (
     <div className="map-container">

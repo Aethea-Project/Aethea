@@ -13,9 +13,11 @@ import {
 } from '../repositories/doctorRepository.js';
 import {
   listDoctorSchedules,
+  listMarketplaceSchedules,
   getScheduleById,
   createSchedule,
   type CreateScheduleInput,
+  type MarketplaceScheduleFilters,
 } from '../repositories/scheduleRepository.js';
 
 /* ─── Doctor discovery ─── */
@@ -63,6 +65,16 @@ export async function getPublishedSchedules(
 ) {
   const skip = (page - 1) * limit;
   return listDoctorSchedules(doctorProfileId, from, to, skip, limit);
+}
+
+export async function getMarketplacePosts(
+  filters: MarketplaceScheduleFilters,
+  page: number,
+  limit: number,
+) {
+  const skip = (page - 1) * limit;
+  const { schedules, total } = await listMarketplaceSchedules(filters, skip, limit);
+  return { schedules, total };
 }
 
 export async function createDoctorSchedule(userId: string, data: CreateScheduleInput) {
