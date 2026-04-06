@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FeatureHeader } from '../../components/FeatureHeader';
 import { Modal } from '../../components/Modal';
 import { imageAssets } from '../../constants/imageAssets';
 import { useMarketplaceSchedules } from '../../hooks/useDoctors';
 import { useReservations } from '../../hooks/useReservations';
 import { useAuth } from '@core/auth/useAuth';
+import { useUiNotifications } from '../../contexts/UiNotificationsProvider';
 import { decodeJWT } from '@core/auth/token-manager';
 import type { AccountType } from '@core/auth/auth-types';
 import type { MarketplaceSchedulePost } from '../../services/medicalApi';
@@ -31,6 +33,10 @@ function getAccountType(accessToken?: string): AccountType | null {
   return claim === 'patient' || claim === 'doctor' || claim === 'pharmacist' || claim === 'admin' ? claim : null;
 }
 
+function resolveAccountType(tokenAccountType: AccountType | null, profileAccountType: AccountType | null | undefined): AccountType | null {
+  return tokenAccountType ?? profileAccountType ?? null;
+}
+
 function ReserveModal({
   post,
   onClose,
@@ -41,11 +47,11 @@ function ReserveModal({
   onBooked: () => void;
 }) {
   const { book } = useReservations();
+  const { notifySuccess, notifyError } = useUiNotifications();
   const [selectedSlotIndex, setSelectedSlotIndex] = useState<number | null>(null);
   const [reason, setReason] = useState('');
   const [shareHealthData, setShareHealthData] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const availableSlots = useMemo(
     () => Array.from({ length: post.schedule.maxPatients }, (_, i) => i).filter((i) => !post.schedule.bookedSlotIndexes.includes(i)),
@@ -58,7 +64,6 @@ function ReserveModal({
     e.preventDefault();
     if (selectedSlotIndex === null || !reason.trim()) return;
     setSubmitting(true);
-    setError(null);
     try {
       await book({
         doctorScheduleId: post.schedule.id,
@@ -66,9 +71,17 @@ function ReserveModal({
         reason: reason.trim(),
         shareHealthData,
       });
+      notifySuccess(
+        'Appointment booked',
+        `Your reservation with Dr. ${post.doctor.firstName} ${post.doctor.lastName} is confirmed.`,
+      );
       onBooked();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Booking failed');
+      notifyError(
+        'Booking failed',
+        'We could not complete your reservation.',
+        err instanceof Error ? err.message : 'Unknown error',
+      );
     } finally {
       setSubmitting(false);
     }
@@ -112,8 +125,10 @@ function ReserveModal({
               rows={3}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Describe your visit reason"
+              placeholder="Describe your visit reason (e.g. Back pain, Checkup)"
               required
+              minLength={2}
+              maxLength={500}
             />
           </label>
 
@@ -125,9 +140,6 @@ function ReserveModal({
             />
             Share my health records with this doctor
           </label>
-
-          {error && <p className="error">{error}</p>}
-          {selectedSlotIndex === null && <p className="error">Select a slot time before booking.</p>}
 
           <div className="modal-actions">
             <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
@@ -142,19 +154,81 @@ function ReserveModal({
 }
 
 export default function AppointmentsMarketplacePage() {
-  const { session } = useAuth();
-  const accountType = getAccountType(session?.access_token);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { session, profile } = useAuth();
+  const accountType = resolveAccountType(getAccountType(session?.access_token), profile?.accountType);
   const canBook = accountType !== 'admin';
 
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(() => searchParams.get('search') ?? '');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [specialty, setSpecialty] = useState('All Specialties');
-  const [city, setCity] = useState('');
-  const [date, setDate] = useState('');
+  const [specialty, setSpecialty] = useState(() => {
+    const specialtyParam = searchParams.get('specialty');
+    return specialtyParam && SPECIALTIES.includes(specialtyParam) ? specialtyParam : 'All Specialties';
+  });
+  const [city, setCity] = useState(() => searchParams.get('city') ?? '');
+  const [date, setDate] = useState(() => searchParams.get('date') ?? '');
   const [selectedPost, setSelectedPost] = useState<MarketplaceSchedulePost | null>(null);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [alertMessages, setAlertMessages] = useState<Record<string, string>>({});
+  const [alertLoading, setAlertLoading] = useState<Record<string, boolean>>({});
 
   const { posts, loading, error, search: searchPosts } = useMarketplaceSchedules();
+  const { alertOnAvailability } = useReservations();
+
+  const clearFilters = () => {
+    setSearch('');
+    setCity('');
+    setDate('');
+    setSpecialty('All Specialties');
+  };
+
+  const emptyState = useMemo(() => {
+    if (accountType === 'doctor') {
+      return {
+        message: 'No published schedule posts match the current filters.',
+        hint: 'Create or publish availability from Availability Manager so patients can book.',
+        showDoctorAction: true,
+      };
+    }
+
+    if (accountType === 'patient') {
+      return {
+        message: 'No doctor posts match your current filters.',
+        hint: 'Try clearing filters or choosing a different date or city.',
+        showDoctorAction: false,
+      };
+    }
+
+    if (accountType === 'admin') {
+      return {
+        message: 'No published schedule posts match the current filters.',
+        hint: 'Admin view is read-only. You can clear filters to inspect more posts.',
+        showDoctorAction: false,
+      };
+    }
+
+    return {
+      message: 'No posts found for your filters.',
+      hint: 'Try clearing filters or changing search criteria.',
+      showDoctorAction: false,
+    };
+  }, [accountType]);
+
+  const handleAlertSubscription = async (doctorScheduleId: string) => {
+    setAlertLoading((prev) => ({ ...prev, [doctorScheduleId]: true }));
+    try {
+      const message = await alertOnAvailability(doctorScheduleId);
+      setAlertMessages((prev) => ({ ...prev, [doctorScheduleId]: message }));
+    } catch (err) {
+      setAlertMessages((prev) => ({
+        ...prev,
+        [doctorScheduleId]: err instanceof Error ? err.message : 'Failed to subscribe to availability alerts',
+      }));
+    } finally {
+      setAlertLoading((prev) => ({ ...prev, [doctorScheduleId]: false }));
+    }
+  };
 
   useEffect(() => {
     const timeout = setTimeout(() => setDebouncedSearch(search), 350);
@@ -218,41 +292,103 @@ export default function AppointmentsMarketplacePage() {
       {loading ? (
         <p className="loading">Loading availability posts...</p>
       ) : posts.length === 0 ? (
-        <p className="loading">No posts found for your filters.</p>
+        <div className="marketplace-empty-state">
+          <p className="loading">{emptyState.message}</p>
+          <p className="marketplace-empty-state-hint">{emptyState.hint}</p>
+          <div className="marketplace-empty-actions">
+            <button type="button" className="btn btn-ghost" onClick={clearFilters}>
+              Clear Filters
+            </button>
+            {emptyState.showDoctorAction && (
+              <button
+                type="button"
+                className="book-btn"
+                onClick={() => navigate('/availability-manager')}
+              >
+                Open Availability Manager
+              </button>
+            )}
+          </div>
+        </div>
       ) : (
-        <div className="appointments-posts-grid">
+        <div className="doctors-grid appointments-posts-grid">
           {posts.map((post) => {
             const availableSlots = post.schedule.maxPatients - post.schedule.bookedSlotIndexes.length;
+            const name = `Dr. ${post.doctor.firstName} ${post.doctor.lastName}`;
+            const location = [post.doctor.clinicName, post.doctor.city].filter(Boolean).join(', ') || 'Location unknown';
+
             return (
-              <div key={post.schedule.id} className="appointments-post-card">
-                <div className="appointments-post-header">
-                  <h3>Dr. {post.doctor.firstName} {post.doctor.lastName}</h3>
-                  <span className="appointments-post-badge">{post.doctor.specialty}</span>
+              <div key={post.schedule.id} className="doctor-card appointments-post-card">
+                <div className="doctor-card-header">
+                  <div className="doctor-avatar">
+                   {post.doctor.photoUrl ? (
+                      <img src={post.doctor.photoUrl} alt={name} />
+                    ) : (
+                      <span>{post.doctor.firstName[0]}{post.doctor.lastName[0]}</span>
+                    )}
+                  </div>
+                  <div className="doctor-info">
+                    <div className="doctor-name-row">
+                      <h3>{name}</h3>
+                      {post.doctor.verified && (
+                        <span className="verified-badge" title="Verified">✓</span>
+                      )}
+                    </div>
+                    <p className="doctor-specialty">{post.doctor.specialty}</p>
+                  </div>
                 </div>
-                <p className="appointments-post-meta">
-                  {post.doctor.clinicName ?? 'Clinic not set'} · {post.doctor.city ?? 'City not set'}
-                </p>
-                <p className="appointments-post-meta">
-                  {new Date(post.schedule.scheduleDate).toLocaleDateString()} ·
-                  {' '}
-                  {new Date(post.schedule.startAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-                  {' - '}
-                  {new Date(post.schedule.endAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-                </p>
-                <p className="appointments-post-meta">
-                  {post.schedule.slotDurationMins} min slots · {availableSlots}/{post.schedule.maxPatients} available
-                </p>
-                <button
-                  className="book-btn"
-                  type="button"
-                  disabled={!canBook || availableSlots <= 0}
-                  onClick={() => {
-                    setSelectedPost(post);
-                    setBookingSuccess(false);
-                  }}
-                >
-                  {availableSlots <= 0 ? 'Fully Booked' : canBook ? 'Reserve Slot' : 'Read Only'}
-                </button>
+
+                <div className="doctor-details">
+                  <div className="detail-row">
+                    <span className="detail-icon">📅</span>
+                    <span>{new Date(post.schedule.scheduleDate).toLocaleDateString()}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-icon">⏰</span>
+                    <span>
+                      {new Date(post.schedule.startAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                      {' - '}
+                      {new Date(post.schedule.endAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  {location && (
+                    <div className="detail-row">
+                      <span className="detail-icon">📍</span>
+                      <span>{location}</span>
+                    </div>
+                  )}
+                  <div className="detail-row">
+                    <span className="detail-icon">👥</span>
+                    <span>{post.schedule.slotDurationMins} min slots · {availableSlots}/{post.schedule.maxPatients} available</span>
+                  </div>
+                </div>
+
+                <div className="doctor-actions layout-col">
+                  <button
+                    className="book-btn"
+                    type="button"
+                    disabled={!canBook || availableSlots <= 0}
+                    onClick={() => {
+                      setSelectedPost(post);
+                      setBookingSuccess(false);
+                    }}
+                  >
+                    {availableSlots <= 0 ? 'Fully Booked' : canBook ? 'Reserve Slot' : 'Read Only'}
+                  </button>
+                  {availableSlots <= 0 && canBook && (
+                    <button
+                      className="view-profile-btn"
+                      type="button"
+                      disabled={alertLoading[post.schedule.id] === true}
+                      onClick={() => void handleAlertSubscription(post.schedule.id)}
+                    >
+                      {alertLoading[post.schedule.id] ? 'Saving...' : 'Notify Me If Slot Opens'}
+                    </button>
+                  )}
+                  {alertMessages[post.schedule.id] && (
+                    <p className="appointments-alert-message">{alertMessages[post.schedule.id]}</p>
+                  )}
+                </div>
               </div>
             );
           })}

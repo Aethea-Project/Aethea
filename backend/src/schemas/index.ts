@@ -110,6 +110,10 @@ export const updateReservationStatusSchema = z.object({
   notes: z.string().max(500).optional(),
 }).strict();
 
+export const reservationAvailabilityAlertSchema = z.object({
+  doctorScheduleId: z.string().uuid(),
+}).strict();
+
 /**
  * Doctor discovery query
  */
@@ -194,7 +198,7 @@ export const adminListUsersQuerySchema = z.object({
 export const adminCreateUserSchema = z.object({
   email: z.string().trim().email().max(254),
   temporaryPassword: z.string().min(12).max(128),
-  accountType: z.enum(['doctor', 'pharmacist']),
+  accountType: accountTypeEnum,
   firstName: z.string().trim().min(2).max(50),
   lastName: z.string().trim().min(2).max(50),
 }).strict();
@@ -212,6 +216,25 @@ export const adminUpdateUserStatusSchema = z.object({
     });
   }
 });
+
+export const adminUpdateUserAccountTypeSchema = z.object({
+  accountType: accountTypeEnum,
+}).strict();
+
+export const adminUpdateUserProfileSchema = z.object({
+  firstName: z.string().trim().min(2).max(50).optional(),
+  lastName: z.string().trim().min(2).max(50).optional(),
+  gender: z.enum(['male', 'female']).optional(),
+  phone: z.string().trim().max(20).optional(),
+  dateOfBirth: z.string().date().optional(),
+  bloodType: z.enum(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']).optional(),
+  allergies: z.string().trim().max(500).optional(),
+  chronicConditions: z.string().trim().max(500).optional(),
+  heightCm: z.number().min(30).max(300).optional(),
+  weightKg: z.number().min(1).max(500).optional(),
+  emergencyContactName: z.string().trim().max(100).optional(),
+  emergencyContactPhone: z.string().trim().max(20).optional(),
+}).strict();
 
 const auditActionEnum = z.enum([
   'user.approve',

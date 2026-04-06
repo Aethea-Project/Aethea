@@ -13,6 +13,7 @@ import {
   getPublishedSchedules,
   getMarketplacePosts,
   createDoctorSchedule,
+  removeDoctorSchedule,
 } from '../services/doctorService.js';
 import type { CreateScheduleInput } from '../repositories/scheduleRepository.js';
 
@@ -83,4 +84,12 @@ export const createMySchedule = async (req: Request, res: Response): Promise<voi
   const user = req.localUser!;
   const schedule = await createDoctorSchedule(user.id, req.body as CreateScheduleInput);
   res.status(201).json({ schedule });
+};
+
+/** DELETE /doctors/me/schedules/:scheduleId — doctor deletes a schedule */
+export const deleteMySchedule = async (req: Request, res: Response): Promise<void> => {
+  const user = req.localUser!;
+  const reason = req.body?.reason || 'No reason provided';
+  await removeDoctorSchedule(user.id, req.params.scheduleId as string, reason);
+  res.status(204).send();
 };

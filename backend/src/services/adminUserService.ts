@@ -13,11 +13,16 @@ import {
   countActiveAdmins,
   getAccountStatus,
   updateAccountStatus,
+  findUserById,
+  updateUserProfileByAdmin,
+  updateUserAccountType,
   countUsers,
   findUsers,
   countAuditLogs,
   findAuditLogs,
   type AccountStatus,
+  type AccountType,
+  type AdminProfileUpdateInput,
   type StaffAccountType,
   type ListUsersFilters,
   type AuditLogFilters,
@@ -51,6 +56,17 @@ export interface UpdateStatusInput {
 export interface RequestMeta {
   headers: Record<string, string | string[] | undefined>;
   socketAddress?: string;
+}
+
+export interface UpdateAccountTypeInput {
+  userId: string;
+  accountType: AccountType;
+  actorId: string;
+}
+
+export interface DeleteUserInput {
+  userId: string;
+  actorId: string;
 }
 
 /* ─── Service functions ─── */
@@ -190,6 +206,182 @@ export async function listUsers(filters: ListUsersFilters, page: number, limit: 
   }));
 
   return { data: mapped, total, page, limit };
+}
+
+export async function getUserDetail(userId: string) {
+  const row = await findUserById(userId);
+  if (!row) {
+    throw AppError.notFound('User account not found');
+  }
+
+  return {
+    id: row.id,
+    email: row.email,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    gender: row.gender,
+    phone: row.phone,
+    dateOfBirth: row.date_of_birth,
+    bloodType: row.blood_type,
+    allergies: row.allergies,
+    chronicConditions: row.chronic_conditions,
+    heightCm: row.height_cm,
+    weightKg: row.weight_kg,
+    emergencyContactName: row.emergency_contact_name,
+    emergencyContactPhone: row.emergency_contact_phone,
+    accountType: row.account_type,
+    accountStatus: row.account_status,
+    mustChangePassword: row.must_change_password,
+    approvedBy: row.approved_by,
+    approvedAt: row.approved_at,
+    rejectedReason: row.rejected_reason,
+    suspendedReason: row.suspended_reason,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export async function updateUserProfile(
+  userId: string,
+  input: AdminProfileUpdateInput,
+  actorId: string,
+  meta: RequestMeta,
+) {
+  const current = await findUserById(userId);
+  if (!current) {
+    throw AppError.notFound('User account not found');
+  }
+
+  await updateUserProfileByAdmin(userId, input);
+  const updated = await getUserDetail(userId);
+
+  const { ipAddress, userAgent } = extractRequestMeta(meta.headers, meta.socketAddress);
+  await writeAuditLog({
+    actorId,
+    action: 'user.approve',
+    targetType: 'user_account',
+    targetId: userId,
+    oldValue: {
+      firstName: current.first_name,
+      lastName: current.last_name,
+      phone: current.phone,
+      gender: current.gender,
+      dateOfBirth: current.date_of_birth,
+    },
+    newValue: {
+      firstName: updated.firstName,
+      lastName: updated.lastName,
+      phone: updated.phone,
+      gender: updated.gender,
+      dateOfBirth: updated.dateOfBirth,
+    },
+    ipAddress,
+    userAgent,
+  });
+
+  return updated;
+}
+
+export async function changeUserAccountType(
+  input: UpdateAccountTypeInput,
+  meta: RequestMeta,
+) {
+  const current = await getAccountStatus(input.userId);
+  if (!current) {
+    throw AppError.notFound('User account not found');
+  }
+
+  const nextStatus: AccountStatus =
+    input.accountType === 'patient' ? 'active' :
+      input.accountType === 'admin' ? 'active' :
+        'pending';
+
+  const mustChangePassword = input.accountType !== 'patient';
+
+  const updated = await updateUserAccountType(
+    input.userId,
+    input.accountType,
+    nextStatus,
+    mustChangePassword,
+    input.actorId,
+  );
+
+  if (!updated) {
+    throw AppError.notFound('User account not found');
+  }
+
+  const { ipAddress, userAgent } = extractRequestMeta(meta.headers, meta.socketAddress);
+  await writeAuditLog({
+    actorId: input.actorId,
+    action: 'user.approve',
+    targetType: 'user_account',
+    targetId: input.userId,
+    oldValue: {
+      accountType: current.account_type,
+      accountStatus: current.account_status,
+      mustChangePassword: current.must_change_password,
+    },
+    newValue: {
+      accountType: updated.account_type,
+      accountStatus: updated.account_status,
+      mustChangePassword: updated.must_change_password,
+    },
+    ipAddress,
+    userAgent,
+  });
+
+  return {
+    id: updated.id,
+    accountType: updated.account_type,
+    accountStatus: updated.account_status,
+    mustChangePassword: updated.must_change_password,
+    approvedBy: updated.approved_by,
+    approvedAt: updated.approved_at,
+    rejectedReason: updated.rejected_reason,
+    suspendedReason: updated.suspended_reason,
+    updatedAt: updated.updated_at,
+  };
+}
+
+export async function deleteUserAccount(input: DeleteUserInput, meta: RequestMeta) {
+  const current = await getAccountStatus(input.userId);
+  if (!current) {
+    throw AppError.notFound('User account not found');
+  }
+
+  if (current.account_type === 'admin' && current.account_status === 'active') {
+    const adminCount = await countActiveAdmins();
+    if (adminCount <= 1) {
+      throw AppError.badRequest(
+        'Cannot delete the only active admin account. Create another active admin first.',
+        'ADMIN_LOCKOUT_PREVENTED',
+      );
+    }
+  }
+
+  const supabaseAdmin = getSupabaseAdminClient();
+  const { error } = await supabaseAdmin.auth.admin.deleteUser(input.userId);
+  if (error) {
+    throw AppError.badRequest(error.message, 'ADMIN_DELETE_USER_FAILED');
+  }
+
+  const { ipAddress, userAgent } = extractRequestMeta(meta.headers, meta.socketAddress);
+  await writeAuditLog({
+    actorId: input.actorId,
+    action: 'user.reject',
+    targetType: 'user_account',
+    targetId: input.userId,
+    oldValue: {
+      accountType: current.account_type,
+      accountStatus: current.account_status,
+      mustChangePassword: current.must_change_password,
+    },
+    newValue: {
+      deleted: true,
+    },
+    ipAddress,
+    userAgent,
+  });
 }
 
 export async function listAuditLog(filters: AuditLogFilters, page: number, limit: number, skip: number) {

@@ -15,6 +15,7 @@ interface NearbyPlace {
 interface DoctorMapProps {
   mapReady: boolean;
   mapError: string;
+  onInitError?: (message: string) => void;
   nearbyPharmacies: NearbyPlace[];
   nearbyDoctors: NearbyPlace[];
   nearbyMedicalBuildings: NearbyPlace[];
@@ -25,6 +26,7 @@ interface DoctorMapProps {
 export const DoctorMap: React.FC<DoctorMapProps> = ({
   mapReady,
   mapError,
+  onInitError,
   nearbyPharmacies,
   nearbyDoctors,
   nearbyMedicalBuildings,
@@ -36,38 +38,6 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
   const googleMapsRef = useRef<any | null>(null);
   const placeMarkersRef = useRef<any[]>([]);
 
-  const GOOGLE_MAPS_SCRIPT_ID = 'aethea-google-maps-script';
-
-  const loadGoogleMapsApi = (apiKey: string) =>
-    new Promise<any>((resolve, reject) => {
-      const windowWithGoogle = window as Window & {
-        google?: {
-          maps?: any;
-        };
-      };
-
-      if (windowWithGoogle.google?.maps) {
-        resolve(windowWithGoogle.google);
-        return;
-      }
-
-      const existingScript = document.getElementById(GOOGLE_MAPS_SCRIPT_ID) as HTMLScriptElement | null;
-      if (existingScript) {
-        existingScript.addEventListener('load', () => resolve(windowWithGoogle.google));
-        existingScript.addEventListener('error', () => reject(new Error('Failed to load Google Maps script')));
-        return;
-      }
-
-      const script = document.createElement('script');
-      script.id = GOOGLE_MAPS_SCRIPT_ID;
-      script.async = true;
-      script.defer = true;
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
-      script.onload = () => resolve(windowWithGoogle.google);
-      script.onerror = () => reject(new Error('Failed to load Google Maps script'));
-      document.head.appendChild(script);
-    });
-
   const clearMarkers = (markersRef: React.MutableRefObject<any[]>) => {
     markersRef.current.forEach((marker) => marker.setMap(null));
     markersRef.current = [];
@@ -77,15 +47,24 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
     let cancelled = false;
 
     const initializeMap = async () => {
-      if (!googleMapsApiKey || !mapElementRef.current) return;
+      if (!googleMapsApiKey || !mapReady || !mapElementRef.current) return;
+      if (!(mapElementRef.current instanceof HTMLElement)) return;
+      if (mapInstanceRef.current) return;
 
       try {
-        const google = await loadGoogleMapsApi(googleMapsApiKey);
-        if (cancelled || !mapElementRef.current) return;
+        const windowWithGoogle = window as Window & { google?: { maps?: Record<string, unknown> } };
+        const google = windowWithGoogle.google;
+        if (!google || cancelled || !mapElementRef.current) return;
 
-        googleMapsRef.current = google;
+        if (typeof google.maps?.Map !== 'function') {
+          throw new Error('Google Maps failed to initialize. Check API key and billing/project status.');
+        }
 
-        const map = new google.maps.Map(mapElementRef.current, {
+        const googleMaps = google as any;
+
+        googleMapsRef.current = googleMaps;
+
+        const map = new googleMaps.maps.Map(mapElementRef.current, {
           center: userLocation,
           zoom: 13,
           mapTypeControl: false,
@@ -102,7 +81,7 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
 
         mapInstanceRef.current = map;
 
-        new google.maps.Marker({
+        new googleMaps.maps.Marker({
           map,
           position: userLocation,
           title: 'Your current location',
@@ -110,12 +89,18 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
         });
       } catch (err) {
         console.error('Failed to init map', err);
+        onInitError?.('Could not initialize Google Maps. Verify VITE_GOOGLE_MAPS_API_KEY and Google Cloud project status.');
       }
     };
 
     void initializeMap();
-    return () => { cancelled = true; };
-  }, [googleMapsApiKey, userLocation]);
+    return () => {
+      cancelled = true;
+      clearMarkers(placeMarkersRef);
+      mapInstanceRef.current = null;
+      googleMapsRef.current = null;
+    };
+  }, [googleMapsApiKey, mapReady, onInitError, userLocation]);
 
   useEffect(() => {
     if (!mapReady || !mapInstanceRef.current || !googleMapsRef.current) return;

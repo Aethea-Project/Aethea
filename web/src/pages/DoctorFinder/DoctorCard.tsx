@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { DoctorProfile } from '../../services/medicalApi';
 
 interface DoctorCardProps {
@@ -6,8 +7,21 @@ interface DoctorCardProps {
 }
 
 export const DoctorCard: React.FC<DoctorCardProps> = ({ doctor }) => {
+  const navigate = useNavigate();
   const name = `Dr. ${doctor.firstName} ${doctor.lastName}`;
   const location = [doctor.clinicName, doctor.city].filter(Boolean).join(', ') || 'Location unknown';
+
+  const handleViewInMarketplace = () => {
+    const params = new URLSearchParams();
+    params.set('search', `${doctor.firstName} ${doctor.lastName}`);
+    if (doctor.specialty) {
+      params.set('specialty', doctor.specialty);
+    }
+    if (doctor.city) {
+      params.set('city', doctor.city);
+    }
+    navigate(`/appointments-marketplace?${params.toString()}`);
+  };
 
   return (
     <div className="doctor-card">
@@ -52,7 +66,7 @@ export const DoctorCard: React.FC<DoctorCardProps> = ({ doctor }) => {
       </div>
 
       <div className="doctor-actions">
-        <button className="book-btn" type="button" disabled>
+        <button className="book-btn" type="button" onClick={handleViewInMarketplace}>
           View In Marketplace
         </button>
       </div>

@@ -1,0 +1,154 @@
+.notifications-page {
+  padding: 2rem;
+}
+
+.notifications-toolbar {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.notifications-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.notifications-search,
+.notifications-select {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.58rem 0.7rem;
+  background: #ffffff;
+  color: #0f172a;
+  min-width: 180px;
+}
+
+.notifications-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.notifications-unread {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #334155;
+  margin-right: 0.35rem;
+}
+
+.notifications-empty {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #475569;
+  padding: 1rem;
+}
+
+.notifications-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.notifications-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.notifications-item.unread {
+  background: #f8fafc;
+}
+
+.notifications-main {
+  flex: 1;
+}
+
+.notifications-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.notifications-title-row h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #0f172a;
+}
+
+.notifications-main p {
+  margin: 0.35rem 0 0;
+  color: #1e293b;
+  font-size: 0.9rem;
+}
+
+.notifications-main pre {
+  margin: 0.45rem 0 0;
+  white-space: pre-wrap;
+  border-radius: 8px;
+  background: #f1f5f9;
+  padding: 0.55rem;
+  color: #334155;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.82rem;
+}
+
+.notifications-main small {
+  display: block;
+  margin-top: 0.45rem;
+  color: #64748b;
+}
+
+.notifications-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #0f766e;
+  display: inline-block;
+}
+
+.notifications-item-actions {
+  display: flex;
+  gap: 0.45rem;
+  align-items: flex-start;
+}
+
+.notifications-item.success {
+  border-left: 4px solid #15803d;
+}
+
+.notifications-item.error {
+  border-left: 4px solid #b91c1c;
+}
+
+.notifications-item.warning {
+  border-left: 4px solid #b45309;
+}
+
+.notifications-item.info {
+  border-left: 4px solid #0369a1;
+}
+
+@media (max-width: 820px) {
+  .notifications-page {
+    padding: 1rem;
+  }
+
+  .notifications-item {
+    flex-direction: column;
+  }
+
+  .notifications-item-actions {
+    justify-content: flex-end;
+  }
+}

@@ -41,6 +41,15 @@ function resolveApiBaseUrl(): string {
 
 export const API_BASE = resolveApiBaseUrl();
 
+function emitApiError(title: string, message: string, details?: string): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(
+    new CustomEvent('aethea-api-error', {
+      detail: { title, message, details },
+    }),
+  );
+}
+
 // ── Authenticated fetch ──────────────────────────────────────────────────────
 
 /**
@@ -71,18 +80,42 @@ export async function authFetch<T>(path: string, init?: RequestInit): Promise<T>
     if (!res.ok) {
       const text = await res.text();
       let message = text || `Request failed (${res.status})`;
+      let detailsString = `Endpoint: ${path} | HTTP ${res.status}`;
+      
       try {
         const json = JSON.parse(text);
         if (json.error) message = json.error;
+        if (json.details && Array.isArray(json.details)) {
+          detailsString += '\\n' + json.details.map((d: any) => `- ${d.field}: ${d.message}`).join('\\n');
+        }
       } catch {
-        // Response body is not JSON — use raw text as-is
+        // Response body is not JSON - use raw text as-is
       }
+
+      if (res.status >= 500) {
+        emitApiError(
+          `System Error (${res.status})`,
+          message,
+          detailsString,
+        );
+      }
+
       throw new Error(message);
     }
 
-    return res.json() as Promise<T>;
+    if (res.status === 204) {
+      return undefined as unknown as T;
+    }
+
+    const responseText = await res.text();
+    if (!responseText) {
+      return undefined as unknown as T;
+    }
+
+    return JSON.parse(responseText) as T;
   } catch (err) {
     if (err instanceof DOMException && err.name === 'AbortError') {
+      emitApiError('Network Timeout', 'The request took too long and was cancelled.', `Endpoint: ${path}`);
       throw new Error(`Request to ${path} timed out after ${REQUEST_TIMEOUT_MS / 1000}s`);
     }
     throw err;

@@ -202,6 +202,7 @@ export type UserWhereInput = {
   labTests?: Prisma.LabTestListRelationFilter
   scans?: Prisma.ScanListRelationFilter
   reservations?: Prisma.ReservationListRelationFilter
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionListRelationFilter
   doctorProfile?: Prisma.XOR<Prisma.DoctorProfileNullableScalarRelationFilter, Prisma.DoctorProfileWhereInput> | null
   notifications?: Prisma.NotificationListRelationFilter
 }
@@ -218,6 +219,7 @@ export type UserOrderByWithRelationInput = {
   labTests?: Prisma.LabTestOrderByRelationAggregateInput
   scans?: Prisma.ScanOrderByRelationAggregateInput
   reservations?: Prisma.ReservationOrderByRelationAggregateInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionOrderByRelationAggregateInput
   doctorProfile?: Prisma.DoctorProfileOrderByWithRelationInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
 }
@@ -237,6 +239,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   labTests?: Prisma.LabTestListRelationFilter
   scans?: Prisma.ScanListRelationFilter
   reservations?: Prisma.ReservationListRelationFilter
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionListRelationFilter
   doctorProfile?: Prisma.XOR<Prisma.DoctorProfileNullableScalarRelationFilter, Prisma.DoctorProfileWhereInput> | null
   notifications?: Prisma.NotificationListRelationFilter
 }, "id" | "email">
@@ -279,6 +282,7 @@ export type UserCreateInput = {
   labTests?: Prisma.LabTestCreateNestedManyWithoutUserInput
   scans?: Prisma.ScanCreateNestedManyWithoutUserInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionCreateNestedManyWithoutUserInput
   doctorProfile?: Prisma.DoctorProfileCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
@@ -295,6 +299,7 @@ export type UserUncheckedCreateInput = {
   labTests?: Prisma.LabTestUncheckedCreateNestedManyWithoutUserInput
   scans?: Prisma.ScanUncheckedCreateNestedManyWithoutUserInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUncheckedCreateNestedManyWithoutUserInput
   doctorProfile?: Prisma.DoctorProfileUncheckedCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
@@ -311,6 +316,7 @@ export type UserUpdateInput = {
   labTests?: Prisma.LabTestUpdateManyWithoutUserNestedInput
   scans?: Prisma.ScanUpdateManyWithoutUserNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUpdateManyWithoutUserNestedInput
   doctorProfile?: Prisma.DoctorProfileUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
@@ -327,6 +333,7 @@ export type UserUncheckedUpdateInput = {
   labTests?: Prisma.LabTestUncheckedUpdateManyWithoutUserNestedInput
   scans?: Prisma.ScanUncheckedUpdateManyWithoutUserNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUncheckedUpdateManyWithoutUserNestedInput
   doctorProfile?: Prisma.DoctorProfileUncheckedUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -482,6 +489,20 @@ export type UserUpdateOneRequiredWithoutDoctorProfileNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDoctorProfileInput, Prisma.UserUpdateWithoutDoctorProfileInput>, Prisma.UserUncheckedUpdateWithoutDoctorProfileInput>
 }
 
+export type UserCreateNestedOneWithoutAlertSubscriptionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAlertSubscriptionsInput, Prisma.UserUncheckedCreateWithoutAlertSubscriptionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAlertSubscriptionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAlertSubscriptionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAlertSubscriptionsInput, Prisma.UserUncheckedCreateWithoutAlertSubscriptionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAlertSubscriptionsInput
+  upsert?: Prisma.UserUpsertWithoutAlertSubscriptionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAlertSubscriptionsInput, Prisma.UserUpdateWithoutAlertSubscriptionsInput>, Prisma.UserUncheckedUpdateWithoutAlertSubscriptionsInput>
+}
+
 export type UserCreateNestedOneWithoutNotificationsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput
@@ -507,6 +528,7 @@ export type UserCreateWithoutSessionsInput = {
   labTests?: Prisma.LabTestCreateNestedManyWithoutUserInput
   scans?: Prisma.ScanCreateNestedManyWithoutUserInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionCreateNestedManyWithoutUserInput
   doctorProfile?: Prisma.DoctorProfileCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
@@ -522,6 +544,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   labTests?: Prisma.LabTestUncheckedCreateNestedManyWithoutUserInput
   scans?: Prisma.ScanUncheckedCreateNestedManyWithoutUserInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUncheckedCreateNestedManyWithoutUserInput
   doctorProfile?: Prisma.DoctorProfileUncheckedCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
@@ -553,6 +576,7 @@ export type UserUpdateWithoutSessionsInput = {
   labTests?: Prisma.LabTestUpdateManyWithoutUserNestedInput
   scans?: Prisma.ScanUpdateManyWithoutUserNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUpdateManyWithoutUserNestedInput
   doctorProfile?: Prisma.DoctorProfileUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
@@ -568,6 +592,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   labTests?: Prisma.LabTestUncheckedUpdateManyWithoutUserNestedInput
   scans?: Prisma.ScanUncheckedUpdateManyWithoutUserNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUncheckedUpdateManyWithoutUserNestedInput
   doctorProfile?: Prisma.DoctorProfileUncheckedUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -583,6 +608,7 @@ export type UserCreateWithoutLabTestsInput = {
   sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
   scans?: Prisma.ScanCreateNestedManyWithoutUserInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionCreateNestedManyWithoutUserInput
   doctorProfile?: Prisma.DoctorProfileCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
@@ -598,6 +624,7 @@ export type UserUncheckedCreateWithoutLabTestsInput = {
   sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
   scans?: Prisma.ScanUncheckedCreateNestedManyWithoutUserInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUncheckedCreateNestedManyWithoutUserInput
   doctorProfile?: Prisma.DoctorProfileUncheckedCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
@@ -629,6 +656,7 @@ export type UserUpdateWithoutLabTestsInput = {
   sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
   scans?: Prisma.ScanUpdateManyWithoutUserNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUpdateManyWithoutUserNestedInput
   doctorProfile?: Prisma.DoctorProfileUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
@@ -644,6 +672,7 @@ export type UserUncheckedUpdateWithoutLabTestsInput = {
   sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
   scans?: Prisma.ScanUncheckedUpdateManyWithoutUserNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUncheckedUpdateManyWithoutUserNestedInput
   doctorProfile?: Prisma.DoctorProfileUncheckedUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -659,6 +688,7 @@ export type UserCreateWithoutScansInput = {
   sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
   labTests?: Prisma.LabTestCreateNestedManyWithoutUserInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionCreateNestedManyWithoutUserInput
   doctorProfile?: Prisma.DoctorProfileCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
@@ -674,6 +704,7 @@ export type UserUncheckedCreateWithoutScansInput = {
   sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
   labTests?: Prisma.LabTestUncheckedCreateNestedManyWithoutUserInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUncheckedCreateNestedManyWithoutUserInput
   doctorProfile?: Prisma.DoctorProfileUncheckedCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
@@ -705,6 +736,7 @@ export type UserUpdateWithoutScansInput = {
   sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
   labTests?: Prisma.LabTestUpdateManyWithoutUserNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUpdateManyWithoutUserNestedInput
   doctorProfile?: Prisma.DoctorProfileUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
@@ -720,6 +752,7 @@ export type UserUncheckedUpdateWithoutScansInput = {
   sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
   labTests?: Prisma.LabTestUncheckedUpdateManyWithoutUserNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUncheckedUpdateManyWithoutUserNestedInput
   doctorProfile?: Prisma.DoctorProfileUncheckedUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -735,6 +768,7 @@ export type UserCreateWithoutReservationsInput = {
   sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
   labTests?: Prisma.LabTestCreateNestedManyWithoutUserInput
   scans?: Prisma.ScanCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionCreateNestedManyWithoutUserInput
   doctorProfile?: Prisma.DoctorProfileCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
@@ -750,6 +784,7 @@ export type UserUncheckedCreateWithoutReservationsInput = {
   sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
   labTests?: Prisma.LabTestUncheckedCreateNestedManyWithoutUserInput
   scans?: Prisma.ScanUncheckedCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUncheckedCreateNestedManyWithoutUserInput
   doctorProfile?: Prisma.DoctorProfileUncheckedCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
@@ -781,6 +816,7 @@ export type UserUpdateWithoutReservationsInput = {
   sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
   labTests?: Prisma.LabTestUpdateManyWithoutUserNestedInput
   scans?: Prisma.ScanUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUpdateManyWithoutUserNestedInput
   doctorProfile?: Prisma.DoctorProfileUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
@@ -796,6 +832,7 @@ export type UserUncheckedUpdateWithoutReservationsInput = {
   sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
   labTests?: Prisma.LabTestUncheckedUpdateManyWithoutUserNestedInput
   scans?: Prisma.ScanUncheckedUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUncheckedUpdateManyWithoutUserNestedInput
   doctorProfile?: Prisma.DoctorProfileUncheckedUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -812,6 +849,7 @@ export type UserCreateWithoutDoctorProfileInput = {
   labTests?: Prisma.LabTestCreateNestedManyWithoutUserInput
   scans?: Prisma.ScanCreateNestedManyWithoutUserInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
 }
 
@@ -827,6 +865,7 @@ export type UserUncheckedCreateWithoutDoctorProfileInput = {
   labTests?: Prisma.LabTestUncheckedCreateNestedManyWithoutUserInput
   scans?: Prisma.ScanUncheckedCreateNestedManyWithoutUserInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
 }
 
@@ -858,6 +897,7 @@ export type UserUpdateWithoutDoctorProfileInput = {
   labTests?: Prisma.LabTestUpdateManyWithoutUserNestedInput
   scans?: Prisma.ScanUpdateManyWithoutUserNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
 }
 
@@ -873,6 +913,87 @@ export type UserUncheckedUpdateWithoutDoctorProfileInput = {
   labTests?: Prisma.LabTestUncheckedUpdateManyWithoutUserNestedInput
   scans?: Prisma.ScanUncheckedUpdateManyWithoutUserNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutAlertSubscriptionsInput = {
+  id: string
+  email: string
+  firstName?: string | null
+  lastName?: string | null
+  accountType?: $Enums.AccountType
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.UserSessionCreateNestedManyWithoutUserInput
+  labTests?: Prisma.LabTestCreateNestedManyWithoutUserInput
+  scans?: Prisma.ScanCreateNestedManyWithoutUserInput
+  reservations?: Prisma.ReservationCreateNestedManyWithoutUserInput
+  doctorProfile?: Prisma.DoctorProfileCreateNestedOneWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutAlertSubscriptionsInput = {
+  id: string
+  email: string
+  firstName?: string | null
+  lastName?: string | null
+  accountType?: $Enums.AccountType
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.UserSessionUncheckedCreateNestedManyWithoutUserInput
+  labTests?: Prisma.LabTestUncheckedCreateNestedManyWithoutUserInput
+  scans?: Prisma.ScanUncheckedCreateNestedManyWithoutUserInput
+  reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutUserInput
+  doctorProfile?: Prisma.DoctorProfileUncheckedCreateNestedOneWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutAlertSubscriptionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAlertSubscriptionsInput, Prisma.UserUncheckedCreateWithoutAlertSubscriptionsInput>
+}
+
+export type UserUpsertWithoutAlertSubscriptionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAlertSubscriptionsInput, Prisma.UserUncheckedUpdateWithoutAlertSubscriptionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAlertSubscriptionsInput, Prisma.UserUncheckedCreateWithoutAlertSubscriptionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAlertSubscriptionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAlertSubscriptionsInput, Prisma.UserUncheckedUpdateWithoutAlertSubscriptionsInput>
+}
+
+export type UserUpdateWithoutAlertSubscriptionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.UserSessionUpdateManyWithoutUserNestedInput
+  labTests?: Prisma.LabTestUpdateManyWithoutUserNestedInput
+  scans?: Prisma.ScanUpdateManyWithoutUserNestedInput
+  reservations?: Prisma.ReservationUpdateManyWithoutUserNestedInput
+  doctorProfile?: Prisma.DoctorProfileUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAlertSubscriptionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountType?: Prisma.EnumAccountTypeFieldUpdateOperationsInput | $Enums.AccountType
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.UserSessionUncheckedUpdateManyWithoutUserNestedInput
+  labTests?: Prisma.LabTestUncheckedUpdateManyWithoutUserNestedInput
+  scans?: Prisma.ScanUncheckedUpdateManyWithoutUserNestedInput
+  reservations?: Prisma.ReservationUncheckedUpdateManyWithoutUserNestedInput
+  doctorProfile?: Prisma.DoctorProfileUncheckedUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
 }
 
@@ -888,6 +1009,7 @@ export type UserCreateWithoutNotificationsInput = {
   labTests?: Prisma.LabTestCreateNestedManyWithoutUserInput
   scans?: Prisma.ScanCreateNestedManyWithoutUserInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionCreateNestedManyWithoutUserInput
   doctorProfile?: Prisma.DoctorProfileCreateNestedOneWithoutUserInput
 }
 
@@ -903,6 +1025,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   labTests?: Prisma.LabTestUncheckedCreateNestedManyWithoutUserInput
   scans?: Prisma.ScanUncheckedCreateNestedManyWithoutUserInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutUserInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUncheckedCreateNestedManyWithoutUserInput
   doctorProfile?: Prisma.DoctorProfileUncheckedCreateNestedOneWithoutUserInput
 }
 
@@ -934,6 +1057,7 @@ export type UserUpdateWithoutNotificationsInput = {
   labTests?: Prisma.LabTestUpdateManyWithoutUserNestedInput
   scans?: Prisma.ScanUpdateManyWithoutUserNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUpdateManyWithoutUserNestedInput
   doctorProfile?: Prisma.DoctorProfileUpdateOneWithoutUserNestedInput
 }
 
@@ -949,6 +1073,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   labTests?: Prisma.LabTestUncheckedUpdateManyWithoutUserNestedInput
   scans?: Prisma.ScanUncheckedUpdateManyWithoutUserNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutUserNestedInput
+  alertSubscriptions?: Prisma.ReservationAlertSubscriptionUncheckedUpdateManyWithoutUserNestedInput
   doctorProfile?: Prisma.DoctorProfileUncheckedUpdateOneWithoutUserNestedInput
 }
 
@@ -962,6 +1087,7 @@ export type UserCountOutputType = {
   labTests: number
   scans: number
   reservations: number
+  alertSubscriptions: number
   notifications: number
 }
 
@@ -970,6 +1096,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   labTests?: boolean | UserCountOutputTypeCountLabTestsArgs
   scans?: boolean | UserCountOutputTypeCountScansArgs
   reservations?: boolean | UserCountOutputTypeCountReservationsArgs
+  alertSubscriptions?: boolean | UserCountOutputTypeCountAlertSubscriptionsArgs
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
 }
 
@@ -1014,6 +1141,13 @@ export type UserCountOutputTypeCountReservationsArgs<ExtArgs extends runtime.Typ
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountAlertSubscriptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReservationAlertSubscriptionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.NotificationWhereInput
 }
@@ -1031,6 +1165,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   labTests?: boolean | Prisma.User$labTestsArgs<ExtArgs>
   scans?: boolean | Prisma.User$scansArgs<ExtArgs>
   reservations?: boolean | Prisma.User$reservationsArgs<ExtArgs>
+  alertSubscriptions?: boolean | Prisma.User$alertSubscriptionsArgs<ExtArgs>
   doctorProfile?: boolean | Prisma.User$doctorProfileArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -1072,6 +1207,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   labTests?: boolean | Prisma.User$labTestsArgs<ExtArgs>
   scans?: boolean | Prisma.User$scansArgs<ExtArgs>
   reservations?: boolean | Prisma.User$reservationsArgs<ExtArgs>
+  alertSubscriptions?: boolean | Prisma.User$alertSubscriptionsArgs<ExtArgs>
   doctorProfile?: boolean | Prisma.User$doctorProfileArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
@@ -1086,6 +1222,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     labTests: Prisma.$LabTestPayload<ExtArgs>[]
     scans: Prisma.$ScanPayload<ExtArgs>[]
     reservations: Prisma.$ReservationPayload<ExtArgs>[]
+    alertSubscriptions: Prisma.$ReservationAlertSubscriptionPayload<ExtArgs>[]
     doctorProfile: Prisma.$DoctorProfilePayload<ExtArgs> | null
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
   }
@@ -1495,6 +1632,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   labTests<T extends Prisma.User$labTestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$labTestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LabTestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   scans<T extends Prisma.User$scansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$scansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reservations<T extends Prisma.User$reservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  alertSubscriptions<T extends Prisma.User$alertSubscriptionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$alertSubscriptionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReservationAlertSubscriptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   doctorProfile<T extends Prisma.User$doctorProfileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$doctorProfileArgs<ExtArgs>>): Prisma.Prisma__DoctorProfileClient<runtime.Types.Result.GetResult<Prisma.$DoctorProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -2014,6 +2152,30 @@ export type User$reservationsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.ReservationScalarFieldEnum | Prisma.ReservationScalarFieldEnum[]
+}
+
+/**
+ * User.alertSubscriptions
+ */
+export type User$alertSubscriptionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReservationAlertSubscription
+   */
+  select?: Prisma.ReservationAlertSubscriptionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReservationAlertSubscription
+   */
+  omit?: Prisma.ReservationAlertSubscriptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReservationAlertSubscriptionInclude<ExtArgs> | null
+  where?: Prisma.ReservationAlertSubscriptionWhereInput
+  orderBy?: Prisma.ReservationAlertSubscriptionOrderByWithRelationInput | Prisma.ReservationAlertSubscriptionOrderByWithRelationInput[]
+  cursor?: Prisma.ReservationAlertSubscriptionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReservationAlertSubscriptionScalarFieldEnum | Prisma.ReservationAlertSubscriptionScalarFieldEnum[]
 }
 
 /**

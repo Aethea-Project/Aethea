@@ -8,10 +8,12 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@core/auth/useAuth';
 import { isValidEmail } from '@core/auth/auth-utils';
 import { useTurnstile } from '../hooks/useTurnstile';
+import { useUiNotifications } from '../contexts/UiNotificationsProvider';
 import './LoginForm.css';
 
 export const LoginForm: React.FC = () => {
   const { signIn, signInWithGoogle, loading, error, user, session } = useAuth();
+  const { notifySuccess, notifyError } = useUiNotifications();
   const signUpPath = user && session ? '/dashboard' : '/register';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -56,8 +58,14 @@ export const LoginForm: React.FC = () => {
 
     try {
       await signIn(email, password, captchaToken, rememberMe);
+      notifySuccess('Login successful', 'Welcome back to Aethea.');
       resetCaptcha();
     } catch (err) {
+      notifyError(
+        'Login failed',
+        'Unable to sign in with the provided credentials.',
+        err instanceof Error ? err.message : 'Unknown error',
+      );
       setLocalError(err instanceof Error ? err.message : 'Login failed');
       resetCaptcha();
     }

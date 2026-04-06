@@ -12,6 +12,7 @@ import {
   bookReservation,
   getMyReservations,
   cancelMyReservation,
+  subscribeAvailabilityAlert,
   getDoctorScheduleSlots,
   updateSlotStatus,
 } from '../services/reservationService.js';
@@ -31,6 +32,7 @@ export const createReservation = async (req: Request, res: Response): Promise<vo
     throw AppError.forbidden('Admin accounts cannot book appointments. Use a non-admin account.');
   }
   const reservation = await bookReservation(user.id, {
+    patientEmail: req.user?.email,
     doctorScheduleId: req.body.doctorScheduleId,
     slotIndex: req.body.slotIndex,
     reason: req.body.reason,
@@ -48,6 +50,25 @@ export const cancelReservation = async (req: Request, res: Response): Promise<vo
   if (!id) throw AppError.badRequest('Missing reservation id');
   await cancelMyReservation(id, user.id);
   res.status(204).send();
+};
+
+/** POST /reservations/alerts — patient subscribes to slot-available alert for a full schedule */
+export const subscribeToAvailabilityAlerts = async (req: Request, res: Response): Promise<void> => {
+  const user = req.localUser!;
+  if (user.accountType !== 'patient') {
+    throw AppError.forbidden('Only patient accounts can subscribe to slot alerts.');
+  }
+
+  await subscribeAvailabilityAlert({
+    patientUserId: user.id,
+    patientEmail: req.user?.email,
+    doctorScheduleId: req.body.doctorScheduleId,
+  });
+
+  res.status(201).json({
+    subscribed: true,
+    message: 'You will be notified in-app and by email when a slot becomes available.',
+  });
 };
 
 /** GET /reservations/schedule/:scheduleId/slots — doctor views anonymized slots */

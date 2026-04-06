@@ -177,6 +177,10 @@ export default function DoctorFinderPage() {
         <DoctorMap
           mapReady={mapReady}
           mapError={mapError}
+          onInitError={(message) => {
+            setMapReady(false);
+            setMapError(message);
+          }}
           userLocation={userLocationRef.current}
           nearbyDoctors={nearbyDoctors}
           nearbyPharmacies={nearbyPharmacies}

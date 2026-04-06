@@ -43,7 +43,7 @@ const AuthConfirmPage: React.FC = () => {
 
         if (hasCode || sessionResponse.data) {
           setState('success');
-          setMessage('Your account has been confirmed successfully. You can sign in now.');
+          setMessage('Your account has been confirmed successfully. Please complete your remaining details.');
           return;
         }
 
@@ -86,13 +86,20 @@ const AuthConfirmPage: React.FC = () => {
           {message}
         </div>
 
-        {state !== 'loading' && (
+        {state == 'error' && (
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             <Link to="/login" style={{ color: '#0f766e', fontWeight: 600 }}>
               Go to Sign in
             </Link>
             <Link to="/register" style={{ color: '#0f766e', fontWeight: 600 }}>
               Create new account
+            </Link>
+          </div>
+        )}
+        {state === 'success' && (
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <Link to="/dashboard" style={{ color: '#0f766e', fontWeight: 600 }}>
+              Continue
             </Link>
           </div>
         )}

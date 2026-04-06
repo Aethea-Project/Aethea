@@ -268,6 +268,13 @@ export const medicalApi = {
     await authFetch<void>(`/reservations/${id}`, { method: 'DELETE' });
   },
 
+  async subscribeToAvailabilityAlert(doctorScheduleId: string): Promise<{ subscribed: boolean; message: string }> {
+    return authFetch<{ subscribed: boolean; message: string }>('/reservations/alerts', {
+      method: 'POST',
+      body: JSON.stringify({ doctorScheduleId }),
+    });
+  },
+
   /* ── Doctor discovery (any authenticated user) ── */
   async fetchDoctors(params?: DoctorListParams): Promise<{ doctors: DoctorProfile[]; total: number }> {
     const qs = new URLSearchParams();
@@ -341,6 +348,13 @@ export const medicalApi = {
       body: JSON.stringify(payload),
     });
     return toDoctorSchedule(data.schedule);
+  },
+
+  async deleteMySchedule(scheduleId: string, reason: string): Promise<void> {
+    await authFetch<void>(`/doctors/me/schedules/${scheduleId}`, {
+      method: 'DELETE',
+      body: JSON.stringify({ reason }),
+    });
   },
 
   /* ── Doctor: view own schedule's anonymized slots ── */
@@ -517,4 +531,4 @@ export interface CreateSchedulePayload {
 }
 
 /** @deprecated use BookReservationPayload */
-export interface ReservationPayload extends BookReservationPayload {}
+export type ReservationPayload = BookReservationPayload;

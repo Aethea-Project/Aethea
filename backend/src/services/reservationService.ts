@@ -8,8 +8,10 @@
  */
 
 import { AppError } from '../lib/AppError.js';
+import logger from '../lib/logger.js';
 import {
   createReservation,
+  getActiveReservationCountForSchedule,
   listPatientReservations,
   getReservationById,
   cancelReservation as repoCancelReservation,
@@ -23,10 +25,21 @@ import {
 } from '../repositories/scheduleRepository.js';
 import { getDoctorProfileByUserId } from '../repositories/doctorRepository.js';
 import { createNotification } from '../repositories/notificationRepository.js';
+import {
+  deactivateReservationAlertSubscriptions,
+  listActiveReservationAlertSubscribers,
+  upsertReservationAlertSubscription,
+} from '../repositories/reservationAlertRepository.js';
+import {
+  sendReservationBookedEmail,
+  sendReservationCancelledEmail,
+  sendSlotAvailableEmail,
+} from './emailService.js';
 
 const CANCEL_WINDOW_MS = 6 * 60 * 60 * 1000; // 6 hours
 
 export interface BookReservationInput {
+  patientEmail?: string;
   doctorScheduleId: string;
   slotIndex: number;
   reason: string;
@@ -85,6 +98,8 @@ export async function bookReservation(patientUserId: string, input: BookReservat
   const doctorUserId = schedule.doctorProfile.userId;
   const dateStr = slotStartAt.toLocaleDateString('en-US', { dateStyle: 'medium' });
   const timeStr = slotStartAt.toLocaleTimeString('en-US', { timeStyle: 'short' });
+  const customDateStr = new Date(schedule.scheduleDate).toLocaleDateString('en-US', { dateStyle: 'full' });
+
   await createNotification(
     doctorUserId,
     'reservation_confirmed',
@@ -93,7 +108,64 @@ export async function bookReservation(patientUserId: string, input: BookReservat
     { reservationId: reservation.id },
   );
 
+  // Check capacity for doctor alerts
+  const newActiveCount = await getActiveReservationCountForSchedule(input.doctorScheduleId);
+  const ratio = newActiveCount / schedule.maxPatients;
+  const previousRatio = (newActiveCount - 1) / schedule.maxPatients;
+
+  if (ratio === 1) {
+    await createNotification(
+      doctorUserId,
+      'reservation_confirmed',
+      'Schedule Fully Booked',
+      `Your schedule for ${customDateStr} is now 100% full.`,
+      { scheduleId: schedule.id }
+    );
+  } else if (ratio >= 0.7 && previousRatio < 0.7) {
+    await createNotification(
+      doctorUserId,
+      'reservation_confirmed',
+      'Schedule 70% Booked',
+      `Your schedule for ${customDateStr} is now 70% full.`,
+      { scheduleId: schedule.id }
+    );
+  }
+
+  if (input.patientEmail) {
+    const doctorName = `Dr. ${schedule.doctorProfile.firstName} ${schedule.doctorProfile.lastName}`;
+    await sendReservationBookedEmail({
+      to: input.patientEmail,
+      doctorName,
+      specialty: schedule.doctorProfile.specialty,
+      startAt: slotStartAt,
+      endAt: slotEndAt,
+      clinic: schedule.doctorProfile.clinicName ?? undefined,
+    });
+  }
+
   return reservation;
+}
+
+export async function subscribeAvailabilityAlert(input: {
+  patientUserId: string;
+  patientEmail?: string;
+  doctorScheduleId: string;
+}) {
+  const schedule = await getScheduleById(input.doctorScheduleId);
+  if (!schedule || !schedule.isPublished) {
+    throw AppError.notFound('Schedule not found or not available');
+  }
+
+  const activeCount = await getActiveReservationCountForSchedule(input.doctorScheduleId);
+  if (activeCount < schedule.maxPatients) {
+    throw AppError.badRequest('This schedule currently has available slots. You can book immediately.');
+  }
+
+  await upsertReservationAlertSubscription(
+    input.patientUserId,
+    input.doctorScheduleId,
+    input.patientEmail,
+  );
 }
 
 /* ─── Patient: list own reservations ─── */
@@ -122,17 +194,75 @@ export async function cancelMyReservation(reservationId: string, userId: string)
 
   const cancelled = await repoCancelReservation(reservationId);
 
-  // Notify the doctor if the patient opted in
-  if (reservation.notifyOnCancel) {
-    const doctorUserId = reservation.doctorSchedule.doctorProfile.userId;
-    const dateStr = reservation.startAt.toLocaleDateString('en-US', { dateStyle: 'medium' });
-    await createNotification(
-      doctorUserId,
-      'reservation_cancelled',
-      'Booking Cancelled',
-      `A patient cancelled their appointment on ${dateStr} (slot ${reservation.slotIndex + 1}).`,
-      { reservationId },
+  const doctorName = `Dr. ${reservation.doctorSchedule.doctorProfile.firstName} ${reservation.doctorSchedule.doctorProfile.lastName}`;
+
+  // Send patient confirmation email for successful cancellation (best-effort)
+  if (reservation.user?.email) {
+    await sendReservationCancelledEmail({
+      to: reservation.user.email,
+      doctorName,
+      specialty: reservation.doctorSchedule.doctorProfile.specialty,
+      startAt: reservation.startAt,
+      endAt: reservation.endAt,
+      clinic: reservation.doctorSchedule.doctorProfile.clinicName ?? undefined,
+    });
+  }
+
+  // Best-effort side effects only. Cancellation has already succeeded above.
+  try {
+    // Notify the doctor if the patient opted in
+    if (reservation.notifyOnCancel) {
+      const doctorUserId = reservation.doctorSchedule.doctorProfile.userId;
+      const dateStr = reservation.startAt.toLocaleDateString('en-US', { dateStyle: 'medium' });
+      await createNotification(
+        doctorUserId,
+        'reservation_cancelled',
+        'Booking Cancelled',
+        `A patient cancelled their appointment on ${dateStr} (slot ${reservation.slotIndex + 1}).`,
+        { reservationId },
+      );
+    }
+
+    const alertSubscribers = await listActiveReservationAlertSubscribers(
+      reservation.doctorScheduleId,
+      userId,
     );
+
+    if (alertSubscribers.length > 0) {
+      const title = 'Slot Available';
+      const body = `A slot is now available with ${doctorName} on ${reservation.startAt.toLocaleDateString('en-US', { dateStyle: 'medium' })}.`;
+
+      for (const subscriber of alertSubscribers) {
+        await createNotification(
+          subscriber.userId,
+          'slot_available',
+          title,
+          body,
+          {
+            doctorScheduleId: reservation.doctorScheduleId,
+            releasedReservationId: reservationId,
+          },
+        );
+
+        if (subscriber.email) {
+          await sendSlotAvailableEmail({
+            to: subscriber.email,
+            doctorName,
+            specialty: reservation.doctorSchedule.doctorProfile.specialty,
+            scheduleDate: reservation.startAt,
+            startAt: reservation.doctorSchedule.startAt,
+            endAt: reservation.doctorSchedule.endAt,
+          });
+        }
+      }
+
+      await deactivateReservationAlertSubscriptions(
+        reservation.doctorScheduleId,
+        alertSubscribers.map((subscriber) => subscriber.userId),
+      );
+    }
+  } catch (error) {
+    logger.warn({ err: error, reservationId }, 'Reservation cancelled but post-cancel notifications failed');
   }
 
   return cancelled;

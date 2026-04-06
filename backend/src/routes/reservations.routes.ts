@@ -7,6 +7,7 @@ import {
   listReservations,
   createReservation,
   cancelReservation,
+  subscribeToAvailabilityAlerts,
   getScheduleSlots,
   patchReservationStatus,
 } from '../controllers/reservations.controller.js';
@@ -16,6 +17,7 @@ import { requireLocalUser } from '../lib/authMiddleware.js';
 import { requireActiveAccount, requirePasswordChanged, requireTrustedClaims } from '../middleware/requireAccountType.js';
 import {
   createReservationSchema,
+  reservationAvailabilityAlertSchema,
   updateReservationStatusSchema,
   paginationSchema,
 } from '../schemas/index.js';
@@ -31,6 +33,8 @@ export const createReservationRoutes = (authMiddleware: RequestHandler): Router 
   router.post('/', auth, validateBody(createReservationSchema), asyncHandler(createReservation));
   // Patient: cancel their own reservation
   router.delete('/:id', auth, asyncHandler(cancelReservation));
+  // Patient: subscribe to availability alerts for full schedules
+  router.post('/alerts', auth, validateBody(reservationAvailabilityAlertSchema), asyncHandler(subscribeToAvailabilityAlerts));
   // Doctor: view anonymized slots for a schedule they own
   router.get('/schedule/:scheduleId/slots', auth, asyncHandler(getScheduleSlots));
   // Doctor: update a slot's status (e.g., confirmed → in_progress → completed)

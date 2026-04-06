@@ -8,6 +8,7 @@ import { medicalApi } from '../../services/medicalApi';
 import { useAuth } from '@core/auth/useAuth';
 import { decodeJWT } from '@core/auth/token-manager';
 import type { AccountType } from '@core/auth/auth-types';
+import { Modal } from '../../components/Modal';
 import './styles.css';
 
 function getAccountType(accessToken?: string): AccountType | null {
@@ -64,11 +65,61 @@ function CreateScheduleForm({ onCreated, onCancel }: CreateScheduleFormProps) {
     startAt: '',
     endAt: '',
     slotDurationMins: 30,
-    maxPatients: 10,
     isPublished: true,
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const getSlotCapacity = () => {
+    if (!form.startAt || !form.endAt || form.slotDurationMins <= 0) {
+      return 0;
+    }
+
+    const [startHour, startMinute] = form.startAt.split(':').map(Number);
+    const [endHour, endMinute] = form.endAt.split(':').map(Number);
+
+    const startTotalMins = startHour * 60 + startMinute;
+    const endTotalMins = endHour * 60 + endMinute;
+
+    if (endTotalMins <= startTotalMins) {
+      return 0;
+    }
+
+    const durationMins = endTotalMins - startTotalMins;
+    return Math.floor(durationMins / form.slotDurationMins);
+  };
+
+  const slotCapacity = getSlotCapacity();
+  const maxPatientsValid = slotCapacity > 0;
+
+  const getStartAndEndMinutes = () => {
+    if (!form.startAt || !form.endAt) {
+      return { startTotalMins: null as number | null, endTotalMins: null as number | null };
+    }
+
+    const [startHour, startMinute] = form.startAt.split(':').map(Number);
+    const [endHour, endMinute] = form.endAt.split(':').map(Number);
+
+    return {
+      startTotalMins: startHour * 60 + startMinute,
+      endTotalMins: endHour * 60 + endMinute,
+    };
+  };
+
+  const { startTotalMins, endTotalMins } = getStartAndEndMinutes();
+  const hasTimeRange = startTotalMins !== null && endTotalMins !== null;
+  const endAfterStart = hasTimeRange && endTotalMins! > startTotalMins!;
+
+  const validationReasons: string[] = [];
+  if (hasTimeRange && !endAfterStart) {
+    validationReasons.push('End time must be after start time.');
+  }
+  if (endAfterStart && slotCapacity === 0) {
+    validationReasons.push('Current time range with this slot duration creates 0 bookable slots.');
+  }
+  if (!form.isPublished) {
+    validationReasons.push('Schedule is draft only. Patients cannot see or book it until published.');
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -83,21 +134,38 @@ function CreateScheduleForm({ onCreated, onCancel }: CreateScheduleFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.scheduleDate || !form.startAt || !form.endAt) return;
+
+    if (slotCapacity === 0) {
+      setError('End time must be after start time and long enough to fit at least one slot.');
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
     try {
-      const datePrefix = form.scheduleDate;
+      const [year, month, day] = form.scheduleDate.split('-').map(Number);
+      const [startHour, startMinute] = form.startAt.split(':').map(Number);
+      const [endHour, endMinute] = form.endAt.split(':').map(Number);
+
+      const dtStart = new Date(year, month - 1, day, startHour, startMinute, 0, 0);
+      const dtEnd = new Date(year, month - 1, day, endHour, endMinute, 0, 0);
+
       await medicalApi.createMySchedule({
-        scheduleDate: datePrefix,
-        startAt: `${datePrefix}T${form.startAt}:00.000Z`,
-        endAt: `${datePrefix}T${form.endAt}:00.000Z`,
+        scheduleDate: form.scheduleDate,
+        startAt: dtStart.toISOString(),
+        endAt: dtEnd.toISOString(),
         slotDurationMins: form.slotDurationMins,
-        maxPatients: form.maxPatients,
+        maxPatients: slotCapacity, // Automatically set max patients to available time slots
         isPublished: form.isPublished,
       });
       onCreated();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create schedule');
+      const message = err instanceof Error ? err.message : 'Failed to create schedule';
+      if (message.includes('endAt must be after startAt')) {
+        setError('End time must be later than start time. Please adjust the selected period.');
+      } else {
+        setError(message);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -108,24 +176,33 @@ function CreateScheduleForm({ onCreated, onCancel }: CreateScheduleFormProps) {
       <h3>Create New Schedule</h3>
       <label>
         Date
-        <input type="date" name="scheduleDate" value={form.scheduleDate} onChange={handleChange} required />
+        <input type="date" name="scheduleDate" value={form.scheduleDate} min={new Date().toISOString().split('T')[0]} onChange={handleChange} required />
       </label>
       <label>
-        Start Time (UTC)
+        Start Time
         <input type="time" name="startAt" value={form.startAt} onChange={handleChange} required />
       </label>
       <label>
-        End Time (UTC)
+        End Time
         <input type="time" name="endAt" value={form.endAt} onChange={handleChange} required />
       </label>
       <label>
         Slot Duration (minutes)
         <input type="number" name="slotDurationMins" value={form.slotDurationMins} onChange={handleChange} min={10} max={120} required />
       </label>
-      <label>
-        Max Patients
-        <input type="number" name="maxPatients" value={form.maxPatients} onChange={handleChange} min={1} max={50} required />
-      </label>
+      <p className="dr-create-helper">
+        Calculated available slots: <strong>{slotCapacity > 0 ? slotCapacity : 'Invalid time range'}</strong>
+      </p>
+      {validationReasons.length > 0 && (
+        <div className="dr-create-warnings" role="alert">
+          <strong>Please review before creating:</strong>
+          <ul>
+            {validationReasons.map((reason) => (
+              <li key={reason}>{reason}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       <label className="checkbox-label">
         <input type="checkbox" name="isPublished" checked={form.isPublished} onChange={handleChange} />
         Publish immediately
@@ -133,26 +210,67 @@ function CreateScheduleForm({ onCreated, onCancel }: CreateScheduleFormProps) {
       {error && <p className="error">{error}</p>}
       <div className="modal-actions">
         <button type="button" className="btn btn-ghost" onClick={onCancel}>Cancel</button>
-        <button type="submit" className="book-btn" disabled={submitting}>{submitting ? 'Creating...' : 'Create Schedule'}</button>
+        <button type="submit" className="book-btn" disabled={submitting || !maxPatientsValid}>{submitting ? 'Creating...' : 'Create Schedule'}</button>
       </div>
     </form>
   );
 }
 
-function ScheduleCard({ schedule, onView }: { schedule: DoctorSchedule; onView: (id: string) => void }) {
+function ScheduleCard({ schedule, onView, onDelete }: { schedule: DoctorSchedule; onView: (id: string) => void; onDelete: (id: string, reason: string) => void }) {
+  const [showCancel, setShowCancel] = useState(false);
+  const [reason, setReason] = useState('');
+  
   const date = new Date(schedule.scheduleDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-  const start = new Date(schedule.startAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-  const end = new Date(schedule.endAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  const start = new Date(schedule.startAt).toLocaleTimeString('en-US', { timeZone: 'Africa/Cairo', hour: '2-digit', minute: '2-digit' });
+  const end = new Date(schedule.endAt).toLocaleTimeString('en-US', { timeZone: 'Africa/Cairo', hour: '2-digit', minute: '2-digit' });
   const available = schedule.maxPatients - schedule.bookedCount;
   return (
     <div className="dr-schedule-card">
       <div className="dr-schedule-info">
         <span className="dr-schedule-date">{date}</span>
-        <span className="dr-schedule-time">{start} – {end}</span>
+        <span className="dr-schedule-time">{start} – {end} (Cairo Time)</span>
         <span className="dr-schedule-slots">{available}/{schedule.maxPatients} slots available</span>
         {!schedule.isPublished && <span className="dr-badge-draft">Draft</span>}
       </div>
-      <button className="btn btn-ghost" onClick={() => onView(schedule.id)}>View Slots</button>
+      <div className="dr-schedule-actions" style={{ display: 'flex', gap: '8px' }}>
+        <button className="btn btn-ghost" onClick={() => onView(schedule.id)}>View Slots</button>
+        <button className="btn outline" style={{ color: 'var(--error)' }} onClick={() => setShowCancel(true)}>Cancel Schedule</button>
+      </div>
+
+      <Modal isOpen={showCancel} onClose={() => setShowCancel(false)} ariaLabel="Cancel Schedule">
+        <h2 style={{ marginBottom: '8px' }}>Cancel Schedule</h2>
+        <div style={{ padding: '16px', background: 'rgba(255,0,0,0.05)', border: '1px solid var(--error)', borderRadius: '6px', marginBottom: '16px', color: 'var(--error)' }}>
+          <strong>Warning:</strong> You are about to cancel this schedule. All booked patients will be notified. Frequent unexcused cancellations will be reviewed by administration and may result in penalties or account suspension.
+        </div>
+        <p style={{ marginBottom: '16px', color: 'var(--text-muted)' }}>
+          Please provide a reason for the cancellation. This reason will be sent to all patients who have reservations on this schedule.
+        </p>
+        <div className="dr-form-group">
+          <label>Cancellation Reason *</label>
+          <textarea 
+            value={reason} 
+            onChange={(e) => setReason(e.target.value)} 
+            placeholder="e.g. Unexpected personal emergency"
+            rows={3}
+            style={{ width: '100%', padding: '8px', border: '1px solid var(--border)', borderRadius: '6px', background: 'var(--surface)' }}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '16px' }}>
+          <button className="btn btn-ghost" onClick={() => setShowCancel(false)}>Keep Schedule</button>
+          <button 
+            className="btn book-btn" 
+            style={{ background: 'var(--error)' }} 
+            disabled={!reason.trim()} 
+            onClick={() => {
+              if (!reason.trim()) return;
+              onDelete(schedule.id, reason.trim());
+              setShowCancel(false);
+            }}
+          >
+            Confirm Cancellation
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }
@@ -312,7 +430,14 @@ export default function DoctorReservationsPage() {
       ) : (
         <div className="dr-schedule-list">
           {schedules.map((sch) => (
-            <ScheduleCard key={sch.id} schedule={sch} onView={setViewingScheduleId} />
+            <ScheduleCard key={sch.id} schedule={sch} onView={setViewingScheduleId} onDelete={async (id, reason) => {
+              try {
+                await medicalApi.deleteMySchedule(id, reason);
+                refresh();
+              } catch (err) {
+                alert('Failed to delete: ' + (err instanceof Error ? err.message : 'Unknown error'));
+              }
+            }} />
           ))}
         </div>
       )}

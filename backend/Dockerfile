@@ -14,6 +14,7 @@ FROM base AS deps
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma/
 RUN npm install --omit=dev && \
+    npm install --omit=dev nodemailer && \
     npx prisma generate && \
     npm cache clean --force
 
@@ -22,6 +23,7 @@ FROM base AS build-deps
 COPY package.json package-lock.json* ./
 COPY prisma ./prisma/
 RUN npm install && \
+    npm install nodemailer && \
     npx prisma generate && \
     npm cache clean --force
 

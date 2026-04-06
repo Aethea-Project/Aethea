@@ -1,0 +1,114 @@
+.admin-user-details-page {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-user-details-page .details-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.admin-user-details-page .details-card h3 {
+  margin: 0;
+}
+
+.admin-user-details-page .details-row {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 8px;
+}
+
+.admin-user-details-page .details-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.admin-user-details-page .details-form-grid label,
+.admin-user-details-page .details-control-row label {
+  display: grid;
+  gap: 6px;
+}
+
+.admin-user-details-page input,
+.admin-user-details-page select,
+.admin-user-details-page textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.admin-user-details-page .full-width {
+  grid-column: 1 / -1;
+}
+
+.admin-user-details-page .details-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.admin-user-details-page .details-control-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: end;
+}
+
+.admin-user-details-page .danger-zone {
+  margin-top: 8px;
+  border: 1px solid #fecaca;
+  background: #fff1f2;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-user-details-page .btn-danger {
+  border: 1px solid #b91c1c;
+  background: #b91c1c;
+  color: #fff;
+  border-radius: 10px;
+  padding: 9px 12px;
+}
+
+.admin-user-details-page .error-banner {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+.admin-user-details-page .success-banner {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+.admin-user-details-page .status-chip {
+  text-transform: capitalize;
+  font-weight: 600;
+}
+
+.admin-user-details-page .status-chip.pending { color: #b45309; }
+.admin-user-details-page .status-chip.active { color: #166534; }
+.admin-user-details-page .status-chip.suspended { color: #991b1b; }
+.admin-user-details-page .status-chip.rejected { color: #9f1239; }
+
+@media (max-width: 700px) {
+  .admin-user-details-page .details-row {
+    grid-template-columns: 1fr;
+  }
+}

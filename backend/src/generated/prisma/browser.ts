@@ -53,6 +53,11 @@ export type DoctorProfile = Prisma.DoctorProfileModel
  */
 export type DoctorSchedule = Prisma.DoctorScheduleModel
 /**
+ * Model ReservationAlertSubscription
+ * 
+ */
+export type ReservationAlertSubscription = Prisma.ReservationAlertSubscriptionModel
+/**
  * Model Notification
  * 
  */

@@ -14,11 +14,13 @@ import { LoginForm } from './components/LoginForm';
 import { RegisterForm } from './components/RegisterForm';
 import { ForgotPasswordForm } from './components/ForgotPasswordForm';
 import { imageAssets } from './constants/imageAssets';
+import { UiNotificationsProvider, useUiNotifications } from './contexts/UiNotificationsProvider';
+import { NotificationCenter } from './components/NotificationCenter';
 import './App.css';
 
 import {
   DashboardIcon, LabIcon, ScanIcon, MedicineIcon, DoctorIcon,
-  NutritionIcon, RecoveryIcon, ProfileIcon, MenuIcon, CalendarIcon
+  NutritionIcon, RecoveryIcon, ProfileIcon, MenuIcon, CalendarIcon, ChatIcon
 } from './components/Icons';
 
 /* ── Lazy-loaded page components (code splitting for performance) ── */
@@ -30,10 +32,13 @@ const ReservationsPage = lazy(() => import('./pages/Reservations'));
 const AppointmentsMarketplacePage = lazy(() => import('./pages/AppointmentsMarketplace'));
 const NutritionPlannerPage = lazy(() => import('./pages/NutritionPlanner'));
 const RecoveryAssistantPage = lazy(() => import('./pages/RecoveryAssistant'));
+const NotificationsPage = lazy(() => import('./pages/Notifications'));
 const ProfilePage = lazy(() => import('./pages/Profile'));
 const TestMessageEmailPage = lazy(() => import('./pages/TestMessageEmail'));
 const AuthConfirmPage = lazy(() => import('./pages/AuthConfirm'));
+const CompleteProfilePage = lazy(() => import('./pages/CompleteProfile'));
 const AdminUsersPage = lazy(() => import('./pages/AdminUsers'));
+const AdminUserDetailsPage = lazy(() => import('./pages/AdminUserDetails'));
 const StaffVerificationPage = lazy(() => import('./pages/StaffVerification'));
 const DoctorReservationsPage = lazy(() => import('./pages/DoctorReservations'));
 
@@ -151,6 +156,17 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (isPendingStaff && location.pathname !== '/staff-verification') {
     return <Navigate to="/staff-verification" replace />;
+  }
+
+  // Force users to complete profile details first if missing crucial fields
+  // Admins might not strictly need phone/DOB/gender, but let's assume we skip it for them.
+  // Wait, let's enforce it for standard users.
+  const isProfileIncomplete =
+    accountType !== 'admin' &&
+    (!profile?.phone || !profile?.dateOfBirth || !profile?.gender);
+
+  if (isProfileIncomplete && location.pathname !== '/complete-profile') {
+    return <Navigate to="/complete-profile" replace />;
   }
 
   // Admin accounts with must_change_password=true are locked out of all routes
@@ -601,8 +617,26 @@ const SidebarItem = ({ to, icon: Icon, label }: { to: string; icon: React.Compon
 
 const Sidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const { signOut, session, profile } = useAuth();
+  const { notifyInfo, notifyError } = useUiNotifications();
   const accountType = resolveAccountType(session, profile?.accountType);
   const isAdmin = accountType === 'admin';
+
+  const handleSignOut = async () => {
+    try {
+      notifyInfo('Signed out', 'You have been signed out successfully.', undefined, {
+        persist: false,
+        toast: true,
+        autoCloseMs: 2500,
+      });
+      await signOut();
+    } catch (error) {
+      notifyError(
+        'Sign out failed',
+        'Unable to sign out right now.',
+        error instanceof Error ? error.message : 'Unknown error',
+      );
+    }
+  };
 
   return (
     <>
@@ -631,6 +665,7 @@ const Sidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
             <SidebarItem to="/medicines" icon={MedicineIcon} label="Medicines" />
             <SidebarItem to="/care-locator" icon={DoctorIcon} label="Care Locator" />
             <SidebarItem to="/appointments-marketplace" icon={CalendarIcon} label="Appointments Marketplace" />
+            <SidebarItem to="/my-appointments" icon={CalendarIcon} label="My Appointments" />
             <SidebarItem to="/nutrition" icon={NutritionIcon} label="Nutrition" />
             <SidebarItem to="/recovery" icon={RecoveryIcon} label="Recovery" />
           </div>
@@ -646,13 +681,14 @@ const Sidebar = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
           {isAdmin && (
             <div className="nav-group" role="group" aria-labelledby="nav-admin">
               <span className="nav-label" id="nav-admin">Administration</span>
-              <SidebarItem to="/admin/users" icon={DoctorIcon} label="Staff Console" />
+              <SidebarItem to="/admin/users" icon={DoctorIcon} label="User Management" />
             </div>
           )}
         </nav>
         <div className="sidebar-footer">
           <SidebarItem to="/profile" icon={ProfileIcon} label="My Profile" />
-          <button type="button" className="nav-item" onClick={() => void signOut()} aria-label="Sign out">
+          <SidebarItem to="/notifications" icon={ChatIcon} label="Notifications" />
+          <button type="button" className="nav-item" onClick={() => void handleSignOut()} aria-label="Sign out">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
               <polyline points="16 17 21 12 16 7" />
@@ -681,6 +717,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Sidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
       <main id="main-content" className="main-content" role="main" tabIndex={-1}>
+        <NotificationCenter />
         {children}
       </main>
       <button
@@ -932,6 +969,14 @@ function AppRoutes() {
         <Route path="/register" element={<PublicOnlyRoute><RegisterForm /></PublicOnlyRoute>} />
         <Route path="/forgot-password" element={<ForgotPasswordForm />} />
         <Route path="/auth/confirm" element={<AuthConfirmPage />} />
+        <Route
+          path="/complete-profile"
+          element={
+            <ProtectedRoute>
+              <CompleteProfilePage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/test-message-email" element={<TestMessageEmailPage />} />
 
         {/* ── Protected routes ── */}
@@ -942,12 +987,17 @@ function AppRoutes() {
         <Route path="/care-locator" element={<ProtectedRoute><PageLayout><DoctorFinderPage /></PageLayout></ProtectedRoute>} />
         <Route path="/appointments-marketplace" element={<ProtectedRoute><PageLayout><AppointmentsMarketplacePage /></PageLayout></ProtectedRoute>} />
         <Route path="/my-appointments" element={<ProtectedRoute><PageLayout><ReservationsPage /></PageLayout></ProtectedRoute>} />
+        <Route path="/notifications" element={<ProtectedRoute><PageLayout><NotificationsPage /></PageLayout></ProtectedRoute>} />
         <Route path="/nutrition" element={<ProtectedRoute><PageLayout><NutritionPlannerPage /></PageLayout></ProtectedRoute>} />
         <Route path="/recovery" element={<ProtectedRoute><PageLayout><RecoveryAssistantPage /></PageLayout></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><PageLayout><ProfilePage /></PageLayout></ProtectedRoute>} />
         <Route
           path="/admin/users"
           element={<RoleRoute allowed={['admin']}><PageLayout><AdminUsersPage /></PageLayout></RoleRoute>}
+        />
+        <Route
+          path="/admin/users/:id"
+          element={<RoleRoute allowed={['admin']}><PageLayout><AdminUserDetailsPage /></PageLayout></RoleRoute>}
         />
         <Route
           path="/staff-verification"
@@ -974,7 +1024,9 @@ function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
-        <AppRoutes />
+        <UiNotificationsProvider>
+          <AppRoutes />
+        </UiNotificationsProvider>
       </AuthProvider>
     </BrowserRouter>
   );

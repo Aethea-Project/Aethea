@@ -143,6 +143,30 @@
 }
 
 .dr-create-form input[type="date"],
+
+.dr-create-helper {
+  margin: -0.2rem 0 0;
+  color: #475569;
+  font-size: 0.92rem;
+}
+
+.dr-create-warnings {
+  border: 1px solid #fed7d7;
+  background: #fff5f5;
+  color: #742a2a;
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+}
+
+.dr-create-warnings strong {
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.dr-create-warnings ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
 .dr-create-form input[type="time"],
 .dr-create-form input[type="number"] {
   padding: 0.5rem 0.75rem;

@@ -11,6 +11,7 @@ import {
   getMyDoctorProfile,
   upsertDoctorProfile,
   createMySchedule,
+  deleteMySchedule,
 } from '../controllers/doctors.controller.js';
 import { validateBody, validateQuery } from '../middleware/validate.js';
 import { asyncHandler } from '../middleware/asyncHandler.js';
@@ -33,6 +34,7 @@ export const createDoctorRoutes = (authMiddleware: RequestHandler): Router => {
   router.get('/me/profile', auth, asyncHandler(getMyDoctorProfile));
   router.put('/me/profile', auth, validateBody(upsertDoctorProfileSchema), asyncHandler(upsertDoctorProfile));
   router.post('/me/schedules', auth, validateBody(createDoctorScheduleSchema), asyncHandler(createMySchedule));
+  router.delete('/me/schedules/:scheduleId', auth, asyncHandler(deleteMySchedule));
 
   // Public (but authenticated): browse doctors
   router.get('/', auth, validateQuery(doctorListQuerySchema), asyncHandler(listDoctors));

@@ -11,7 +11,8 @@ import prisma from '../lib/prisma.js';
 /* ─── Shared types ─── */
 
 export type AccountStatus = 'pending' | 'active' | 'suspended' | 'rejected';
-export type StaffAccountType = 'doctor' | 'pharmacist';
+export type AccountType = 'patient' | 'doctor' | 'pharmacist' | 'admin';
+export type StaffAccountType = AccountType;
 
 export interface AccountStatusRow {
   id: string;
@@ -68,6 +69,47 @@ export interface AuditLogFilters {
   targetId?: string;
   from?: string;
   to?: string;
+}
+
+export interface AdminUserDetailRow {
+  id: unknown;
+  email: unknown;
+  first_name: unknown;
+  last_name: unknown;
+  gender: unknown;
+  phone: unknown;
+  date_of_birth: unknown;
+  blood_type: unknown;
+  allergies: unknown;
+  chronic_conditions: unknown;
+  height_cm: unknown;
+  weight_kg: unknown;
+  emergency_contact_name: unknown;
+  emergency_contact_phone: unknown;
+  account_type: unknown;
+  account_status: unknown;
+  must_change_password: unknown;
+  approved_by: unknown;
+  approved_at: unknown;
+  rejected_reason: unknown;
+  suspended_reason: unknown;
+  created_at: unknown;
+  updated_at: unknown;
+}
+
+export interface AdminProfileUpdateInput {
+  firstName?: string;
+  lastName?: string;
+  gender?: 'male' | 'female';
+  phone?: string;
+  dateOfBirth?: string;
+  bloodType?: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
+  allergies?: string;
+  chronicConditions?: string;
+  heightCm?: number;
+  weightKg?: number;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
 }
 
 const UUID_V4_REGEX =
@@ -132,6 +174,89 @@ export async function updateAccountStatus(
     WHERE id = ${userId}::uuid
     RETURNING id, account_type, account_status, must_change_password, approved_by, approved_at, rejected_reason, suspended_reason, updated_at
   `;
+  return rows[0];
+}
+
+export async function findUserById(userId: string): Promise<AdminUserDetailRow | undefined> {
+  const rows = await prisma.$queryRaw<AdminUserDetailRow[]>(
+    Prisma.sql`
+      SELECT
+        ua.id,
+        p.email,
+        p.first_name,
+        p.last_name,
+        p.gender,
+        p.phone,
+        p.date_of_birth,
+        p.blood_type,
+        p.allergies,
+        p.chronic_conditions,
+        p.height_cm,
+        p.weight_kg,
+        p.emergency_contact_name,
+        p.emergency_contact_phone,
+        ua.account_type,
+        ua.account_status,
+        ua.must_change_password,
+        ua.approved_by,
+        ua.approved_at,
+        ua.rejected_reason,
+        ua.suspended_reason,
+        ua.created_at,
+        ua.updated_at
+      FROM public.user_accounts ua
+      LEFT JOIN public.profiles p ON p.id = ua.id
+      WHERE ua.id = ${userId}::uuid
+      LIMIT 1
+    `
+  );
+
+  return rows[0];
+}
+
+export async function updateUserProfileByAdmin(userId: string, input: AdminProfileUpdateInput): Promise<void> {
+  await prisma.$executeRaw`
+    UPDATE public.profiles
+    SET
+      first_name = COALESCE(${input.firstName ?? null}, first_name),
+      last_name = COALESCE(${input.lastName ?? null}, last_name),
+      gender = COALESCE(${input.gender ?? null}, gender),
+      phone = COALESCE(${input.phone ?? null}, phone),
+      date_of_birth = COALESCE(${input.dateOfBirth ?? null}::date, date_of_birth),
+      blood_type = COALESCE(${input.bloodType ?? null}, blood_type),
+      allergies = COALESCE(${input.allergies ?? null}, allergies),
+      chronic_conditions = COALESCE(${input.chronicConditions ?? null}, chronic_conditions),
+      height_cm = COALESCE(${input.heightCm ?? null}, height_cm),
+      weight_kg = COALESCE(${input.weightKg ?? null}, weight_kg),
+      emergency_contact_name = COALESCE(${input.emergencyContactName ?? null}, emergency_contact_name),
+      emergency_contact_phone = COALESCE(${input.emergencyContactPhone ?? null}, emergency_contact_phone),
+      updated_at = now()
+    WHERE id = ${userId}::uuid
+  `;
+}
+
+export async function updateUserAccountType(
+  userId: string,
+  accountType: AccountType,
+  accountStatus: AccountStatus,
+  mustChangePassword: boolean,
+  actorId: string,
+): Promise<AccountStatusRow | undefined> {
+  const rows = await prisma.$queryRaw<AccountStatusRow[]>`
+    UPDATE public.user_accounts
+    SET
+      account_type = ${accountType}::public.account_type,
+      account_status = ${accountStatus}::public.account_status,
+      must_change_password = ${mustChangePassword},
+      approved_by = CASE WHEN ${accountStatus} = 'active' THEN ${actorId}::uuid ELSE approved_by END,
+      approved_at = CASE WHEN ${accountStatus} = 'active' THEN now() ELSE approved_at END,
+      rejected_reason = NULL,
+      suspended_reason = NULL,
+      updated_at = now()
+    WHERE id = ${userId}::uuid
+    RETURNING id, account_type, account_status, must_change_password, approved_by, approved_at, rejected_reason, suspended_reason, updated_at
+  `;
+
   return rows[0];
 }
 

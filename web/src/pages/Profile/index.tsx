@@ -24,6 +24,7 @@ import type { ProfileUpdateRequest, UserProfile, BloodType, Gender } from '@core
 import { isValidName, isValidDateOfBirth, isValidPhone } from '@core/auth/auth-utils';
 import { validatePassword, doPasswordsMatch } from '@core/auth/auth-utils';
 import { Modal } from '../../components/Modal';
+import { useUiNotifications } from '../../contexts/UiNotificationsProvider';
 import './styles.css';
 
 // ── Validation ──────────────────────────────
@@ -76,6 +77,7 @@ function validateForm(form: ProfileUpdateRequest): ValidationErrors {
 
 const ProfilePage: React.FC = () => {
   const { profile, loading, updateProfile, updatePassword, refreshProfile, user, session } = useAuth();
+  const { notifySuccess, notifyError } = useUiNotifications();
   const navigate = useNavigate();
 
   // Detect if admin is forced here to change password
@@ -183,10 +185,12 @@ const ProfilePage: React.FC = () => {
 
     if (result.success) {
       setSuccessMsg(result.message ?? 'Profile updated successfully');
+      notifySuccess('Profile updated', 'Your profile data has been updated successfully.');
       setIsEditing(false);
       setValidationErrors({});
       await refreshProfile();
     } else {
+      notifyError('Update failed', 'Unable to update your profile.', result.message ?? 'Unknown update error');
       setErrorMsg(result.message ?? 'Update failed');
     }
   };

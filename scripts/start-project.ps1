@@ -60,6 +60,104 @@ function Get-BooleanEnvValue {
   return @('1', 'true', 'yes', 'y', 'on') -contains $normalized
 }
 
+function Get-EnvFileValue {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Name,
+    [Parameter(Mandatory = $true)]
+    [string]$ProjectRoot
+  )
+
+  $envFilePath = Join-Path $ProjectRoot ".env"
+  if (-not (Test-Path $envFilePath)) {
+    return $null
+  }
+
+  $line = Get-Content $envFilePath |
+    Where-Object { $_ -match "^\s*$Name\s*=" } |
+    Select-Object -First 1
+
+  if ([string]::IsNullOrWhiteSpace($line)) {
+    return $null
+  }
+
+  $parts = $line.Split('=', 2)
+  if ($parts.Length -lt 2) {
+    return $null
+  }
+
+  return $parts[1].Trim()
+}
+
+function Get-BackendHostPort {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$ProjectRoot
+  )
+
+  $fromProcess = [Environment]::GetEnvironmentVariable('BACKEND_PORT')
+  if (-not [string]::IsNullOrWhiteSpace($fromProcess)) {
+    return $fromProcess.Trim()
+  }
+
+  $fromEnvFile = Get-EnvFileValue -Name 'BACKEND_PORT' -ProjectRoot $ProjectRoot
+  if (-not [string]::IsNullOrWhiteSpace($fromEnvFile)) {
+    return $fromEnvFile
+  }
+
+  return '3001'
+}
+
+function Test-PortExcluded {
+  param(
+    [Parameter(Mandatory = $true)]
+    [int]$Port
+  )
+
+  $excludedRanges = netsh interface ipv4 show excludedportrange protocol=tcp 2>$null
+  if ($LASTEXITCODE -ne 0 -or -not $excludedRanges) {
+    return $false
+  }
+
+  foreach ($line in $excludedRanges) {
+    if ($line -match '^\s*(\d+)\s+(\d+)\s*(\*?)\s*$') {
+      $start = [int]$matches[1]
+      $end = [int]$matches[2]
+      if ($Port -ge $start -and $Port -le $end) {
+        return $true
+      }
+    }
+  }
+
+  return $false
+}
+
+function Get-PortOwnerPid {
+  param(
+    [Parameter(Mandatory = $true)]
+    [int]$Port
+  )
+
+  $matches = netstat -ano | Select-String ":$Port"
+  if (-not $matches) {
+    return $null
+  }
+
+  foreach ($item in $matches) {
+    $line = $item.Line.Trim()
+    $parts = ($line -split '\s+')
+    if ($parts.Length -ge 5) {
+      $localAddress = $parts[1]
+      $ownerPid = $parts[-1]
+      if ($localAddress -match ":$Port$" -and $ownerPid -match '^\d+$') {
+        return [int]$ownerPid
+      }
+    }
+  }
+
+  return $null
+}
+
 function Test-TunnelRunning {
   $containerId = docker ps --filter "name=aethea-tunnel" --filter "status=running" -q
   return ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($containerId))
@@ -68,6 +166,8 @@ function Test-TunnelRunning {
 Write-Host "Starting Aethea project..." -ForegroundColor Yellow
 
 $projectRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
+$backendHostPortRaw = Get-BackendHostPort -ProjectRoot $projectRoot
+$backendHostPort = [int]$backendHostPortRaw
 $autoStartTunnel = Get-BooleanEnvValue -Name "AUTO_START_TUNNEL"
 $shouldStartTunnel = (-not $DevMode) -and (-not $NoTunnel)
 
@@ -128,6 +228,10 @@ try {
     Write-Host "Frontend URL:  http://localhost:5173" -ForegroundColor Green
     Write-Host "Backend URL:   http://localhost:3001" -ForegroundColor Green
   } else {
+    if (Test-PortExcluded -Port $backendHostPort) {
+      throw "Host port $backendHostPort is reserved by Windows (excluded port range). Change BACKEND_PORT in .env to a fixed free port (e.g. 3101), then retry."
+    }
+
     # Stop conflicting services before starting (prevents port collisions)
     if ($Production) {
       docker compose stop backend web *>$null
@@ -156,23 +260,39 @@ try {
     Write-Host "Waiting for services to initialize..." -ForegroundColor Yellow
     Start-Sleep -Seconds 15
 
-    Push-Location backend
-    $previousErrorActionPreference = $ErrorActionPreference
-    $ErrorActionPreference = 'Continue'
-    $migrationOutput = npx prisma migrate deploy 2>&1
-    $migrationExitCode = $LASTEXITCODE
-    $ErrorActionPreference = $previousErrorActionPreference
-    if ($migrationExitCode -ne 0) {
-      Write-Host $migrationOutput -ForegroundColor Red
-      throw "Prisma migrate deploy failed."
+    $migrationService = if ($Production) { 'backend-prod' } else { 'backend' }
+    $migrationScript = {
+      param($serviceName, $rootPath)
+      Set-Location $rootPath
+      $output = & docker compose exec -T $serviceName npx prisma migrate deploy 2>&1
+      [pscustomobject]@{
+        ExitCode = $LASTEXITCODE
+        Output   = ($output | Out-String)
+      }
     }
-    $migrationText = ($migrationOutput | Out-String)
-    if ($migrationText -match 'No pending migrations to apply') {
-      Write-Host "Database migrations are up to date." -ForegroundColor DarkGray
+
+    $migrationJob = Start-Job -ScriptBlock $migrationScript -ArgumentList $migrationService, $projectRoot.Path
+    $jobCompleted = Wait-Job $migrationJob -Timeout 90
+
+    if (-not $jobCompleted) {
+      Stop-Job $migrationJob -ErrorAction SilentlyContinue
+      Remove-Job $migrationJob -Force -ErrorAction SilentlyContinue
+      Write-Host "Migration check timed out after 90s. Continuing startup (you can run migrations manually later)." -ForegroundColor Yellow
     } else {
-      Write-Host "Database migrations applied successfully." -ForegroundColor Green
+      $migrationResult = Receive-Job $migrationJob
+      Remove-Job $migrationJob -Force -ErrorAction SilentlyContinue
+
+      if ($migrationResult.ExitCode -ne 0) {
+        Write-Host $migrationResult.Output -ForegroundColor Yellow
+        Write-Host "Migration step failed, but services are running. Run 'npm run docker:prisma:migrate' when ready." -ForegroundColor Yellow
+      } else {
+        if ($migrationResult.Output -match 'No pending migrations to apply') {
+          Write-Host "Database migrations are up to date." -ForegroundColor DarkGray
+        } else {
+          Write-Host "Database migrations applied successfully." -ForegroundColor Green
+        }
+      }
     }
-    Pop-Location
 
     $tunnelIsRunning = if ($shouldStartTunnel) { $true } else { Test-TunnelRunning }
 
@@ -186,8 +306,8 @@ try {
       } else {
         Write-Host "Frontend URL:  http://localhost:5173" -ForegroundColor Green
       }
-      Write-Host "Backend URL:   http://localhost:3001" -ForegroundColor Green
-      Write-Host "Health URL:    http://localhost:3001/health" -ForegroundColor Green
+      Write-Host "Backend URL:   http://localhost:$backendHostPort" -ForegroundColor Green
+      Write-Host "Health URL:    http://localhost:$backendHostPort/health" -ForegroundColor Green
       Write-Host "Public tunnel is OFF. Use -StartTunnel or npm run start:server:tunnel to enable aethea.me." -ForegroundColor Yellow
     }
   }

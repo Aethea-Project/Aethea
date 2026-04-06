@@ -1,12 +1,14 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { FeatureHeader } from '../../components/FeatureHeader';
 import { imageAssets } from '../../constants/imageAssets';
 import { useAdminUsers } from '../../hooks/useAdminUsers';
-import { AccountStatus } from '../../services/adminApi';
+import { AccountStatus, AccountType } from '../../services/adminApi';
 import { staffVerificationApi, VerificationStatus } from '../../services/staffVerificationApi';
 import './styles.css';
 
 const accountStatuses: AccountStatus[] = ['pending', 'active', 'suspended', 'rejected'];
+const accountTypes: AccountType[] = ['patient', 'doctor', 'pharmacist', 'admin'];
 
 export default function AdminUsersPage() {
   const {
@@ -16,6 +18,7 @@ export default function AdminUsersPage() {
     page,
     total,
     totalPages,
+    accountType,
     accountStatus,
     search,
     fetchUsers,
@@ -26,7 +29,7 @@ export default function AdminUsersPage() {
   const [createForm, setCreateForm] = useState({
     email: '',
     temporaryPassword: '',
-    accountType: 'doctor' as 'doctor' | 'pharmacist',
+    accountType: 'patient' as AccountType,
     firstName: '',
     lastName: '',
   });
@@ -47,11 +50,6 @@ export default function AdminUsersPage() {
     last_name: string | null;
   }>>([]);
   const [documentLinks, setDocumentLinks] = useState<Record<string, { governmentIdUrl: string | null; certificateUrl: string | null; selfieUrl: string | null }>>({});
-
-  const activeUsers = useMemo(
-    () => users.filter((u) => u.accountType === 'doctor' || u.accountType === 'pharmacist'),
-    [users],
-  );
 
   const loadQueue = async (status: VerificationStatus) => {
     setQueueLoading(true);
@@ -78,7 +76,7 @@ export default function AdminUsersPage() {
       setCreateForm({
         email: '',
         temporaryPassword: '',
-        accountType: 'doctor',
+        accountType: 'patient',
         firstName: '',
         lastName: '',
       });
@@ -155,10 +153,12 @@ export default function AdminUsersPage() {
             <label>Account Type</label>
             <select
               value={createForm.accountType}
-              onChange={(e) => setCreateForm((p) => ({ ...p, accountType: e.target.value as 'doctor' | 'pharmacist' }))}
+              onChange={(e) => setCreateForm((p) => ({ ...p, accountType: e.target.value as AccountType }))}
             >
+              <option value="patient">Patient</option>
               <option value="doctor">Doctor</option>
               <option value="pharmacist">Pharmacist</option>
+              <option value="admin">Admin</option>
             </select>
           </div>
           <div className="form-control">
@@ -187,13 +187,29 @@ export default function AdminUsersPage() {
 
       <section className="admin-card">
         <div className="admin-filter-row">
-          <h3>Staff Accounts</h3>
+          <h3>All Accounts</h3>
           <div className="filter-controls">
             <input
               placeholder="Search by name or email"
               value={search ?? ''}
               onChange={(e) => void fetchUsers({ search: e.target.value, page: 1 })}
             />
+            <select
+              value={accountType ?? ''}
+              onChange={(e) =>
+                void fetchUsers({
+                  accountType: (e.target.value || undefined) as AccountType | undefined,
+                  page: 1,
+                })
+              }
+            >
+              <option value="">All types</option>
+              {accountTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
             <select
               value={accountStatus ?? ''}
               onChange={(e) =>
@@ -214,11 +230,11 @@ export default function AdminUsersPage() {
         </div>
 
         {loading ? (
-          <p className="loading">Loading staff users...</p>
+          <p className="loading">Loading users...</p>
         ) : (
           <>
             <div className="users-grid">
-              {activeUsers.map((user) => (
+              {users.map((user) => (
                 <article key={user.id} className="user-card">
                   <div className="user-row"><strong>Name</strong><span>{[user.firstName, user.lastName].filter(Boolean).join(' ') || '—'}</span></div>
                   <div className="user-row"><strong>Email</strong><span>{user.email || '—'}</span></div>
@@ -240,6 +256,7 @@ export default function AdminUsersPage() {
                     <button className="btn btn-ghost" onClick={() => void onStatusUpdate(user.id, 'active')} disabled={submitting || user.accountStatus === 'active'}>Approve</button>
                     <button className="btn btn-ghost" onClick={() => void onStatusUpdate(user.id, 'suspended')} disabled={submitting || user.accountStatus === 'suspended'}>Suspend</button>
                     <button className="btn btn-ghost" onClick={() => void onStatusUpdate(user.id, 'rejected')} disabled={submitting || user.accountStatus === 'rejected'}>Reject</button>
+                    <Link className="btn btn-ghost" to={`/admin/users/${user.id}`}>Open Profile</Link>
                   </div>
                 </article>
               ))}

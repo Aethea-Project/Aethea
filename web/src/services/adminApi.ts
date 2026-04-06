@@ -40,9 +40,50 @@ interface ListUsersFilters {
 interface CreateStaffPayload {
   email: string;
   temporaryPassword: string;
-  accountType: 'doctor' | 'pharmacist';
+  accountType: AccountType;
   firstName: string;
   lastName: string;
+}
+
+export interface AdminUserDetail {
+  id: string;
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  gender: 'male' | 'female' | null;
+  phone: string | null;
+  dateOfBirth: string | null;
+  bloodType: string | null;
+  allergies: string | null;
+  chronicConditions: string | null;
+  heightCm: number | null;
+  weightKg: number | null;
+  emergencyContactName: string | null;
+  emergencyContactPhone: string | null;
+  accountType: AccountType;
+  accountStatus: AccountStatus;
+  mustChangePassword: boolean;
+  approvedBy: string | null;
+  approvedAt: string | null;
+  rejectedReason: string | null;
+  suspendedReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminProfileUpdatePayload {
+  firstName?: string;
+  lastName?: string;
+  gender?: 'male' | 'female';
+  phone?: string;
+  dateOfBirth?: string;
+  bloodType?: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
+  allergies?: string;
+  chronicConditions?: string;
+  heightCm?: number;
+  weightKg?: number;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
 }
 
 interface UpdateStatusPayload {
@@ -82,6 +123,33 @@ export const adminApi = {
       body: JSON.stringify(payload),
     });
     return res.data;
+  },
+
+  async getUserById(userId: string): Promise<AdminUserDetail> {
+    const res = await authFetch<{ data: AdminUserDetail }>(`/v1/admin/users/${userId}`);
+    return res.data;
+  },
+
+  async updateUserProfile(userId: string, payload: AdminProfileUpdatePayload): Promise<AdminUserDetail> {
+    const res = await authFetch<{ data: AdminUserDetail }>(`/v1/admin/users/${userId}/profile`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+    return res.data;
+  },
+
+  async updateUserAccountType(userId: string, accountType: AccountType): Promise<AdminUser> {
+    const res = await authFetch<{ data: AdminUser }>(`/v1/admin/users/${userId}/account-type`, {
+      method: 'PATCH',
+      body: JSON.stringify({ accountType }),
+    });
+    return res.data;
+  },
+
+  async deleteUser(userId: string): Promise<void> {
+    await authFetch<unknown>(`/v1/admin/users/${userId}`, {
+      method: 'DELETE',
+    });
   },
 };
 

@@ -3,6 +3,8 @@
  */
 
 import { AppError } from '../lib/AppError.js';
+import prisma from '../lib/prisma.js';
+import { sendReservationCancelledEmail } from './emailService.js';
 import {
   listDoctors,
   getDoctorProfileById,
@@ -16,6 +18,7 @@ import {
   listMarketplaceSchedules,
   getScheduleById,
   createSchedule,
+  deleteSchedule,
   type CreateScheduleInput,
   type MarketplaceScheduleFilters,
 } from '../repositories/scheduleRepository.js';
@@ -114,4 +117,76 @@ export async function getScheduleDetail(scheduleId: string) {
     throw AppError.notFound('Schedule not found');
   }
   return schedule;
+}
+
+export async function removeDoctorSchedule(userId: string, scheduleId: string, reason: string) {
+  const profile = await getDoctorProfileByUserId(userId);
+  if (!profile) {
+    throw AppError.notFound('Profile not found');
+  }
+
+  const schedule = await getScheduleById(scheduleId);
+  if (!schedule) {
+    throw AppError.notFound('Schedule not found');
+  }
+
+  if (schedule.doctorProfileId !== profile.id) {
+    throw AppError.forbidden("Cannot delete another doctor's schedule");
+  }
+
+  const reservations = await prisma.reservation.findMany({
+    where: {
+      doctorScheduleId: scheduleId,
+      status: { not: 'cancelled' },
+    },
+    select: { 
+      userId: true, 
+      startAt: true, 
+      endAt: true,
+      user: { select: { email: true } },
+    },
+  });
+
+  if (reservations.length > 0) {
+    const defaultDateStr = new Date(schedule.scheduleDate).toLocaleDateString('en-US', { dateStyle: 'full' });
+
+    await prisma.notification.createMany({
+      data: reservations.map(r => ({
+        userId: r.userId,
+        type: 'reservation_cancelled',
+        title: 'Reservation Cancelled by Doctor',
+        body: `Your appointment on ${defaultDateStr} was cancelled by Dr. ${profile.firstName} ${profile.lastName}. Reason given: ${reason}. We apologize for the inconvenience and the situation will be reviewed to ensure accountability.`,
+      })),
+    });
+
+    // Send emails in parallel
+    await Promise.all(
+      reservations.map(r => 
+        sendReservationCancelledEmail({
+          to: r.user.email,
+          doctorName: `${profile.firstName} ${profile.lastName}`,
+          specialty: profile.specialty,
+          clinic: profile.clinicName ?? undefined,
+          startAt: r.startAt,
+          endAt: r.endAt,
+          reason,
+        }).catch(err => {
+          // just log email errors, don't fail the deletion
+          console.error(`Failed to send cancellation email to ${r.user.email}:`, err);
+        })
+      )
+    );
+  }
+
+  await deleteSchedule(scheduleId);
+  
+  // Create a notification for the doctor as well
+  await prisma.notification.create({
+    data: {
+      userId,
+      type: 'reservation_cancelled',
+      title: 'Schedule Cancelled Successfully',
+      body: `You have successfully cancelled your schedule on ${new Date(schedule.scheduleDate).toLocaleDateString('en-US', { dateStyle: 'full' })}. All booked patients have been notified.`,
+    }
+  });
 }

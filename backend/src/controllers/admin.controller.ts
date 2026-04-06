@@ -11,6 +11,10 @@ import { parsePagination, paginatedResult } from '../lib/pagination.js';
 import {
   createStaffUser,
   changeUserStatus,
+  getUserDetail,
+  updateUserProfile,
+  changeUserAccountType,
+  deleteUserAccount,
   listUsers,
   listAuditLog,
 } from '../services/adminUserService.js';
@@ -80,6 +84,111 @@ export const updateAdminUserStatus = async (req: Request, res: Response): Promis
   );
 
   res.json({ data });
+};
+
+/**
+ * GET /api/admin/users/:id
+ */
+export const getAdminUserById = async (req: Request, res: Response): Promise<void> => {
+  const rawId = req.params.id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+
+  if (!id || !UUID_V4_REGEX.test(id)) {
+    throw AppError.badRequest('Invalid user id');
+  }
+
+  const data = await getUserDetail(id);
+  res.json({ data });
+};
+
+/**
+ * PATCH /api/admin/users/:id/profile
+ */
+export const updateAdminUserProfile = async (req: Request, res: Response): Promise<void> => {
+  const rawId = req.params.id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+  const actorId = req.user?.id;
+
+  if (!id || !UUID_V4_REGEX.test(id)) {
+    throw AppError.badRequest('Invalid user id');
+  }
+
+  if (!actorId) {
+    throw AppError.unauthorized('No authenticated user');
+  }
+
+  const data = await updateUserProfile(
+    id,
+    req.body,
+    actorId,
+    {
+      headers: req.headers as Record<string, string | string[] | undefined>,
+      socketAddress: req.socket?.remoteAddress,
+    },
+  );
+
+  res.json({ data });
+};
+
+/**
+ * PATCH /api/admin/users/:id/account-type
+ */
+export const updateAdminUserAccountType = async (req: Request, res: Response): Promise<void> => {
+  const rawId = req.params.id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+  const actorId = req.user?.id;
+
+  if (!id || !UUID_V4_REGEX.test(id)) {
+    throw AppError.badRequest('Invalid user id');
+  }
+
+  if (!actorId) {
+    throw AppError.unauthorized('No authenticated user');
+  }
+
+  const data = await changeUserAccountType(
+    {
+      userId: id,
+      accountType: req.body.accountType,
+      actorId,
+    },
+    {
+      headers: req.headers as Record<string, string | string[] | undefined>,
+      socketAddress: req.socket?.remoteAddress,
+    },
+  );
+
+  res.json({ data });
+};
+
+/**
+ * DELETE /api/admin/users/:id
+ */
+export const deleteAdminUser = async (req: Request, res: Response): Promise<void> => {
+  const rawId = req.params.id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+  const actorId = req.user?.id;
+
+  if (!id || !UUID_V4_REGEX.test(id)) {
+    throw AppError.badRequest('Invalid user id');
+  }
+
+  if (!actorId) {
+    throw AppError.unauthorized('No authenticated user');
+  }
+
+  await deleteUserAccount(
+    {
+      userId: id,
+      actorId,
+    },
+    {
+      headers: req.headers as Record<string, string | string[] | undefined>,
+      socketAddress: req.socket?.remoteAddress,
+    },
+  );
+
+  res.status(204).send();
 };
 
 /**

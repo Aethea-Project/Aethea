@@ -20,6 +20,7 @@ export interface UseReservationsResult {
   error: string | null;
   book: (payload: BookReservationPayload) => Promise<void>;
   cancel: (id: string) => Promise<void>;
+  alertOnAvailability: (doctorScheduleId: string) => Promise<string>;
 }
 
 export function useReservations(): UseReservationsResult {
@@ -50,9 +51,24 @@ export function useReservations(): UseReservationsResult {
   }, [fetchData]);
 
   const cancel = useCallback(async (id: string): Promise<void> => {
-    await medicalApi.cancelReservation(id);
+    let originalError: unknown;
+    try {
+      await medicalApi.cancelReservation(id);
+    } catch (err) {
+      originalError = err;
+    }
+
     await fetchData();
+
+    if (originalError) {
+      throw originalError;
+    }
   }, [fetchData]);
 
-  return { reservations, loading, error, book, cancel };
+  const alertOnAvailability = useCallback(async (doctorScheduleId: string): Promise<string> => {
+    const result = await medicalApi.subscribeToAvailabilityAlert(doctorScheduleId);
+    return result.message;
+  }, []);
+
+  return { reservations, loading, error, book, cancel, alertOnAvailability };
 }

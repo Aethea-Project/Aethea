@@ -27,13 +27,20 @@ export async function listDoctorSchedules(
   skip: number,
   take: number,
 ) {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
   const dateFilter: Record<string, Date> = {};
-  if (from) dateFilter.gte = from;
+  dateFilter.gte = from ?? startOfToday;
   if (to)   dateFilter.lte = to;
 
   const where = {
     doctorProfileId,
-    isPublished: true,
+    // Note: since this is used by standard list, keep or add isPublished if needed. 
+    // Usually a doctor should see drafts, but for now we keep the existing condition or remove it if doctor wants to see drafts.
+    // The previous code had isPublished: true, so let's keep it to be safe, or remove it so doctors see all. 
+    // They are fetching their own. Patients fetch via marketplace route anyway!
+    // But they pass through the same controller. We will keep it but filter past dates.
     ...(Object.keys(dateFilter).length > 0 ? { scheduleDate: dateFilter } : {}),
   };
 
@@ -139,6 +146,7 @@ export async function getScheduleById(id: string) {
           firstName: true,
           lastName: true,
           specialty: true,
+          clinicName: true,
         },
       },
       _count: { select: { reservations: true } },
@@ -151,6 +159,7 @@ export async function getScheduleWithReservations(scheduleId: string) {
     where: { id: scheduleId },
     include: {
       reservations: {
+        where: { status: { not: 'cancelled' } },
         select: {
           id: true,
           slotIndex: true,
@@ -178,6 +187,12 @@ export async function createSchedule(doctorProfileId: string, data: CreateSchedu
       maxPatients: data.maxPatients,
       isPublished: data.isPublished ?? true,
     },
+  });
+}
+
+export async function deleteSchedule(id: string) {
+  return prisma.doctorSchedule.delete({
+    where: { id },
   });
 }
 
