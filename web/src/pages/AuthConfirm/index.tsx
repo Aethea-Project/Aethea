@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/auth';
+import { useAuth } from '@core/auth/useAuth';
 
 type ConfirmState = 'loading' | 'success' | 'error';
 
@@ -15,14 +16,17 @@ const decodeParam = (value: string | null): string | null => {
 
 const AuthConfirmPage: React.FC = () => {
   const [state, setState] = useState<ConfirmState>('loading');
-  const [message, setMessage] = useState('Confirming your account...');
+  const [message, setMessage] = useState('Processing request and confirming account...');
+  const { profile, session, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
 
+  // 1. Initial auth confirmation & token exchange
   useEffect(() => {
     let active = true;
 
     const run = async () => {
       const params = new URLSearchParams(window.location.search);
-      const errorDescription = decodeParam(params.get('error_description'));
+      const errorDescription = decodeParam(params.get('error_description'));    
       const errorCode = decodeParam(params.get('error'));
       const hasCode = params.has('code');
 
@@ -35,6 +39,7 @@ const AuthConfirmPage: React.FC = () => {
 
       try {
         if (hasCode) {
+          // Wait briefly for Supabase to exchange PKCE code
           await new Promise((resolve) => setTimeout(resolve, 700));
         }
 
@@ -43,12 +48,12 @@ const AuthConfirmPage: React.FC = () => {
 
         if (hasCode || sessionResponse.data) {
           setState('success');
-          setMessage('Your account has been confirmed successfully. Please complete your remaining details.');
+          setMessage('Account confirmed successfully. Loading...');
           return;
         }
 
         setState('error');
-        setMessage('Invalid or expired confirmation link. Please request a new confirmation email.');
+        setMessage('Invalid or expired confirmation link. Please request a new link.');
       } catch {
         if (!active) return;
         setState('error');
@@ -62,45 +67,70 @@ const AuthConfirmPage: React.FC = () => {
     };
   }, []);
 
+  // 2. Redirect logic handling based on profile state (Wait for auth to finish loading)
+  useEffect(() => {
+    if (state === 'success' && !authLoading && session) {
+      const isComplete = profile?.phone && profile?.dateOfBirth && profile?.gender;
+
+      if (isComplete) {
+        setMessage('Signed in successfully! Redirecting to dashboard...');
+        const timer = setTimeout(() => {
+          navigate('/dashboard', { replace: true });
+        }, 1000);
+        return () => clearTimeout(timer);
+      } else {
+        setMessage('Signed in successfully! Redirecting to complete your basic details...');
+        const timer = setTimeout(() => {
+          navigate('/complete-profile', { replace: true });
+        }, 1000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [state, authLoading, session, profile, navigate]);
+
   return (
-    <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: '1rem' }}>
+    <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: '1rem', backgroundColor: 'var(--bg-default)' }}>
       <div
+        className=""
         style={{
           width: '100%',
-          maxWidth: '520px',
-          background: '#fff',
-          border: '1px solid #e2e8f0',
+          maxWidth: '480px',
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border)',
           borderRadius: '12px',
-          padding: '1.25rem',
+          padding: '24px',
           display: 'grid',
-          gap: '0.75rem',
+          gap: '16px',
+          textAlign: 'center',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
         }}
       >
-        <h1 style={{ margin: 0, fontSize: '1.25rem' }}>Account confirmation</h1>
+        <h1 style={{ margin: 0, fontSize: '1.5rem', color: 'var(--text-primary)' }}>Account Confirmation</h1>
+        
         <div
           style={{
-            color: state === 'error' ? '#b91c1c' : state === 'success' ? '#166534' : '#334155',
-            fontSize: '0.95rem',
+            color: state === 'error' ? 'var(--error)' : state === 'success' ? 'var(--success)' : 'var(--text-secondary)',
+            fontSize: '1rem',
+            lineHeight: 1.5,
           }}
         >
           {message}
         </div>
 
-        {state == 'error' && (
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <Link to="/login" style={{ color: '#0f766e', fontWeight: 600 }}>
+        {state === 'error' && (
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '16px' }}>
+            <Link to="/login" className="btn btn-primary" style={{ textDecoration: 'none' }}>
               Go to Sign in
             </Link>
-            <Link to="/register" style={{ color: '#0f766e', fontWeight: 600 }}>
+            <Link to="/register" className="btn btn-secondary" style={{ textDecoration: 'none' }}>
               Create new account
             </Link>
           </div>
         )}
+        
         {state === 'success' && (
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <Link to="/dashboard" style={{ color: '#0f766e', fontWeight: 600 }}>
-              Continue
-            </Link>
+          <div style={{ marginTop: '16px' }}>
+            <span className="btn-spinner" style={{ width: '20px', height: '20px', display: 'inline-block', borderColor: 'var(--primary) transparent transparent transparent' }} aria-hidden="true" />
           </div>
         )}
       </div>

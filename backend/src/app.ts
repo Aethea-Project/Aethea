@@ -51,6 +51,10 @@ interface AppConfig {
 
 export function createApp(config: AppConfig = {}) {
   const app = express();
+
+  // Trust the first proxy to enable rate limiting behind NGINX or Cloudflare
+  app.set('trust proxy', 1);
+
   const {
     supabaseUrl,
     supabaseServiceKey,

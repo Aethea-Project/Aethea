@@ -157,7 +157,7 @@ export class AuthRepository {
       }
 
       if (existing.data) {
-        const existingRow = existing.data as Record<string, any>;
+        const existingRow = existing.data as Record<string, unknown>;
         const existingNameFromFull = splitName(toNullableString(existingRow.full_name));
         const existingFirstName = toNullableString(existingRow.first_name) ?? existingNameFromFull.firstName;
         const existingLastName = toNullableString(existingRow.last_name) ?? existingNameFromFull.lastName;

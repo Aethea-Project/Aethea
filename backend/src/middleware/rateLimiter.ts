@@ -17,7 +17,7 @@ import { RedisStore } from 'rate-limit-redis';
 import logger from '../lib/logger.js';
 
 /* ---------- Redis store (optional) ---------- */
-let redisStore: Store | undefined;
+let getRedisStore: ((prefix: string) => Store) | undefined;
 
 if (process.env.REDIS_URL) {
   try {
@@ -34,9 +34,9 @@ if (process.env.REDIS_URL) {
         logger.warn('Redis unavailable for rate limiter — falling back to in-memory behavior');
       });
 
-    redisStore = new RedisStore({
+    getRedisStore = (prefix: string) => new RedisStore({
       sendCommand: (...args: string[]) => redisClient.sendCommand(args),
-      prefix: 'rl:',
+      prefix,
     });
   } catch {
     logger.warn('Redis unavailable for rate limiter — falling back to in-memory store');
@@ -51,7 +51,7 @@ export const apiLimiter = rateLimit({
   max: 100,                  // limit each IP to 100 requests per window
   standardHeaders: true,     // Return rate limit info in `RateLimit-*` headers
   legacyHeaders: false,      // Disable `X-RateLimit-*` headers
-  ...(redisStore && { store: redisStore }),
+  ...(getRedisStore && { store: getRedisStore('rl:api:') }),
   message: {
     error: 'Too many requests',
     message: 'You have exceeded the rate limit. Please try again later.',
@@ -71,7 +71,7 @@ export const authLimiter = rateLimit({
   max: 10,                   // only 10 auth attempts per window
   standardHeaders: true,
   legacyHeaders: false,
-  ...(redisStore && { store: redisStore }),
+  ...(getRedisStore && { store: getRedisStore('rl:auth:') }),
   message: {
     error: 'Too many authentication attempts',
     message: 'Please try again after 15 minutes.',

@@ -83,10 +83,38 @@ export async function authFetch<T>(path: string, init?: RequestInit): Promise<T>
       let detailsString = `Endpoint: ${path} | HTTP ${res.status}`;
       
       try {
-        const json = JSON.parse(text);
-        if (json.error) message = json.error;
-        if (json.details && Array.isArray(json.details)) {
-          detailsString += '\\n' + json.details.map((d: any) => `- ${d.field}: ${d.message}`).join('\\n');
+        const json = JSON.parse(text) as {
+          error?: unknown;
+          details?: unknown;
+        };
+
+        if (typeof json.error === 'string' && json.error.trim() !== '') {
+          message = json.error;
+        }
+
+        if (Array.isArray(json.details)) {
+          const detailLines = json.details
+            .map((detail) => {
+              if (!detail || typeof detail !== 'object') return null;
+
+              const field =
+                'field' in detail && typeof (detail as { field?: unknown }).field === 'string'
+                  ? (detail as { field: string }).field
+                  : null;
+
+              const detailMessage =
+                'message' in detail && typeof (detail as { message?: unknown }).message === 'string'
+                  ? (detail as { message: string }).message
+                  : null;
+
+              if (!field || !detailMessage) return null;
+              return `- ${field}: ${detailMessage}`;
+            })
+            .filter((line): line is string => line !== null);
+
+          if (detailLines.length > 0) {
+            detailsString += `\n${detailLines.join('\n')}`;
+          }
         }
       } catch {
         // Response body is not JSON - use raw text as-is

@@ -22,6 +22,22 @@ export interface JWTPayload {
   must_change_password?: boolean;
 }
 
+interface VerifiedAuthUser {
+  id: string;
+  email?: string | null;
+}
+
+type TokenVerificationResult =
+  | {
+      valid: true;
+      user: VerifiedAuthUser;
+      payload: JWTPayload | null;
+    }
+  | {
+      valid: false;
+      error: string;
+    };
+
 const decodePayload = (token: string): JWTPayload | null => {
   try {
     const parts = token.split('.');
@@ -46,7 +62,7 @@ export class JWTVerifier {
   /**
    * Verify JWT token and get user (with timeout)
    */
-  async verifyToken(token: string): Promise<{ valid: boolean; user?: any; payload?: JWTPayload | null; error?: string }> {
+  async verifyToken(token: string): Promise<TokenVerificationResult> {
     try {
       const result = await Promise.race([
         this.supabase.auth.getUser(token),
@@ -69,10 +85,10 @@ export class JWTVerifier {
         user: data.user,
         payload: decodePayload(token),
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         valid: false,
-        error: error.message || 'Token verification failed',
+        error: error instanceof Error ? error.message : 'Token verification failed',
       };
     }
   }

@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import { FeatureHeader } from '../../components/FeatureHeader';
 import { imageAssets } from '../../constants/imageAssets';
 import { useDoctors } from '../../hooks/useDoctors';
@@ -18,6 +18,36 @@ interface NearbyPlace {
   location: LatLng;
 }
 
+interface GoogleMapsPlaceResult {
+  place_id: string;
+  name: string;
+  vicinity?: string;
+  geometry?: {
+    location?: {
+      lat?: () => number;
+      lng?: () => number;
+    };
+  };
+}
+
+interface GooglePlacesService {
+  nearbySearch: (
+    request: { location: LatLng; radius: number; type: string },
+    callback: (results: GoogleMapsPlaceResult[] | null, status: string) => void,
+  ) => void;
+}
+
+interface GoogleMapsApi {
+  maps: {
+    places: {
+      PlacesService: new (container: HTMLElement) => GooglePlacesService;
+      PlacesServiceStatus: {
+        OK: string;
+      };
+    };
+  };
+}
+
 const DEFAULT_CENTER: LatLng = { lat: 30.0444, lng: 31.2357 };
 const GOOGLE_MAPS_SCRIPT_ID = 'aethea-google-maps-script';
 
@@ -35,12 +65,18 @@ const getCurrentPositionAsync = () =>
   });
 
 const loadGoogleMapsApi = (apiKey: string) =>
-  new Promise<any>((resolve, reject) => {
-    const w = window as Window & { google?: { maps?: any } };
+  new Promise<GoogleMapsApi>((resolve, reject) => {
+    const w = window as Window & { google?: GoogleMapsApi };
     if (w.google?.maps) { resolve(w.google); return; }
     const existing = document.getElementById(GOOGLE_MAPS_SCRIPT_ID) as HTMLScriptElement | null;
     if (existing) {
-      existing.addEventListener('load', () => resolve(w.google));
+      existing.addEventListener('load', () => {
+        if (w.google) {
+          resolve(w.google);
+          return;
+        }
+        reject(new Error('Google Maps loaded but global API is unavailable'));
+      });
       existing.addEventListener('error', () => reject(new Error('Failed to load Google Maps')));
       return;
     }
@@ -49,7 +85,13 @@ const loadGoogleMapsApi = (apiKey: string) =>
     script.async = true;
     script.defer = true;
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
-    script.onload = () => resolve(w.google);
+    script.onload = () => {
+      if (w.google) {
+        resolve(w.google);
+        return;
+      }
+      reject(new Error('Google Maps loaded but global API is unavailable'));
+    };
     script.onerror = () => reject(new Error('Failed to load Google Maps'));
     document.head.appendChild(script);
   });
@@ -71,7 +113,7 @@ export default function DoctorFinderPage() {
   const [nearbyMedicalBuildings, setNearbyMedicalBuildings] = useState<NearbyPlace[]>([]);
 
   const userLocationRef = useRef<LatLng>(DEFAULT_CENTER);
-  const googleMapsRef = useRef<any | null>(null);
+  const googleMapsRef = useRef<GoogleMapsApi | null>(null);
   const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -103,10 +145,10 @@ export default function DoctorFinderPage() {
 
         const searchNearby = (type: string, setter: React.Dispatch<React.SetStateAction<NearbyPlace[]>>) =>
           new Promise<void>((res) => {
-            svc.nearbySearch({ location: userLocationRef.current, radius: 4000, type }, (results: any[] | null, status: string) => {
+            svc.nearbySearch({ location: userLocationRef.current, radius: 4000, type }, (results: GoogleMapsPlaceResult[] | null, status: string) => {
               if (cancelled) { res(); return; }
               if (status !== google.maps.places.PlacesServiceStatus.OK || !results) { setter([]); res(); return; }
-              const places = results.slice(0, 6).map((p: any) => {
+              const places = results.slice(0, 6).map((p) => {
                 const lat = p.geometry?.location?.lat?.();
                 const lng = p.geometry?.location?.lng?.();
                 if (typeof lat !== 'number' || typeof lng !== 'number') return null;

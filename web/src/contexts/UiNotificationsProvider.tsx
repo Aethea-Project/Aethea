@@ -88,9 +88,10 @@ export const UiNotificationsProvider: React.FC<{ children: React.ReactNode }> = 
   }, [entries]);
 
   useEffect(() => {
+    const timeouts = timeoutRef.current;
     return () => {
-      timeoutRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId));
-      timeoutRef.current.clear();
+      timeouts.forEach((timeoutId) => window.clearTimeout(timeoutId));
+      timeouts.clear();
     };
   }, []);
 
@@ -205,6 +206,7 @@ export const UiNotificationsProvider: React.FC<{ children: React.ReactNode }> = 
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useUiNotifications(): UiNotificationsContextValue {
   const context = useContext(UiNotificationsContext);
   if (!context) {

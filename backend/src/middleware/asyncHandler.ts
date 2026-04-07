@@ -12,7 +12,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 
-type AsyncRequestHandler = (req: Request, res: Response, next: NextFunction) => Promise<any>;
+type AsyncRequestHandler = (req: Request, res: Response, next: NextFunction) => Promise<unknown>;
 
 export const asyncHandler = (fn: AsyncRequestHandler) => {
   return (req: Request, res: Response, next: NextFunction) => {

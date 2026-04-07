@@ -3,6 +3,7 @@
  */
 
 import { AppError } from '../lib/AppError.js';
+import logger from '../lib/logger.js';
 import prisma from '../lib/prisma.js';
 import { sendReservationCancelledEmail } from './emailService.js';
 import {
@@ -172,7 +173,7 @@ export async function removeDoctorSchedule(userId: string, scheduleId: string, r
           reason,
         }).catch(err => {
           // just log email errors, don't fail the deletion
-          console.error(`Failed to send cancellation email to ${r.user.email}:`, err);
+          logger.warn({ err, email: r.user.email }, 'Failed to send cancellation email');
         })
       )
     );

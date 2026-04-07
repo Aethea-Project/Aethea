@@ -42,6 +42,15 @@ export const updateProfileSchema = z.object({
   emergencyContactPhone: z.string().max(20).optional(),
 }).strict(); // .strict() rejects any extra keys — prevents mass-assignment
 
+export const requestProfileUpdateSchema = z.object({
+  password: z.string().min(6),
+}).strict();
+
+export const verifyProfileUpdateSchema = z.object({
+  code: z.string().length(6),
+  updates: updateProfileSchema,
+}).strict();
+
 /**
  * Pagination query params (reusable)
  */

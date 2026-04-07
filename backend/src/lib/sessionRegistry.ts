@@ -226,9 +226,9 @@ export const createStepUpChallenge = async (userId: string, sessionId: string): 
       userId,
       sessionId,
       revokedAt: null,
-      stepUpRequired: true,
     },
     data: {
+      stepUpRequired: true,
       stepUpCodeHash: sha256(code),
       stepUpCodeExpiresAt: expiresAt,
     },

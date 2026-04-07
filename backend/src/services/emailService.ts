@@ -35,6 +35,11 @@ type MailerTransport = {
 let transport: MailerTransport | null = null;
 let nodemailerUnavailableLogged = false;
 
+interface ProfileUpdateOtpEmailPayload {
+  to: string;
+  code: string;
+  expiresInSeconds: number;
+}
 const isEmailEnabled = (): boolean => {
   const flag = (process.env.EMAIL_NOTIFICATIONS_ENABLED ?? 'true').toLowerCase();
   return ['1', 'true', 'yes', 'on'].includes(flag);
@@ -160,4 +165,17 @@ export async function sendReservationCancelledEmail(payload: ReservationCancelle
   lines.push('', 'If this was a mistake, you can book another slot from the Appointments Marketplace.');
 
   await sendEmail(payload.to, 'Aethea - Appointment Cancelled', lines.join('\n'));
+}
+
+export async function sendProfileUpdateOtpEmail(payload: ProfileUpdateOtpEmailPayload): Promise<void> {
+  const minutes = Math.floor(payload.expiresInSeconds / 60);
+  const lines = [
+    'You have requested to update your profile data.',
+    '',
+    `Your verification code is: ${payload.code}`,
+    `This code will expire in ${minutes} minutes.`,
+    '',
+    'If you did not request this change, please contact support and change your password immediately.',
+  ];
+  await sendEmail(payload.to, 'Aethea - Profile Update Verification Code', lines.join('\n'));
 }

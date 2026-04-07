@@ -14,13 +14,6 @@ export const getSupabaseConfig = () => {
     (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SUPABASE_ANON_KEY) ||
     '';
 
-  if (!url || !anonKey) {
-    console.warn(
-      '⚠️  Supabase credentials not found in environment variables.\n' +
-      '   Set VITE_SUPABASE_URL & VITE_SUPABASE_ANON_KEY in .env'
-    );
-  }
-
   return { url, anonKey } as const;
 };
 

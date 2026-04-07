@@ -6,18 +6,8 @@ import { useDoctorSchedules, useMarketplaceSchedules } from '../../hooks/useDoct
 import { useScheduleSlots } from '../../hooks/useDoctors';
 import { medicalApi } from '../../services/medicalApi';
 import { useAuth } from '@core/auth/useAuth';
-import { decodeJWT } from '@core/auth/token-manager';
-import type { AccountType } from '@core/auth/auth-types';
 import { Modal } from '../../components/Modal';
 import './styles.css';
-
-function getAccountType(accessToken?: string): AccountType | null {
-  if (!accessToken) return null;
-  const decoded = decodeJWT(accessToken);
-  if (!decoded || typeof decoded !== 'object') return null;
-  const claim = (decoded as { account_type?: unknown }).account_type;
-  return claim === 'patient' || claim === 'doctor' || claim === 'pharmacist' || claim === 'admin' ? claim : null;
-}
 
 function SlotRow({ slot }: { slot: ScheduleSlot }) {
   const label = slot.patientLabel ?? 'Available';
@@ -278,7 +268,7 @@ function ScheduleCard({ schedule, onView, onDelete }: { schedule: DoctorSchedule
 export default function DoctorReservationsPage() {
   const { session, user, profile } = useAuth();
   
-  // Create a naive resolution for the page level to match App.tsx so it stays consistent
+  // Resolve account type at page level to stay aligned with route guards in App.tsx.
   const tokenType = session?.user?.app_metadata?.account_type 
                  || session?.user?.user_metadata?.account_type 
                  || undefined;
@@ -292,9 +282,7 @@ export default function DoctorReservationsPage() {
     error: adminError,
   } = useMarketplaceSchedules({ page: 1, limit: 100 }, isAdminReadonly);
 
-  // Hack: use '0' as placeholder before we know the real doctor profile id;
-  // The backend resolves doctor profile from the authenticated user's JWT.
-  // We fetch the doctor's own schedules via GET /doctors/me/profile then use that id.
+  // Load the authenticated doctor's profile ID first, then request schedules.
   const [profileId, setProfileId] = useState<string | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);

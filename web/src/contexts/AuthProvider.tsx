@@ -60,7 +60,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                          || finalSession.user?.user_metadata?.account_type;
           
           if (profileResponse.data?.accountType && tokenType !== profileResponse.data.accountType) {
-            console.warn('[Auth] JWT out of sync with DB. Refreshing session...');
             const refreshResult = await authService.getSupabaseClient().auth.refreshSession();
             if (refreshResult.data?.session) {
               finalSession = refreshResult.data.session;
@@ -399,8 +398,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           profile: profileResponse.data,
         }));
       }
-    } catch (error) {
-      console.error('Failed to refresh profile:', error);
+    } catch {
+      // Ignore transient refresh failures and keep existing profile state.
     }
   }, [authState.user?.id]);
 
@@ -423,7 +422,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           filter: `id=eq.${userId}`,
         },
         async () => {
-          console.warn('Profile deleted, logging out immediately...');
           await signOut();
         }
       )
@@ -435,17 +433,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const response = await authService.getUserProfile(userId);
 
         if (response.error) {
-          console.warn('Profile check failed, keeping session active:', response.error.message);
           return;
         }
 
         // If profile truly missing, logout user
         if (!response.data) {
-          console.warn('Profile deleted or inaccessible, logging out...');
           await signOut();
         }
-      } catch (error) {
-        console.error('Profile check failed:', error);
+      } catch {
         // Don't logout on network errors, only on missing profile
       }
     }, 30000); // Check every 30 seconds

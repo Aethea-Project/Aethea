@@ -83,9 +83,13 @@ export const clearTokenCache = (): void => {
 /**
  * Decode JWT without verification (client-side only)
  */
-export const decodeJWT = (token: string): any => {
+export const decodeJWT = (token: string): Record<string, unknown> | null => {
   try {
     const base64Url = token.split('.')[1];
+    if (!base64Url) {
+      return null;
+    }
+
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(
       atob(base64)
@@ -93,9 +97,8 @@ export const decodeJWT = (token: string): any => {
         .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
         .join('')
     );
-    return JSON.parse(jsonPayload);
-  } catch (error) {
-    console.error('Failed to decode JWT:', error);
+    return JSON.parse(jsonPayload) as Record<string, unknown>;
+  } catch {
     return null;
   }
 };
@@ -105,7 +108,8 @@ export const decodeJWT = (token: string): any => {
  */
 export const getTokenExpiry = (token: string): number | null => {
   const decoded = decodeJWT(token);
-  return decoded?.exp ? decoded.exp * 1000 : null;
+  const exp = decoded?.exp;
+  return typeof exp === 'number' ? exp * 1000 : null;
 };
 
 /**

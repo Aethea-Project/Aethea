@@ -58,7 +58,6 @@ export const ModelName = {
   Reservation: 'Reservation',
   DoctorProfile: 'DoctorProfile',
   DoctorSchedule: 'DoctorSchedule',
-  ReservationAlertSubscription: 'ReservationAlertSubscription',
   Notification: 'Notification'
 } as const
 
@@ -207,19 +206,6 @@ export const DoctorScheduleScalarFieldEnum = {
 } as const
 
 export type DoctorScheduleScalarFieldEnum = (typeof DoctorScheduleScalarFieldEnum)[keyof typeof DoctorScheduleScalarFieldEnum]
-
-
-export const ReservationAlertSubscriptionScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  doctorScheduleId: 'doctorScheduleId',
-  email: 'email',
-  isActive: 'isActive',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type ReservationAlertSubscriptionScalarFieldEnum = (typeof ReservationAlertSubscriptionScalarFieldEnum)[keyof typeof ReservationAlertSubscriptionScalarFieldEnum]
 
 
 export const NotificationScalarFieldEnum = {

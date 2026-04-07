@@ -24,6 +24,7 @@ import type { ProfileUpdateRequest, UserProfile, BloodType, Gender } from '@core
 import { isValidName, isValidDateOfBirth, isValidPhone } from '@core/auth/auth-utils';
 import { validatePassword, doPasswordsMatch } from '@core/auth/auth-utils';
 import { Modal } from '../../components/Modal';
+import { requestProfileUpdateOTP, verifyProfileUpdateOTP } from '../../services/userApi';
 import { useUiNotifications } from '../../contexts/UiNotificationsProvider';
 import './styles.css';
 
@@ -75,8 +76,20 @@ function validateForm(form: ProfileUpdateRequest): ValidationErrors {
   return errors;
 }
 
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  if (error && typeof error === 'object' && 'message' in error && typeof (error as { message?: unknown }).message === 'string') {
+    return (error as { message: string }).message;
+  }
+
+  return fallback;
+}
+
 const ProfilePage: React.FC = () => {
-  const { profile, loading, updateProfile, updatePassword, refreshProfile, user, session } = useAuth();
+  const { profile, loading, updatePassword, refreshProfile, user, session } = useAuth();
   const { notifySuccess, notifyError } = useUiNotifications();
   const navigate = useNavigate();
 
@@ -112,18 +125,27 @@ const ProfilePage: React.FC = () => {
   const isDirty = isEditing && JSON.stringify(form) !== JSON.stringify(originalFormRef.current);
 
   // UI feedback
-  const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Populate form when profile loads or changes
+  // Step-up verification for profile edit
+  const [showStepUpPassword, setShowStepUpPassword] = useState(false);
+  const [stepUpPassword, setStepUpPassword] = useState('');
+  const [showStepUpOtp, setShowStepUpOtp] = useState(false);
+  const [stepUpOtp, setStepUpOtp] = useState('');
+  const [stepUpError, setStepUpError] = useState('');
+  const [stepUpLoading, setStepUpLoading] = useState(false);
+
+  // Populate form when profile loads or changes.
+  // Do not overwrite local edits while user is actively editing or completing step-up.
   useEffect(() => {
-    if (profile) {
-      const formData = profileToForm(profile);
-      setForm(formData);
-      originalFormRef.current = formData;
-    }
-  }, [profile]);
+    if (!profile) return;
+    if (isEditing || showStepUpPassword || showStepUpOtp) return;
+
+    const formData = profileToForm(profile);
+    setForm(formData);
+    originalFormRef.current = formData;
+  }, [profile, isEditing, showStepUpPassword, showStepUpOtp]);
 
   // Unsaved changes warning: beforeunload
   useEffect(() => {
@@ -167,7 +189,7 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     // Validate before saving
     const errors = validateForm(form);
     if (Object.keys(errors).length > 0) {
@@ -176,22 +198,63 @@ const ProfilePage: React.FC = () => {
       return;
     }
 
-    setSaving(true);
-    setErrorMsg('');
-    setSuccessMsg('');
+    // Instead of saving directly, we prompt for step-up verification.
+    setStepUpPassword('');
+    setStepUpError('');
+    setShowStepUpPassword(true);
+  };
 
-    const result = await updateProfile(form);
-    setSaving(false);
+  const submitStepUpPassword = async () => {
+    if (!stepUpPassword) {
+      setStepUpError('Password is required');
+      return;
+    }
+    setStepUpError('');
+    setStepUpLoading(true);
+    try {
+      await requestProfileUpdateOTP(stepUpPassword);
+      setShowStepUpPassword(false);
+      setStepUpOtp('');
+      setShowStepUpOtp(true);
+      notifySuccess('Verification code sent', 'Please check your email for the 6-digit code.');
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, 'Incorrect password or failed to generate verification code.');
+      setStepUpError(message);
+      notifyError('Authentication failed', 'Could not verify password.', message);
+    } finally {
+      setStepUpLoading(false);
+    }
+  };
 
-    if (result.success) {
-      setSuccessMsg(result.message ?? 'Profile updated successfully');
+  const submitStepUpOtp = async () => {
+    if (!stepUpOtp || stepUpOtp.length !== 6) {
+      setStepUpError('A 6-digit code is required');
+      return;
+    }
+
+    const changedUpdates = getChangedProfileFields(form, originalFormRef.current);
+    if (Object.keys(changedUpdates).length === 0) {
+      setStepUpError('No profile changes were detected.');
+      return;
+    }
+
+    setStepUpError('');
+    setStepUpLoading(true);
+    try {
+      await verifyProfileUpdateOTP(stepUpOtp, changedUpdates);
+      // Success!
+      setShowStepUpOtp(false);
+      setSuccessMsg('Profile updated successfully');
       notifySuccess('Profile updated', 'Your profile data has been updated successfully.');
       setIsEditing(false);
       setValidationErrors({});
       await refreshProfile();
-    } else {
-      notifyError('Update failed', 'Unable to update your profile.', result.message ?? 'Unknown update error');
-      setErrorMsg(result.message ?? 'Update failed');
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, 'Invalid or expired code.');
+      setStepUpError(message);
+      notifyError('Update failed', 'Could not update your profile.', message);
+    } finally {
+      setStepUpLoading(false);
     }
   };
 
@@ -590,20 +653,93 @@ const ProfilePage: React.FC = () => {
         {/* ── Action buttons (edit mode) ──────────── */}
         {isEditing && (
           <div className="profile-actions">
-            <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-              {saving ? (
-                <>
-                  <span className="btn-spinner" aria-hidden="true" />
-                  Saving…
-                </>
-              ) : 'Save Changes'}
+            <button className="btn btn-primary" onClick={handleSave}>
+              Save Changes
             </button>
-            <button className="btn btn-secondary" onClick={handleCancel} disabled={saving}>
+            <button className="btn btn-secondary" onClick={handleCancel}>
               Cancel
             </button>
           </div>
         )}
       </div>
+
+      {/* ── Step-up Verification Modals ─────────────── */}
+      <Modal
+        isOpen={showStepUpPassword}
+        onClose={() => !stepUpLoading && setShowStepUpPassword(false)}
+        ariaLabelledBy="stepup-password-title"
+      >
+        <div className="modal-header">
+          <h3 id="stepup-password-title">Verify Your Identity</h3>
+          <button className="modal-close" onClick={() => setShowStepUpPassword(false)} aria-label="Close">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 4.5L13.5 13.5M4.5 13.5L13.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+          </button>
+        </div>
+        <div className="modal-body">
+          <p className="text-muted" style={{ marginBottom: '16px' }}>For your security, please enter your password to save profile changes.</p>
+          {stepUpError && (
+            <div className="alert alert-error" role="alert">
+              {stepUpError}
+            </div>
+          )}
+          <div className="form-group">
+            <label htmlFor="stepup-password">Current Password</label>
+            <input
+              id="stepup-password"
+              type="password"
+              value={stepUpPassword}
+              onChange={(e) => setStepUpPassword(e.target.value)}
+              disabled={stepUpLoading}
+              style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid var(--border)' }}
+            />
+          </div>
+        </div>
+        <div className="profile-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', padding: '16px', borderTop: '1px solid var(--border)' }}>
+          <button className="btn btn-secondary" onClick={() => setShowStepUpPassword(false)} disabled={stepUpLoading}>Cancel</button>
+          <button className="btn btn-primary" onClick={submitStepUpPassword} disabled={stepUpLoading}>
+            {stepUpLoading ? 'Verifying...' : 'Continue'}
+          </button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showStepUpOtp}
+        onClose={() => !stepUpLoading && setShowStepUpOtp(false)}
+        ariaLabelledBy="stepup-otp-title"
+      >
+        <div className="modal-header">
+          <h3 id="stepup-otp-title">Email Verification</h3>
+          <button className="modal-close" onClick={() => setShowStepUpOtp(false)} aria-label="Close">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 4.5L13.5 13.5M4.5 13.5L13.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+          </button>
+        </div>
+        <div className="modal-body">
+          <p className="text-muted" style={{ marginBottom: '16px' }}>A 6-digit code has been sent to your email. It will expire in 10 minutes.</p>
+          {stepUpError && (
+            <div className="alert alert-error" role="alert">
+              {stepUpError}
+            </div>
+          )}
+          <div className="form-group">
+            <label htmlFor="stepup-otp">Verification Code</label>
+            <input
+              id="stepup-otp"
+              type="text"
+              maxLength={6}
+              value={stepUpOtp}
+              onChange={(e) => setStepUpOtp(e.target.value)}
+              disabled={stepUpLoading}
+              style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid var(--border)', letterSpacing: '2px', fontSize: '1.2rem', textAlign: 'center' }}
+            />
+          </div>
+        </div>
+        <div className="profile-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', padding: '16px', borderTop: '1px solid var(--border)' }}>
+          <button className="btn btn-secondary" onClick={() => setShowStepUpOtp(false)} disabled={stepUpLoading}>Cancel</button>
+          <button className="btn btn-primary" onClick={submitStepUpOtp} disabled={stepUpLoading}>
+            {stepUpLoading ? 'Verifying...' : 'Verify & Save'}
+          </button>
+        </div>
+      </Modal>
 
       {/* ── Password Change Modal ─────────────── */}
       <Modal
@@ -877,6 +1013,36 @@ function profileToForm(p: UserProfile): ProfileUpdateRequest {
     emergencyContactName: p.emergencyContactName ?? undefined,
     emergencyContactPhone: p.emergencyContactPhone ?? undefined,
   };
+}
+
+function getChangedProfileFields(
+  current: ProfileUpdateRequest,
+  original: ProfileUpdateRequest,
+): ProfileUpdateRequest {
+  const keys: Array<keyof ProfileUpdateRequest> = [
+    'firstName',
+    'lastName',
+    'gender',
+    'phone',
+    'dateOfBirth',
+    'bloodType',
+    'allergies',
+    'chronicConditions',
+    'heightCm',
+    'weightKg',
+    'emergencyContactName',
+    'emergencyContactPhone',
+    'avatarUrl',
+  ];
+
+  const updates: ProfileUpdateRequest = {};
+  for (const key of keys) {
+    if (current[key] !== original[key]) {
+      updates[key] = current[key] as never;
+    }
+  }
+
+  return updates;
 }
 
 export default ProfilePage;

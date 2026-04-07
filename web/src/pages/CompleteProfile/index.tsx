@@ -8,7 +8,7 @@ import { useUiNotifications } from '../../contexts/UiNotificationsProvider';
 
 const CompleteProfilePage: React.FC = () => {
   const { profile, updateProfile, updatePassword, refreshProfile } = useAuth();
-  const { notifySuccess, notifyError } = useUiNotifications();
+  const { notifySuccess } = useUiNotifications();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
@@ -117,12 +117,7 @@ const CompleteProfilePage: React.FC = () => {
 
       // 2. Set Password locally
       if (password) {
-        const pwdResult: any = await updatePassword(password);
-        if (pwdResult && !pwdResult.success) {
-          setLoading(false);
-          setGlobalError(pwdResult.message || 'Failed to set password');
-          return;
-        }
+        await updatePassword(password);
       }
 
       // 3. Refresh Auth Profile Context
@@ -132,7 +127,7 @@ const CompleteProfilePage: React.FC = () => {
 
       // Proceed to dashboard
       navigate('/dashboard', { replace: true });
-    } catch (err) {
+    } catch {
       setLoading(false);
       setGlobalError('An unexpected error occurred while saving your profile.');
     }

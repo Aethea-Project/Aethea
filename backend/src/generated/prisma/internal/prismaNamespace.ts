@@ -391,7 +391,6 @@ export const ModelName = {
   Reservation: 'Reservation',
   DoctorProfile: 'DoctorProfile',
   DoctorSchedule: 'DoctorSchedule',
-  ReservationAlertSubscription: 'ReservationAlertSubscription',
   Notification: 'Notification'
 } as const
 
@@ -408,7 +407,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "userSession" | "labTest" | "scan" | "reservation" | "doctorProfile" | "doctorSchedule" | "reservationAlertSubscription" | "notification"
+    modelProps: "user" | "userSession" | "labTest" | "scan" | "reservation" | "doctorProfile" | "doctorSchedule" | "notification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -930,80 +929,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    ReservationAlertSubscription: {
-      payload: Prisma.$ReservationAlertSubscriptionPayload<ExtArgs>
-      fields: Prisma.ReservationAlertSubscriptionFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.ReservationAlertSubscriptionFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationAlertSubscriptionPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.ReservationAlertSubscriptionFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationAlertSubscriptionPayload>
-        }
-        findFirst: {
-          args: Prisma.ReservationAlertSubscriptionFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationAlertSubscriptionPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.ReservationAlertSubscriptionFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationAlertSubscriptionPayload>
-        }
-        findMany: {
-          args: Prisma.ReservationAlertSubscriptionFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationAlertSubscriptionPayload>[]
-        }
-        create: {
-          args: Prisma.ReservationAlertSubscriptionCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationAlertSubscriptionPayload>
-        }
-        createMany: {
-          args: Prisma.ReservationAlertSubscriptionCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.ReservationAlertSubscriptionCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationAlertSubscriptionPayload>[]
-        }
-        delete: {
-          args: Prisma.ReservationAlertSubscriptionDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationAlertSubscriptionPayload>
-        }
-        update: {
-          args: Prisma.ReservationAlertSubscriptionUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationAlertSubscriptionPayload>
-        }
-        deleteMany: {
-          args: Prisma.ReservationAlertSubscriptionDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.ReservationAlertSubscriptionUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.ReservationAlertSubscriptionUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationAlertSubscriptionPayload>[]
-        }
-        upsert: {
-          args: Prisma.ReservationAlertSubscriptionUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReservationAlertSubscriptionPayload>
-        }
-        aggregate: {
-          args: Prisma.ReservationAlertSubscriptionAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateReservationAlertSubscription>
-        }
-        groupBy: {
-          args: Prisma.ReservationAlertSubscriptionGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.ReservationAlertSubscriptionGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.ReservationAlertSubscriptionCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.ReservationAlertSubscriptionCountAggregateOutputType> | number
-        }
-      }
-    }
     Notification: {
       payload: Prisma.$NotificationPayload<ExtArgs>
       fields: Prisma.NotificationFieldRefs
@@ -1248,19 +1173,6 @@ export const DoctorScheduleScalarFieldEnum = {
 export type DoctorScheduleScalarFieldEnum = (typeof DoctorScheduleScalarFieldEnum)[keyof typeof DoctorScheduleScalarFieldEnum]
 
 
-export const ReservationAlertSubscriptionScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  doctorScheduleId: 'doctorScheduleId',
-  email: 'email',
-  isActive: 'isActive',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type ReservationAlertSubscriptionScalarFieldEnum = (typeof ReservationAlertSubscriptionScalarFieldEnum)[keyof typeof ReservationAlertSubscriptionScalarFieldEnum]
-
-
 export const NotificationScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -1456,20 +1368,6 @@ export type ListEnumReservationStatusFieldRefInput<$PrismaModel> = FieldRefInput
 
 
 /**
- * Reference to a field of type 'BigInt'
- */
-export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt'>
-    
-
-
-/**
- * Reference to a field of type 'BigInt[]'
- */
-export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt[]'>
-    
-
-
-/**
  * Reference to a field of type 'NotificationType'
  */
 export type EnumNotificationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NotificationType'>
@@ -1612,7 +1510,6 @@ export type GlobalOmitConfig = {
   reservation?: Prisma.ReservationOmit
   doctorProfile?: Prisma.DoctorProfileOmit
   doctorSchedule?: Prisma.DoctorScheduleOmit
-  reservationAlertSubscription?: Prisma.ReservationAlertSubscriptionOmit
   notification?: Prisma.NotificationOmit
 }
 

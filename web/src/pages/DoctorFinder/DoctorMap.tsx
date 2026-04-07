@@ -12,6 +12,23 @@ interface NearbyPlace {
   location: LatLng;
 }
 
+interface GoogleMapsMarker {
+  setMap: (map: unknown) => void;
+  addListener: (eventName: 'click', handler: () => void) => void;
+}
+
+interface GoogleMapsInfoWindow {
+  open: (map: unknown, anchor: GoogleMapsMarker) => void;
+}
+
+interface GoogleMapsApi {
+  maps: {
+    Map: new (element: HTMLElement, options: Record<string, unknown>) => unknown;
+    Marker: new (options: Record<string, unknown>) => GoogleMapsMarker;
+    InfoWindow: new (options: { content: string }) => GoogleMapsInfoWindow;
+  };
+}
+
 interface DoctorMapProps {
   mapReady: boolean;
   mapError: string;
@@ -22,6 +39,14 @@ interface DoctorMapProps {
   userLocation: LatLng;
   googleMapsApiKey?: string;
 }
+
+const escapeHtml = (value: string): string =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 
 export const DoctorMap: React.FC<DoctorMapProps> = ({
   mapReady,
@@ -34,11 +59,11 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
   googleMapsApiKey,
 }) => {
   const mapElementRef = useRef<HTMLDivElement | null>(null);
-  const mapInstanceRef = useRef<any | null>(null);
-  const googleMapsRef = useRef<any | null>(null);
-  const placeMarkersRef = useRef<any[]>([]);
+  const mapInstanceRef = useRef<unknown | null>(null);
+  const googleMapsRef = useRef<GoogleMapsApi | null>(null);
+  const placeMarkersRef = useRef<GoogleMapsMarker[]>([]);
 
-  const clearMarkers = (markersRef: React.MutableRefObject<any[]>) => {
+  const clearMarkers = (markersRef: React.MutableRefObject<GoogleMapsMarker[]>) => {
     markersRef.current.forEach((marker) => marker.setMap(null));
     markersRef.current = [];
   };
@@ -52,7 +77,7 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
       if (mapInstanceRef.current) return;
 
       try {
-        const windowWithGoogle = window as Window & { google?: { maps?: Record<string, unknown> } };
+        const windowWithGoogle = window as Window & { google?: GoogleMapsApi };
         const google = windowWithGoogle.google;
         if (!google || cancelled || !mapElementRef.current) return;
 
@@ -60,7 +85,7 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
           throw new Error('Google Maps failed to initialize. Check API key and billing/project status.');
         }
 
-        const googleMaps = google as any;
+        const googleMaps = google;
 
         googleMapsRef.current = googleMaps;
 
@@ -87,8 +112,7 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
           title: 'Your current location',
           icon: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
         });
-      } catch (err) {
-        console.error('Failed to init map', err);
+      } catch {
         onInitError?.('Could not initialize Google Maps. Verify VITE_GOOGLE_MAPS_API_KEY and Google Cloud project status.');
       }
     };
@@ -114,6 +138,9 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
     ];
 
     placeMarkersRef.current = places.map((place) => {
+      const safeName = escapeHtml(place.name);
+      const safeAddress = escapeHtml(place.address);
+
       const marker = new google.maps.Marker({
         position: place.location,
         map: mapInstanceRef.current,
@@ -124,8 +151,8 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
       const infoWindow = new google.maps.InfoWindow({
         content: `
           <div style="padding: 8px; color: #1e293b;">
-            <div style="font-weight: 600; font-size: 14px; margin-bottom: 2px;">\${place.name}</div>
-            <div style="font-size: 12px; color: #64748b;">\${place.address}</div>
+            <div style="font-weight: 600; font-size: 14px; margin-bottom: 2px;">${safeName}</div>
+            <div style="font-size: 12px; color: #64748b;">${safeAddress}</div>
           </div>
         `,
       });

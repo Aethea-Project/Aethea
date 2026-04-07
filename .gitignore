@@ -47,6 +47,30 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# ── Local debug/scratch artifacts (never commit) ────────────────
+backend_logs.txt
+logs.txt
+testProfile.js
+test_update.ts
+fix_syntax.js
+backend/backend_current.txt
+backend/backend_logs2.txt
+backend/backend_logs_docker.txt
+backend/full_backend_logs.txt
+backend/patch.cjs
+backend/patch.ts
+backend/src/debug*.ts
+backend/src/readDB2.ts
+backend/src/test-db.ts
+backend/src/testUpdate*.ts
+backend/test-script2.ts
+backend/web/
+backend/{
+patch.js
+temp_landing.js
+tmp_res.tsx
+backend/jest-summary.json
+
 # ── OS generated files ───────────────────────────────────────────
 .DS_Store
 .DS_Store?
