@@ -5,6 +5,14 @@ import './styles.css';
 import { useReservations } from '../../hooks/useReservations';
 import { useUiNotifications } from '../../contexts/UiNotificationsProvider';
 
+function buildMapsSearchLink(address: string | null | undefined): string | null {
+  if (!address || !address.trim()) {
+    return null;
+  }
+
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+}
+
 export default function ReservationsPage() {
   const { reservations, loading, error, cancel } = useReservations();
   const { notifySuccess, notifyError } = useUiNotifications();
@@ -60,12 +68,15 @@ export default function ReservationsPage() {
       : 'Unknown Doctor';
     const specialty = res.doctor?.specialty ?? '';
     const clinic = res.doctor?.clinicName ?? res.doctor?.city ?? '';
+    const clinicAddress = res.doctor?.address ?? null;
+    const mapLink = buildMapsSearchLink(clinicAddress ?? clinic);
 
     return (
       <div key={res.id} className="res-card">
         <div className="res-row"><span className="res-label">Doctor</span><span>{doctorName}</span></div>
         {specialty && <div className="res-row"><span className="res-label">Specialty</span><span>{specialty}</span></div>}
         {clinic && <div className="res-row"><span className="res-label">Clinic</span><span>{clinic}</span></div>}
+        {clinicAddress && <div className="res-row"><span className="res-label">Address</span><span>{clinicAddress}</span></div>}
         <div className="res-row"><span className="res-label">Reason</span><span>{res.reason}</span></div>
         <div className="res-row"><span className="res-label">Start</span><span>{new Date(res.startAt).toLocaleString()}</span></div>
         <div className="res-row"><span className="res-label">End</span><span>{new Date(res.endAt).toLocaleString()}</span></div>
@@ -87,6 +98,11 @@ export default function ReservationsPage() {
             >
               {cancelling === res.id ? 'Cancelling...' : 'Cancel'}
             </button>
+          )}
+          {mapLink && (
+            <a className="btn btn-ghost" href={mapLink} target="_blank" rel="noreferrer">
+              Open Clinic Location
+            </a>
           )}
         </div>
       </div>

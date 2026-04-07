@@ -174,3 +174,105 @@
   border-radius: 6px;
   font-size: 0.95rem;
 }
+
+.dr-location-editor {
+  border: 1px solid #dbe6dd;
+  border-radius: 12px;
+  padding: 1rem;
+  background: #ffffff;
+  margin-bottom: 1rem;
+}
+
+.dr-location-header h3 {
+  margin: 0;
+  color: #163e2b;
+}
+
+.dr-location-header p {
+  margin: 0.35rem 0 0;
+  color: #4b5563;
+  font-size: 0.92rem;
+}
+
+.dr-location-grid {
+  margin-top: 0.9rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.dr-location-grid label,
+.dr-location-address-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.dr-location-grid input,
+.dr-location-address-label input,
+.dr-location-search-row input {
+  min-height: 44px;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+}
+
+.dr-location-address-label {
+  margin-top: 0.75rem;
+}
+
+.dr-location-search-row {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dr-location-search-row input {
+  flex: 1;
+  min-width: 220px;
+}
+
+.dr-location-candidates {
+  margin-top: 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.dr-location-candidate {
+  text-align: left;
+  border: 1px solid #dbe6dd;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 0.55rem 0.7rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.dr-location-candidate strong {
+  font-size: 0.9rem;
+  color: #0f172a;
+}
+
+.dr-location-candidate span {
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.dr-location-success {
+  margin: 0.55rem 0 0;
+  color: #065f46;
+  font-weight: 600;
+}
+
+.dr-location-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: flex-end;
+}

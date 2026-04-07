@@ -157,6 +157,39 @@ export const marketplaceScheduleQuerySchema = z.object({
 }).strict();
 
 /**
+ * Maps proxy query validation
+ */
+export const mapsNearbyQuerySchema = z.object({
+  lat: z.coerce.number().min(-90).max(90),
+  lng: z.coerce.number().min(-180).max(180),
+  type: z.enum(['doctor', 'hospital', 'pharmacy']),
+  radius: z.coerce.number().int().min(200).max(10000).default(4000).optional(),
+  limit: z.coerce.number().int().min(1).max(20).default(10).optional(),
+  language: z.string().trim().min(2).max(10).optional(),
+}).strict();
+
+export const mapsGeocodeQuerySchema = z.object({
+  query: z.string().trim().min(3).max(200),
+  limit: z.coerce.number().int().min(1).max(10).default(5).optional(),
+  language: z.string().trim().min(2).max(10).optional(),
+}).strict();
+
+export const mapsReverseGeocodeQuerySchema = z.object({
+  lat: z.coerce.number().min(-90).max(90),
+  lng: z.coerce.number().min(-180).max(180),
+  language: z.string().trim().min(2).max(10).optional(),
+}).strict();
+
+export const mapsFastestRouteQuerySchema = z.object({
+  originLat: z.coerce.number().min(-90).max(90),
+  originLng: z.coerce.number().min(-180).max(180),
+  destinationLat: z.coerce.number().min(-90).max(90),
+  destinationLng: z.coerce.number().min(-180).max(180),
+  mode: z.enum(['driving', 'walking']).default('driving').optional(),
+  language: z.string().trim().min(2).max(10).optional(),
+}).strict();
+
+/**
  * Doctor profile — create / update (doctor-side)
  */
 export const upsertDoctorProfileSchema = z.object({

@@ -37,6 +37,7 @@ export async function listDoctors(
         lastName: true,
         specialty: true,
         clinicName: true,
+        address: true,
         city: true,
         photoUrl: true,
         consultFee: true,

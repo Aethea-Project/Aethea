@@ -78,3 +78,19 @@ export const authLimiter = rateLimit({
     code: 'AUTH_RATE_LIMITED',
   },
 });
+
+/**
+ * Maps proxy limiter — protects external API quota and abuse.
+ */
+export const mapsProxyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  ...(getRedisStore && { store: getRedisStore('rl:maps:') }),
+  message: {
+    error: 'Too many map requests',
+    message: 'Map usage limit reached for now. Please try again shortly.',
+    code: 'MAPS_RATE_LIMITED',
+  },
+});

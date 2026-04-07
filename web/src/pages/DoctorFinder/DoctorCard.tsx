@@ -9,7 +9,7 @@ interface DoctorCardProps {
 export const DoctorCard: React.FC<DoctorCardProps> = ({ doctor }) => {
   const navigate = useNavigate();
   const name = `Dr. ${doctor.firstName} ${doctor.lastName}`;
-  const location = [doctor.clinicName, doctor.city].filter(Boolean).join(', ') || 'Location unknown';
+  const location = doctor.address || [doctor.clinicName, doctor.city].filter(Boolean).join(', ') || 'Location unknown';
 
   const handleViewInMarketplace = () => {
     const params = new URLSearchParams();

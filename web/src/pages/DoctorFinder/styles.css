@@ -619,6 +619,158 @@
   margin: 0;
 }
 
+/* Backend-driven nearby places shell */
+.finder-map-shell {
+  margin-top: 1rem;
+  border: 1px solid #dbe6dd;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 1rem;
+}
+
+.finder-filter-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+
+.finder-filter-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: #334155;
+  font-weight: 600;
+}
+
+.finder-filter-row select,
+.finder-filter-row input[type="range"] {
+  width: 100%;
+}
+
+.finder-checkbox-filter {
+  flex-direction: row !important;
+  align-items: center;
+  min-height: 44px;
+}
+
+.finder-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.finder-quick-btn {
+  min-height: 44px;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #1f6b45;
+  background: #f2fff7;
+  color: #163e2b;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.finder-nearby-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.9rem;
+}
+
+.finder-nearby-section {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.75rem;
+  background: #fbfdfb;
+}
+
+.finder-nearby-section h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: #163e2b;
+}
+
+.finder-nearby-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.finder-nearby-card {
+  border: 1px solid #dbe6dd;
+  border-radius: 8px;
+  padding: 0.6rem;
+  background: #fff;
+}
+
+.finder-nearby-name {
+  margin: 0;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.finder-nearby-address {
+  margin: 0.15rem 0 0;
+  color: #475569;
+  font-size: 0.85rem;
+}
+
+.finder-nearby-meta {
+  margin-top: 0.45rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  color: #334155;
+}
+
+.finder-route-pill {
+  margin: 0.45rem 0 0;
+  padding: 0.3rem 0.45rem;
+  font-size: 0.8rem;
+  background: #ecfdf5;
+  color: #065f46;
+  border-radius: 6px;
+}
+
+.finder-nearby-actions {
+  margin-top: 0.6rem;
+  display: flex;
+  gap: 0.45rem;
+}
+
+.finder-action-btn {
+  min-height: 44px;
+  flex: 1;
+  padding: 0.45rem 0.6rem;
+  border-radius: 7px;
+  border: 1px solid #1f6b45;
+  background: #ffffff;
+  color: #163e2b;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.finder-action-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.finder-nearby-empty {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.86rem;
+}
+
 .language-badges {
   display: flex;
   gap: 0.4rem;

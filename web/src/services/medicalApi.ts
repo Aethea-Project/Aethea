@@ -77,10 +77,43 @@ type RawReservation = {
       lastName: string;
       specialty: string;
       clinicName?: string | null;
+      address?: string | null;
       city?: string | null;
       photoUrl?: string | null;
     };
   };
+};
+
+type RawNearbyPlace = {
+  id: string;
+  name: string;
+  address: string;
+  rating: number | null;
+  ratingsCount: number;
+  openNow: boolean | null;
+  location: {
+    lat: number;
+    lng: number;
+  };
+};
+
+type RawAddressCandidate = {
+  placeId: string;
+  formattedAddress: string;
+  city: string | null;
+  location: {
+    lat: number;
+    lng: number;
+  };
+};
+
+type RawFastestRoute = {
+  distanceText: string;
+  durationText: string;
+  distanceMeters: number;
+  durationSeconds: number;
+  routeSummary: string;
+  mode: 'driving' | 'walking';
 };
 
 type RawDoctorProfile = {
@@ -187,6 +220,7 @@ const toReservation = (item: RawReservation): Reservation => ({
         lastName: item.doctorSchedule.doctorProfile.lastName,
         specialty: item.doctorSchedule.doctorProfile.specialty,
         clinicName: item.doctorSchedule.doctorProfile.clinicName ?? null,
+        address: item.doctorSchedule.doctorProfile.address ?? null,
         city: item.doctorSchedule.doctorProfile.city ?? null,
         photoUrl: item.doctorSchedule.doctorProfile.photoUrl ?? null,
       }
@@ -273,6 +307,48 @@ export const medicalApi = {
       method: 'POST',
       body: JSON.stringify({ doctorScheduleId }),
     });
+  },
+
+  /* ── Maps proxy (secured by backend) ── */
+  async fetchNearbyPlaces(params: NearbyPlacesQuery): Promise<NearbyPlace[]> {
+    const qs = new URLSearchParams({
+      lat: String(params.lat),
+      lng: String(params.lng),
+      type: params.type,
+      radius: String(params.radius ?? 4000),
+      limit: String(params.limit ?? 10),
+    });
+    if (params.language) {
+      qs.set('language', params.language);
+    }
+
+    const data = await authFetch<{ places: RawNearbyPlace[] }>(`/maps/nearby?${qs.toString()}`);
+    return data.places;
+  },
+
+  async searchAddressCandidates(query: string, limit = 5): Promise<AddressCandidate[]> {
+    const qs = new URLSearchParams({ query, limit: String(limit) });
+    const data = await authFetch<{ candidates: RawAddressCandidate[] }>(`/maps/geocode?${qs.toString()}`);
+    return data.candidates;
+  },
+
+  async reverseGeocode(lat: number, lng: number): Promise<AddressCandidate | null> {
+    const qs = new URLSearchParams({ lat: String(lat), lng: String(lng) });
+    const data = await authFetch<{ candidate: RawAddressCandidate | null }>(`/maps/reverse-geocode?${qs.toString()}`);
+    return data.candidate;
+  },
+
+  async fetchFastestRoute(params: FastestRouteQuery): Promise<FastestRoute> {
+    const qs = new URLSearchParams({
+      originLat: String(params.originLat),
+      originLng: String(params.originLng),
+      destinationLat: String(params.destinationLat),
+      destinationLng: String(params.destinationLng),
+      mode: params.mode ?? 'driving',
+    });
+
+    const data = await authFetch<{ route: RawFastestRoute }>(`/maps/route?${qs.toString()}`);
+    return data.route;
   },
 
   /* ── Doctor discovery (any authenticated user) ── */
@@ -388,6 +464,7 @@ export const medicalApi = {
 
 export type ReservationStatus = 'scheduled' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
 export type NotificationType = 'slot_available' | 'reservation_confirmed' | 'reservation_cancelled';
+export type NearbyPlaceType = 'doctor' | 'hospital' | 'pharmacy';
 
 export interface Reservation {
   id: string;
@@ -408,9 +485,42 @@ export interface Reservation {
     lastName: string;
     specialty: string;
     clinicName: string | null;
+    address: string | null;
     city: string | null;
     photoUrl: string | null;
   };
+}
+
+export interface NearbyPlace {
+  id: string;
+  name: string;
+  address: string;
+  rating: number | null;
+  ratingsCount: number;
+  openNow: boolean | null;
+  location: {
+    lat: number;
+    lng: number;
+  };
+}
+
+export interface AddressCandidate {
+  placeId: string;
+  formattedAddress: string;
+  city: string | null;
+  location: {
+    lat: number;
+    lng: number;
+  };
+}
+
+export interface FastestRoute {
+  distanceText: string;
+  durationText: string;
+  distanceMeters: number;
+  durationSeconds: number;
+  routeSummary: string;
+  mode: 'driving' | 'walking';
 }
 
 export interface BookReservationPayload {
@@ -519,6 +629,23 @@ export interface UpsertProfilePayload {
   city?: string;
   consultFee?: number;
   languages?: string[];
+}
+
+export interface NearbyPlacesQuery {
+  lat: number;
+  lng: number;
+  type: NearbyPlaceType;
+  radius?: number;
+  limit?: number;
+  language?: string;
+}
+
+export interface FastestRouteQuery {
+  originLat: number;
+  originLng: number;
+  destinationLat: number;
+  destinationLng: number;
+  mode?: 'driving' | 'walking';
 }
 
 export interface CreateSchedulePayload {

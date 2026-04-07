@@ -25,6 +25,14 @@ const SPECIALTIES = [
   'General Practice',
 ];
 
+function buildMapsSearchLink(address: string | null | undefined): string | null {
+  if (!address || !address.trim()) {
+    return null;
+  }
+
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+}
+
 function getAccountType(accessToken?: string): AccountType | null {
   if (!accessToken) return null;
   const decoded = decodeJWT(accessToken);
@@ -57,6 +65,9 @@ function ReserveModal({
     () => Array.from({ length: post.schedule.maxPatients }, (_, i) => i).filter((i) => !post.schedule.bookedSlotIndexes.includes(i)),
     [post.schedule.maxPatients, post.schedule.bookedSlotIndexes],
   );
+
+  const clinicAddress = post.doctor.address || [post.doctor.clinicName, post.doctor.city].filter(Boolean).join(', ');
+  const clinicMapLink = buildMapsSearchLink(clinicAddress);
 
   const slotDurationMs = post.schedule.slotDurationMins * 60_000;
 
@@ -93,6 +104,14 @@ function ReserveModal({
       <p className="marketplace-modal-subtitle">
         {post.doctor.specialty} · {new Date(post.schedule.scheduleDate).toLocaleDateString()}
       </p>
+      {clinicAddress && (
+        <p className="marketplace-modal-subtitle">Clinic: {clinicAddress}</p>
+      )}
+      {clinicMapLink && (
+        <a className="view-profile-btn" href={clinicMapLink} target="_blank" rel="noreferrer">
+          Open Clinic Location
+        </a>
+      )}
 
       <div className="marketplace-slot-list">
         {availableSlots.length === 0 ? (
@@ -315,7 +334,9 @@ export default function AppointmentsMarketplacePage() {
           {posts.map((post) => {
             const availableSlots = post.schedule.maxPatients - post.schedule.bookedSlotIndexes.length;
             const name = `Dr. ${post.doctor.firstName} ${post.doctor.lastName}`;
-            const location = [post.doctor.clinicName, post.doctor.city].filter(Boolean).join(', ') || 'Location unknown';
+            const locationValue = post.doctor.address || [post.doctor.clinicName, post.doctor.city].filter(Boolean).join(', ');
+            const location = locationValue || 'Location unknown';
+            const clinicMapLink = buildMapsSearchLink(locationValue);
 
             return (
               <div key={post.schedule.id} className="doctor-card appointments-post-card">
@@ -384,6 +405,11 @@ export default function AppointmentsMarketplacePage() {
                     >
                       {alertLoading[post.schedule.id] ? 'Saving...' : 'Notify Me If Slot Opens'}
                     </button>
+                  )}
+                  {clinicMapLink && (
+                    <a className="view-profile-btn" href={clinicMapLink} target="_blank" rel="noreferrer">
+                      View Clinic on Map
+                    </a>
                   )}
                   {alertMessages[post.schedule.id] && (
                     <p className="appointments-alert-message">{alertMessages[post.schedule.id]}</p>

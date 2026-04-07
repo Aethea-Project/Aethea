@@ -42,7 +42,7 @@ export async function createReservation(userId: string, data: CreateReservationI
         doctorSchedule: {
           include: {
             doctorProfile: {
-              select: { firstName: true, lastName: true, specialty: true, clinicName: true },
+              select: { firstName: true, lastName: true, specialty: true, clinicName: true, address: true, city: true },
             },
           },
         },
@@ -68,7 +68,7 @@ export async function createReservation(userId: string, data: CreateReservationI
       doctorSchedule: {
         include: {
           doctorProfile: {
-            select: { firstName: true, lastName: true, specialty: true, clinicName: true },
+            select: { firstName: true, lastName: true, specialty: true, clinicName: true, address: true, city: true },
           },
         },
       },
@@ -84,7 +84,7 @@ export async function listPatientReservations(userId: string, skip: number, take
         doctorSchedule: {
           include: {
             doctorProfile: {
-              select: { firstName: true, lastName: true, specialty: true, clinicName: true, city: true, photoUrl: true },
+              select: { firstName: true, lastName: true, specialty: true, clinicName: true, address: true, city: true, photoUrl: true },
             },
           },
         },
@@ -108,7 +108,7 @@ export async function getReservationById(id: string) {
       doctorSchedule: {
         include: {
           doctorProfile: {
-            select: { firstName: true, lastName: true, specialty: true, clinicName: true, city: true, photoUrl: true, userId: true },
+            select: { firstName: true, lastName: true, specialty: true, clinicName: true, address: true, city: true, photoUrl: true, userId: true },
           },
         },
       },

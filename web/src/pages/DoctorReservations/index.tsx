@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { FeatureHeader } from '../../components/FeatureHeader';
 import { imageAssets } from '../../constants/imageAssets';
-import type { DoctorSchedule, ScheduleSlot } from '../../services/medicalApi';
+import type { AddressCandidate, DoctorProfile, DoctorSchedule, ScheduleSlot } from '../../services/medicalApi';
 import { useDoctorSchedules, useMarketplaceSchedules } from '../../hooks/useDoctors';
 import { useScheduleSlots } from '../../hooks/useDoctors';
 import { medicalApi } from '../../services/medicalApi';
@@ -265,6 +265,185 @@ function ScheduleCard({ schedule, onView, onDelete }: { schedule: DoctorSchedule
   );
 }
 
+function ClinicLocationEditor({
+  profile,
+  onSaved,
+}: {
+  profile: DoctorProfile;
+  onSaved: (profile: DoctorProfile) => void;
+}) {
+  const [clinicName, setClinicName] = useState(profile.clinicName ?? '');
+  const [address, setAddress] = useState(profile.address ?? '');
+  const [city, setCity] = useState(profile.city ?? '');
+  const [searchText, setSearchText] = useState(profile.address ?? '');
+  const [searching, setSearching] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [candidates, setCandidates] = useState<AddressCandidate[]>([]);
+
+  useEffect(() => {
+    setClinicName(profile.clinicName ?? '');
+    setAddress(profile.address ?? '');
+    setCity(profile.city ?? '');
+    setSearchText(profile.address ?? '');
+    setCandidates([]);
+    setSuccess(null);
+    setError(null);
+  }, [profile]);
+
+  const runSearch = async () => {
+    if (!searchText.trim()) {
+      setCandidates([]);
+      return;
+    }
+
+    setSearching(true);
+    setError(null);
+    try {
+      const items = await medicalApi.searchAddressCandidates(searchText.trim(), 5);
+      setCandidates(items);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to search addresses');
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const resolveCurrentLocation = async () => {
+    if (!navigator.geolocation) {
+      setError('Geolocation is not supported on this device.');
+      return;
+    }
+
+    setSearching(true);
+    setError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const candidate = await medicalApi.reverseGeocode(position.coords.latitude, position.coords.longitude);
+          if (!candidate) {
+            setError('Could not resolve your location to an address.');
+            return;
+          }
+
+          setAddress(candidate.formattedAddress);
+          setCity(candidate.city ?? city);
+          setSearchText(candidate.formattedAddress);
+          setCandidates([]);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Failed to resolve location');
+        } finally {
+          setSearching(false);
+        }
+      },
+      (geoError) => {
+        setError(geoError.message || 'Could not read your current location');
+        setSearching(false);
+      },
+      { enableHighAccuracy: true, timeout: 8000 },
+    );
+  };
+
+  const saveLocation = async () => {
+    setSaving(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const updated = await medicalApi.upsertMyDoctorProfile({
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        specialty: profile.specialty,
+        bio: profile.bio ?? undefined,
+        clinicName: clinicName.trim() || undefined,
+        address: address.trim() || undefined,
+        city: city.trim() || undefined,
+        consultFee: profile.consultFee ?? undefined,
+        languages: profile.languages.length > 0 ? profile.languages : undefined,
+      });
+
+      onSaved(updated);
+      setSuccess('Clinic location updated successfully.');
+      setCandidates([]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save clinic location');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <section className="dr-location-editor" aria-labelledby="clinic-location-title">
+      <div className="dr-location-header">
+        <h3 id="clinic-location-title">Clinic Location</h3>
+        <p>Set your clinic address so patients can navigate to your reservation location.</p>
+      </div>
+
+      <div className="dr-location-grid">
+        <label>
+          Clinic Name
+          <input value={clinicName} onChange={(event) => setClinicName(event.target.value)} placeholder="Clinic or hospital name" />
+        </label>
+        <label>
+          City
+          <input value={city} onChange={(event) => setCity(event.target.value)} placeholder="City" />
+        </label>
+      </div>
+
+      <label className="dr-location-address-label">
+        Clinic Address
+        <input value={address} onChange={(event) => setAddress(event.target.value)} placeholder="Street, district, city" />
+      </label>
+
+      <div className="dr-location-search-row">
+        <input
+          value={searchText}
+          onChange={(event) => setSearchText(event.target.value)}
+          placeholder="Search exact address"
+        />
+        <button type="button" className="btn btn-ghost" onClick={() => void runSearch()} disabled={searching}>
+          {searching ? 'Searching...' : 'Search'}
+        </button>
+        <button type="button" className="btn btn-ghost" onClick={() => void resolveCurrentLocation()} disabled={searching}>
+          Use Current Location
+        </button>
+      </div>
+
+      {candidates.length > 0 && (
+        <div className="dr-location-candidates" role="listbox" aria-label="Address suggestions">
+          {candidates.map((candidate) => (
+            <button
+              type="button"
+              key={candidate.placeId}
+              className="dr-location-candidate"
+              onClick={() => {
+                setAddress(candidate.formattedAddress);
+                setCity(candidate.city ?? city);
+                setSearchText(candidate.formattedAddress);
+                setCandidates([]);
+              }}
+            >
+              <strong>{candidate.formattedAddress}</strong>
+              <span>{candidate.city ?? 'Unknown city'}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {error && <p className="error">{error}</p>}
+      {success && <p className="dr-location-success">{success}</p>}
+
+      <div className="dr-location-actions">
+        <button type="button" className="book-btn" onClick={() => void saveLocation()} disabled={saving}>
+          {saving ? 'Saving...' : 'Save Clinic Location'}
+        </button>
+      </div>
+    </section>
+  );
+}
+
 export default function DoctorReservationsPage() {
   const { session, user, profile } = useAuth();
   
@@ -284,6 +463,7 @@ export default function DoctorReservationsPage() {
 
   // Load the authenticated doctor's profile ID first, then request schedules.
   const [profileId, setProfileId] = useState<string | null>(null);
+  const [myProfile, setMyProfile] = useState<DoctorProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [creatingProfile, setCreatingProfile] = useState(false);
@@ -294,7 +474,11 @@ export default function DoctorReservationsPage() {
   // Fetch own profile on mount
   useEffect(() => {
     medicalApi.fetchMyDoctorProfile()
-      .then((profile) => { setProfileId(profile.id); setProfileLoading(false); })
+      .then((profile) => {
+        setProfileId(profile.id);
+        setMyProfile(profile);
+        setProfileLoading(false);
+      })
       .catch((err) => { setProfileError(err instanceof Error ? err.message : 'Could not load your doctor profile.'); setProfileLoading(false); });
   }, []);
 
@@ -318,6 +502,7 @@ export default function DoctorReservationsPage() {
         languages: ['Arabic', 'English'],
       });
       setProfileId(profile.id);
+      setMyProfile(profile);
     } catch (err) {
       setProfileError(err instanceof Error ? err.message : 'Could not create your doctor profile.');
     } finally {
@@ -397,6 +582,15 @@ export default function DoctorReservationsPage() {
         imageSrc={imageAssets.headers.doctor}
         imageAlt="Availability Manager"
       />
+
+      {myProfile && (
+        <ClinicLocationEditor
+          profile={myProfile}
+          onSaved={(updatedProfile) => {
+            setMyProfile(updatedProfile);
+          }}
+        />
+      )}
 
       <div className="dr-toolbar">
         <button className="book-btn" onClick={() => setShowCreate(true)}>+ New Schedule</button>

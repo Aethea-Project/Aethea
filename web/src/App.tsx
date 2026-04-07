@@ -843,7 +843,7 @@ const Dashboard = () => {
             <div className="card-icon-wrapper" aria-hidden="true"><DoctorIcon /></div>
             <div>
               <h3 className="card-title">Find a Doctor</h3>
-              <p className="card-desc">Locate providers, pharmacies, and medical buildings nearby.</p>
+              <p className="card-desc">Locate doctors, hospitals, and pharmacies nearby.</p>
             </div>
             <div className="card-mini-info">
               <div className="card-mini-label">Next Appointment</div>
