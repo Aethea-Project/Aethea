@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { FastestRoute, NearbyPlace } from '../../services/medicalApi';
 
 interface LatLng {
@@ -45,6 +45,16 @@ function mapDirectionsLink(destination: LatLng): string {
   return `https://www.google.com/maps/dir/?api=1&destination=${destination.lat},${destination.lng}`;
 }
 
+function mapEmbedLink(destination: LatLng): string {
+  const zoomPadding = 0.015;
+  const left = destination.lng - zoomPadding;
+  const right = destination.lng + zoomPadding;
+  const top = destination.lat + zoomPadding;
+  const bottom = destination.lat - zoomPadding;
+
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${left}%2C${bottom}%2C${right}%2C${top}&layer=mapnik&marker=${destination.lat}%2C${destination.lng}`;
+}
+
 function enrichPlaces(places: NearbyPlace[], userLocation: LatLng): NearbyPlaceWithDistance[] {
   return places
     .map((place) => ({
@@ -71,12 +81,16 @@ function applyFilters(
 function PlacesSection({
   title,
   places,
+  selectedPlaceId,
+  onSelectPlace,
   routeByPlaceId,
   routeLoadingPlaceId,
   onEstimateRoute,
 }: {
   title: string;
   places: NearbyPlaceWithDistance[];
+  selectedPlaceId: string | null;
+  onSelectPlace: (place: NearbyPlaceWithDistance) => void;
   routeByPlaceId: Record<string, FastestRoute | undefined>;
   routeLoadingPlaceId: string | null;
   onEstimateRoute: (place: NearbyPlace) => void;
@@ -90,8 +104,13 @@ function PlacesSection({
         <div className="finder-nearby-list">
           {places.map((place) => {
             const route = routeByPlaceId[place.id];
+            const isSelected = selectedPlaceId === place.id;
+
             return (
-              <article key={place.id} className="finder-nearby-card">
+              <article
+                key={place.id}
+                className={`finder-nearby-card${isSelected ? ' finder-nearby-card-selected' : ''}`}
+              >
                 <div className="finder-nearby-main">
                   <p className="finder-nearby-name">{place.name}</p>
                   <p className="finder-nearby-address">{place.address}</p>
@@ -107,6 +126,13 @@ function PlacesSection({
                   </p>
                 )}
                 <div className="finder-nearby-actions">
+                  <button
+                    type="button"
+                    className="finder-action-btn"
+                    onClick={() => onSelectPlace(place)}
+                  >
+                    {isSelected ? 'Selected on Map' : 'Show on Map'}
+                  </button>
                   <button
                     type="button"
                     className="finder-action-btn"
@@ -147,6 +173,7 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
   const [maxDistanceKm, setMaxDistanceKm] = useState(10);
   const [minRating, setMinRating] = useState(0);
   const [openNowOnly, setOpenNowOnly] = useState(false);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
 
   const enrichedDoctors = useMemo(() => enrichPlaces(nearbyDoctors, userLocation), [nearbyDoctors, userLocation]);
   const enrichedHospitals = useMemo(() => enrichPlaces(nearbyHospitals, userLocation), [nearbyHospitals, userLocation]);
@@ -164,6 +191,35 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
     () => applyFilters(enrichedPharmacies, maxDistanceKm, minRating, openNowOnly),
     [enrichedPharmacies, maxDistanceKm, minRating, openNowOnly],
   );
+
+  const allFilteredPlaces = useMemo(
+    () => [...filteredDoctors, ...filteredHospitals, ...filteredPharmacies],
+    [filteredDoctors, filteredHospitals, filteredPharmacies],
+  );
+
+  useEffect(() => {
+    if (allFilteredPlaces.length === 0) {
+      if (selectedPlaceId !== null) {
+        setSelectedPlaceId(null);
+      }
+      return;
+    }
+
+    const selectedStillExists = selectedPlaceId
+      ? allFilteredPlaces.some((place) => place.id === selectedPlaceId)
+      : false;
+
+    if (!selectedStillExists) {
+      setSelectedPlaceId(allFilteredPlaces[0].id);
+    }
+  }, [allFilteredPlaces, selectedPlaceId]);
+
+  const selectedPlace = useMemo(
+    () => allFilteredPlaces.find((place) => place.id === selectedPlaceId) ?? null,
+    [allFilteredPlaces, selectedPlaceId],
+  );
+
+  const selectedPlaceRoute = selectedPlace ? routeByPlaceId[selectedPlace.id] : undefined;
 
   const nearestDoctor = filteredDoctors[0] ?? null;
 
@@ -203,13 +259,30 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
 
       {nearestDoctor && (
         <div className="finder-quick-actions" role="region" aria-label="Quick actions">
-          <button type="button" className="finder-quick-btn" onClick={() => onEstimateRoute(nearestDoctor)}>
-            Nearest Doctor
+          <button
+            type="button"
+            className="finder-quick-btn"
+            onClick={() => setSelectedPlaceId(nearestDoctor.id)}
+          >
+            Select Nearest Doctor
           </button>
-          <button type="button" className="finder-quick-btn" onClick={() => onEstimateRoute(nearestDoctor)}>
+          <button
+            type="button"
+            className="finder-quick-btn"
+            onClick={() => {
+              const place = selectedPlace ?? nearestDoctor;
+              setSelectedPlaceId(place.id);
+              onEstimateRoute(place);
+            }}
+          >
             Fastest Route
           </button>
-          <a href={mapDirectionsLink(nearestDoctor.location)} target="_blank" rel="noreferrer" className="finder-quick-btn finder-action-link">
+          <a
+            href={mapDirectionsLink((selectedPlace ?? nearestDoctor).location)}
+            target="_blank"
+            rel="noreferrer"
+            className="finder-quick-btn finder-action-link"
+          >
             Open Direction
           </a>
         </div>
@@ -219,29 +292,70 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
       {error && <p className="error">{error}</p>}
 
       {!loading && !error && (
-        <div className="finder-nearby-grid">
-          <PlacesSection
-            title="Nearby Doctors"
-            places={filteredDoctors}
-            routeByPlaceId={routeByPlaceId}
-            routeLoadingPlaceId={routeLoadingPlaceId}
-            onEstimateRoute={onEstimateRoute}
-          />
-          <PlacesSection
-            title="Nearby Hospitals"
-            places={filteredHospitals}
-            routeByPlaceId={routeByPlaceId}
-            routeLoadingPlaceId={routeLoadingPlaceId}
-            onEstimateRoute={onEstimateRoute}
-          />
-          <PlacesSection
-            title="Nearby Pharmacies"
-            places={filteredPharmacies}
-            routeByPlaceId={routeByPlaceId}
-            routeLoadingPlaceId={routeLoadingPlaceId}
-            onEstimateRoute={onEstimateRoute}
-          />
-        </div>
+        <>
+          {selectedPlace && (
+            <section className="finder-selected-map" aria-label="Selected place on map">
+              <div className="finder-selected-map-meta">
+                <h3>{selectedPlace.name}</h3>
+                <p className="finder-nearby-address">{selectedPlace.address}</p>
+                <div className="finder-nearby-meta">
+                  <span>{selectedPlace.distanceKm.toFixed(1)} km away</span>
+                  <span>Rating: {selectedPlace.rating?.toFixed(1) ?? 'N/A'}</span>
+                  <span>
+                    {selectedPlace.openNow === true
+                      ? 'Open now'
+                      : selectedPlace.openNow === false
+                        ? 'Closed now'
+                        : 'Status unknown'}
+                  </span>
+                </div>
+                {selectedPlaceRoute && (
+                  <p className="finder-route-pill" aria-live="polite">
+                    ETA: {selectedPlaceRoute.durationText} • {selectedPlaceRoute.distanceText}
+                  </p>
+                )}
+              </div>
+              <div className="finder-selected-map-frame-wrap">
+                <iframe
+                  title={`Map for ${selectedPlace.name}`}
+                  src={mapEmbedLink(selectedPlace.location)}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+            </section>
+          )}
+
+          <div className="finder-nearby-grid">
+            <PlacesSection
+              title="Nearby Doctors"
+              places={filteredDoctors}
+              selectedPlaceId={selectedPlaceId}
+              onSelectPlace={(place) => setSelectedPlaceId(place.id)}
+              routeByPlaceId={routeByPlaceId}
+              routeLoadingPlaceId={routeLoadingPlaceId}
+              onEstimateRoute={onEstimateRoute}
+            />
+            <PlacesSection
+              title="Nearby Hospitals"
+              places={filteredHospitals}
+              selectedPlaceId={selectedPlaceId}
+              onSelectPlace={(place) => setSelectedPlaceId(place.id)}
+              routeByPlaceId={routeByPlaceId}
+              routeLoadingPlaceId={routeLoadingPlaceId}
+              onEstimateRoute={onEstimateRoute}
+            />
+            <PlacesSection
+              title="Nearby Pharmacies"
+              places={filteredPharmacies}
+              selectedPlaceId={selectedPlaceId}
+              onSelectPlace={(place) => setSelectedPlaceId(place.id)}
+              routeByPlaceId={routeByPlaceId}
+              routeLoadingPlaceId={routeLoadingPlaceId}
+              onEstimateRoute={onEstimateRoute}
+            />
+          </div>
+        </>
       )}
     </div>
   );
