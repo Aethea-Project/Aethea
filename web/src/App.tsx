@@ -37,6 +37,7 @@ const ProfilePage = lazy(() => import('./pages/Profile'));
 const TestMessageEmailPage = lazy(() => import('./pages/TestMessageEmail'));
 const AuthConfirmPage = lazy(() => import('./pages/AuthConfirm'));
 const CompleteProfilePage = lazy(() => import('./pages/CompleteProfile'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPassword'));
 const AdminUsersPage = lazy(() => import('./pages/AdminUsers'));
 const AdminUserDetailsPage = lazy(() => import('./pages/AdminUserDetails'));
 const StaffVerificationPage = lazy(() => import('./pages/StaffVerification'));
@@ -121,6 +122,13 @@ const resolveMustChangePassword = (
 const RootRoute = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
+  const hashParams = new URLSearchParams(location.hash.startsWith('#') ? location.hash.slice(1) : location.hash);
+  const authFlowType = params.get('type') ?? hashParams.get('type');
+
+  if (authFlowType === 'recovery') {
+    return <Navigate to={`/reset-password${location.search}${location.hash}`} replace />;
+  }
+
   const hasAuthCallback =
     params.has('code') ||
     params.has('error') ||
@@ -968,6 +976,7 @@ function AppRoutes() {
         <Route path="/login" element={<PublicOnlyRoute><LoginForm /></PublicOnlyRoute>} />
         <Route path="/register" element={<PublicOnlyRoute><RegisterForm /></PublicOnlyRoute>} />
         <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/auth/confirm" element={<AuthConfirmPage />} />
         <Route
           path="/complete-profile"

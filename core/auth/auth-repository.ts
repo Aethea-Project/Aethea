@@ -3,7 +3,7 @@
  * Handles all authentication data operations
  */
 
-import { SupabaseClient, User, Session } from '@supabase/supabase-js';
+import { createClient, SupabaseClient, User, Session } from '@supabase/supabase-js';
 import {
   SignUpCredentials,
   SignInCredentials,
@@ -15,6 +15,7 @@ import {
   Database,
 } from './auth-types';
 import { parseAuthError } from './auth-utils';
+import { getSupabaseConfig } from './constants';
 
 const toNullableString = (value: unknown): string | null => {
   if (typeof value !== 'string') return null;
@@ -112,6 +113,27 @@ const buildFallbackProfileRow = (
 
 export class AuthRepository {
   constructor(private supabase: SupabaseClient<Database>) {}
+
+  /**
+   * Build a dedicated client for recovery email links using implicit flow.
+   * This avoids PKCE verifier coupling to the initiating browser storage.
+   */
+  private getPasswordRecoveryClient(): SupabaseClient<Database> {
+    const { url, anonKey } = getSupabaseConfig();
+
+    if (!url || !anonKey) {
+      return this.supabase;
+    }
+
+    return createClient<Database>(url, anonKey, {
+      auth: {
+        flowType: 'implicit',
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+    });
+  }
 
   private async ensureProfileRow(userId: string): Promise<AuthResponse<Record<string, any>>> {
     try {
@@ -387,7 +409,8 @@ export class AuthRepository {
           ? window.location.origin
           : 'https://app.aethea.com'; // fallback for non-browser environments
 
-      const { error } = await this.supabase.auth.resetPasswordForEmail(request.email, {
+      const recoveryClient = this.getPasswordRecoveryClient();
+      const { error } = await recoveryClient.auth.resetPasswordForEmail(request.email, {
         redirectTo: `${origin}/reset-password`,
         captchaToken: request.captchaToken,
       });

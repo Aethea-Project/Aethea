@@ -24,8 +24,14 @@ import type { ProfileUpdateRequest, UserProfile, BloodType, Gender } from '@core
 import { isValidName, isValidDateOfBirth, isValidPhone } from '@core/auth/auth-utils';
 import { validatePassword, doPasswordsMatch } from '@core/auth/auth-utils';
 import { Modal } from '../../components/Modal';
-import { requestProfileUpdateOTP, verifyProfileUpdateOTP } from '../../services/userApi';
+import {
+  requestPasswordChangeOTP,
+  requestProfileUpdateOTP,
+  verifyPasswordChangeOTP,
+  verifyProfileUpdateOTP,
+} from '../../services/userApi';
 import { useUiNotifications } from '../../contexts/UiNotificationsProvider';
+import { useTurnstile } from '../../hooks/useTurnstile';
 import './styles.css';
 
 // ── Validation ──────────────────────────────
@@ -119,6 +125,12 @@ const ProfilePage: React.FC = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordCaptchaToken, setPasswordCaptchaToken] = useState<string | null>(null);
+  const [passwordCaptchaError, setPasswordCaptchaError] = useState('');
+  const [passwordCaptchaResetVersion, setPasswordCaptchaResetVersion] = useState(0);
+  const [showPasswordOtpModal, setShowPasswordOtpModal] = useState(false);
+  const [passwordOtpCode, setPasswordOtpCode] = useState('');
+  const [passwordOtpError, setPasswordOtpError] = useState('');
 
   // Track dirty state for unsaved changes warning
   const originalFormRef = useRef<ProfileUpdateRequest>({});
@@ -135,6 +147,45 @@ const ProfilePage: React.FC = () => {
   const [stepUpOtp, setStepUpOtp] = useState('');
   const [stepUpError, setStepUpError] = useState('');
   const [stepUpLoading, setStepUpLoading] = useState(false);
+
+  const resetPasswordCaptchaState = useCallback(() => {
+    setPasswordCaptchaToken(null);
+    setPasswordCaptchaError('');
+    setPasswordCaptchaResetVersion((prev) => prev + 1);
+  }, []);
+
+  const openPasswordModal = useCallback(() => {
+    setShowPasswordModal(true);
+    setShowPasswordOtpModal(false);
+    setPasswordError('');
+    setPasswordSuccess('');
+    setPasswordOtpError('');
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmNewPassword('');
+    setShowCurrentPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+    setPasswordOtpCode('');
+    resetPasswordCaptchaState();
+  }, [resetPasswordCaptchaState]);
+
+  const closePasswordModal = useCallback(() => {
+    setShowPasswordModal(false);
+    setShowPasswordOtpModal(false);
+    setPasswordOtpError('');
+    setPasswordOtpCode('');
+    setPasswordError('');
+    setPasswordSuccess('');
+    resetPasswordCaptchaState();
+  }, [resetPasswordCaptchaState]);
+
+  const backToPasswordDetailsModal = useCallback(() => {
+    setShowPasswordOtpModal(false);
+    setShowPasswordModal(true);
+    setPasswordOtpCode('');
+    setPasswordOtpError('');
+  }, []);
 
   // Populate form when profile loads or changes.
   // Do not overwrite local edits while user is actively editing or completing step-up.
@@ -198,6 +249,12 @@ const ProfilePage: React.FC = () => {
       return;
     }
 
+    const changedUpdates = getChangedProfileFields(form, originalFormRef.current);
+    if (Object.keys(changedUpdates).length === 0) {
+      setErrorMsg('No profile changes were detected.');
+      return;
+    }
+
     // Instead of saving directly, we prompt for step-up verification.
     setStepUpPassword('');
     setStepUpError('');
@@ -258,60 +315,93 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  // Password change handler
-  const handlePasswordChange = async () => {
+  const validatePasswordChangeForm = (): boolean => {
     setPasswordError('');
     setPasswordSuccess('');
+    setPasswordOtpError('');
 
-    if (!currentPassword) {
+    if (!mustChangePassword && !currentPassword) {
       setPasswordError('Please enter your current password.');
-      return;
+      return false;
     }
     if (!newPassword || !confirmNewPassword) {
       setPasswordError('Please fill in all fields.');
-      return;
+      return false;
     }
     if (!doPasswordsMatch(newPassword, confirmNewPassword)) {
       setPasswordError('Passwords do not match.');
-      return;
+      return false;
     }
     const passwordValidation = validatePassword(newPassword);
     if (!passwordValidation.valid) {
       setPasswordError(passwordValidation.error ?? 'Password does not meet requirements.');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSendPasswordVerificationCode = async () => {
+    if (!validatePasswordChangeForm()) {
+      return;
+    }
+
+    if (!mustChangePassword && !passwordCaptchaToken) {
+      setPasswordError(passwordCaptchaError || 'Please complete the CAPTCHA verification.');
       return;
     }
 
     setPasswordSaving(true);
     try {
-      // Verify current password by re-authenticating
-      const email = user?.email;
-      if (!email) {
-        setPasswordError('Unable to verify identity. Please sign in again.');
-        setPasswordSaving(false);
-        return;
+      await requestPasswordChangeOTP({
+        currentPassword: mustChangePassword ? undefined : currentPassword,
+        captchaToken: mustChangePassword ? undefined : (passwordCaptchaToken ?? undefined),
+      });
+
+      if (!mustChangePassword) {
+        resetPasswordCaptchaState();
       }
-      const { authService: svc } = await import('../../services/auth');
-      const verifyResult = await svc.signIn({ email, password: currentPassword });
-      if (verifyResult.error) {
-        setPasswordError('Current password is incorrect.');
-        setPasswordSaving(false);
-        return;
+
+      setPasswordOtpCode('');
+      setPasswordOtpError('');
+      setShowPasswordModal(false);
+      setShowPasswordOtpModal(true);
+      notifySuccess('Verification code sent', 'Please check your email for the 6-digit code.');
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, 'Failed to send verification code. Please try again.');
+      setPasswordError(message);
+      if (!mustChangePassword) {
+        resetPasswordCaptchaState();
       }
+    }
+    setPasswordSaving(false);
+  };
+
+  const handleVerifyPasswordCodeAndChange = async () => {
+    setPasswordOtpError('');
+
+    if (!/^\d{6}$/.test(passwordOtpCode.trim())) {
+      setPasswordOtpError('Please enter the 6-digit verification code sent to your email.');
+      return;
+    }
+
+    setPasswordSaving(true);
+    try {
+      await verifyPasswordChangeOTP(passwordOtpCode.trim());
 
       await updatePassword(newPassword);
       setPasswordSuccess('Password updated successfully!');
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmNewPassword('');
+      notifySuccess('Password updated', 'Your password has been updated successfully.');
       setTimeout(() => {
-        setShowPasswordModal(false);
+        closePasswordModal();
         // If admin was forced here to change password, redirect to dashboard
         if (mustChangePassword) {
           navigate('/dashboard', { replace: true });
         }
       }, 1500);
-    } catch {
-      setPasswordError('Failed to update password. Please try again.');
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, 'Failed to update password. Please try again.');
+      setPasswordOtpError(message);
     }
     setPasswordSaving(false);
   };
@@ -406,17 +496,7 @@ const ProfilePage: React.FC = () => {
             </svg>
             You must change your temporary password before accessing the platform.
             <button className="btn btn-account-action" style={{ marginLeft: 'auto' }}
-              onClick={() => {
-                setShowPasswordModal(true);
-                setPasswordError('');
-                setPasswordSuccess('');
-                setCurrentPassword('');
-                setNewPassword('');
-                setConfirmNewPassword('');
-                setShowCurrentPassword(false);
-                setShowNewPassword(false);
-                setShowConfirmPassword(false);
-              }}
+              onClick={openPasswordModal}
             >Change Password Now</button>
           </div>
         )}
@@ -629,17 +709,7 @@ const ProfilePage: React.FC = () => {
           <div className="profile-account-actions">
             <button
               className="btn btn-account-action"
-              onClick={() => {
-                setShowPasswordModal(true);
-                setPasswordError('');
-                setPasswordSuccess('');
-                setCurrentPassword('');
-                setNewPassword('');
-                setConfirmNewPassword('');
-                setShowCurrentPassword(false);
-                setShowNewPassword(false);
-                setShowConfirmPassword(false);
-              }}
+              onClick={openPasswordModal}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M4.5 8V5a3.5 3.5 0 1 1 7 0v3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
@@ -690,7 +760,7 @@ const ProfilePage: React.FC = () => {
               value={stepUpPassword}
               onChange={(e) => setStepUpPassword(e.target.value)}
               disabled={stepUpLoading}
-              style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid var(--border)' }}
+              style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid var(--border, #000)' }}
             />
           </div>
         </div>
@@ -729,7 +799,7 @@ const ProfilePage: React.FC = () => {
               value={stepUpOtp}
               onChange={(e) => setStepUpOtp(e.target.value)}
               disabled={stepUpLoading}
-              style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid var(--border)', letterSpacing: '2px', fontSize: '1.2rem', textAlign: 'center' }}
+              style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid var(--border, #000)', letterSpacing: '2px', fontSize: '1.2rem', textAlign: 'center' }}
             />
           </div>
         </div>
@@ -744,34 +814,53 @@ const ProfilePage: React.FC = () => {
       {/* ── Password Change Modal ─────────────── */}
       <Modal
         isOpen={showPasswordModal}
-        onClose={() => !passwordSaving && setShowPasswordModal(false)}
+        onClose={() => !passwordSaving && closePasswordModal()}
         ariaLabelledBy="password-modal-title"
       >
             <div className="modal-header">
               <h3 id="password-modal-title">Change Password</h3>
-              <button className="modal-close" onClick={() => setShowPasswordModal(false)} aria-label="Close">
+              <button className="modal-close" onClick={closePasswordModal} aria-label="Close">
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 4.5L13.5 13.5M4.5 13.5L13.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
               </button>
             </div>
             <div className="modal-body">
               {passwordSuccess && <div className="profile-toast profile-toast-success">{passwordSuccess}</div>}
               {passwordError && <div className="profile-toast profile-toast-error">{passwordError}</div>}
-              <div className="modal-field">
-                <label htmlFor="current-password">Current Password</label>
-                <div className="modal-input-row">
-                  <input
-                    id="current-password"
-                    type={showCurrentPassword ? 'text' : 'password'}
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    autoComplete="current-password"
-                    placeholder="Enter current password"
-                  />
-                  <button type="button" className="modal-toggle-pw" onClick={() => setShowCurrentPassword(v => !v)} aria-label={showCurrentPassword ? 'Hide' : 'Show'}>
-                    {showCurrentPassword ? '🙈' : '👁'}
-                  </button>
+              {!mustChangePassword ? (
+                <div className="modal-field">
+                  <label htmlFor="current-password">Current Password</label>
+                  <div className="modal-input-row">
+                    <input
+                      id="current-password"
+                      type={showCurrentPassword ? 'text' : 'password'}
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      autoComplete="current-password"
+                      placeholder="Enter current password"
+                    />
+                    <button type="button" className="modal-toggle-pw" onClick={() => setShowCurrentPassword(v => !v)} aria-label={showCurrentPassword ? 'Hide' : 'Show'}>
+                      {showCurrentPassword ? '🙈' : '👁'}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <p className="field-hint" style={{ marginTop: 0, marginBottom: '8px' }}>
+                  You are signed in with a temporary password. Set a new password to continue.
+                </p>
+              )}
+              {!mustChangePassword && (
+                <div className="modal-field">
+                  <label>Security Verification</label>
+                  <PasswordChangeCaptcha
+                    onTokenChange={setPasswordCaptchaToken}
+                    onErrorChange={setPasswordCaptchaError}
+                    resetVersion={passwordCaptchaResetVersion}
+                  />
+                  {passwordCaptchaError && (
+                    <span className="field-error" role="alert">{passwordCaptchaError}</span>
+                  )}
+                </div>
+              )}
               <div className="modal-field">
                 <label htmlFor="new-password">New Password</label>
                 <div className="modal-input-row">
@@ -831,13 +920,54 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
             <div className="modal-footer">
-              <button className="btn btn-primary" onClick={handlePasswordChange} disabled={passwordSaving}>
-                {passwordSaving ? 'Updating…' : 'Update Password'}
+              <button className="btn btn-primary" onClick={handleSendPasswordVerificationCode} disabled={passwordSaving}>
+                {passwordSaving ? 'Sending code…' : 'Send Verification Code'}
               </button>
-              <button className="btn btn-secondary" onClick={() => setShowPasswordModal(false)} disabled={passwordSaving}>
+              <button className="btn btn-secondary" onClick={closePasswordModal} disabled={passwordSaving}>
                 Cancel
               </button>
             </div>
+      </Modal>
+
+      <Modal
+        isOpen={showPasswordOtpModal}
+        onClose={() => !passwordSaving && backToPasswordDetailsModal()}
+        ariaLabelledBy="password-otp-modal-title"
+      >
+        <div className="modal-header">
+          <h3 id="password-otp-modal-title">Email Verification</h3>
+          <button className="modal-close" onClick={backToPasswordDetailsModal} aria-label="Close">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 4.5L13.5 13.5M4.5 13.5L13.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+          </button>
+        </div>
+        <div className="modal-body">
+          {passwordSuccess && <div className="profile-toast profile-toast-success">{passwordSuccess}</div>}
+          {passwordOtpError && <div className="profile-toast profile-toast-error">{passwordOtpError}</div>}
+          <p className="field-hint" style={{ marginTop: 0, marginBottom: '8px' }}>
+            A 6-digit code has been sent to your email. It will expire in 10 minutes.
+          </p>
+          <div className="modal-field">
+            <label htmlFor="password-change-otp">Verification Code</label>
+            <input
+              id="password-change-otp"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              value={passwordOtpCode}
+              onChange={(e) => setPasswordOtpCode(e.target.value.replace(/\D/g, ''))}
+              placeholder="Enter 6-digit code"
+            />
+          </div>
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-secondary" onClick={backToPasswordDetailsModal} disabled={passwordSaving}>
+            Back
+          </button>
+          <button className="btn btn-primary" onClick={handleVerifyPasswordCodeAndChange} disabled={passwordSaving}>
+            {passwordSaving ? 'Updating…' : 'Verify Code & Update Password'}
+          </button>
+        </div>
       </Modal>
     </div>
   );
@@ -852,6 +982,38 @@ function parseCommaSeparated(value: string | undefined | null): string[] {
   if (!value) return [];
   return value.split(',').map((s) => s.trim()).filter(Boolean);
 }
+
+interface PasswordChangeCaptchaProps {
+  onTokenChange: (token: string | null) => void;
+  onErrorChange: (message: string) => void;
+  resetVersion: number;
+}
+
+const PasswordChangeCaptcha: React.FC<PasswordChangeCaptchaProps> = ({
+  onTokenChange,
+  onErrorChange,
+  resetVersion,
+}) => {
+  const { captchaToken, turnstileRef, resetCaptcha } = useTurnstile({
+    onError: onErrorChange,
+    onSuccess: () => onErrorChange(''),
+  });
+
+  useEffect(() => {
+    onTokenChange(captchaToken);
+  }, [captchaToken, onTokenChange]);
+
+  useEffect(() => {
+    resetCaptcha();
+    onTokenChange(null);
+  }, [onTokenChange, resetCaptcha, resetVersion]);
+
+  return (
+    <div className="modal-captcha">
+      <div ref={turnstileRef} />
+    </div>
+  );
+};
 
 interface ChipSelectProps {
   options: string[];

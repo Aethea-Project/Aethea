@@ -78,6 +78,11 @@ export interface AdminResetTemporaryPasswordResult {
   revokedSessions: number;
 }
 
+export interface AdminPasswordResetLinkResult {
+  id: string;
+  email: string;
+}
+
 export interface AdminProfileUpdatePayload {
   firstName?: string;
   lastName?: string;
@@ -149,6 +154,14 @@ export const adminApi = {
     const res = await authFetch<{ data: AdminResetTemporaryPasswordResult }>(`/v1/admin/users/${userId}/temporary-password`, {
       method: 'PATCH',
       body: JSON.stringify({ temporaryPassword }),
+    });
+    return res.data;
+  },
+
+  async sendUserPasswordResetLink(userId: string): Promise<AdminPasswordResetLinkResult> {
+    const res = await authFetch<{ data: AdminPasswordResetLinkResult }>(`/v1/admin/users/${userId}/password-reset-link`, {
+      method: 'POST',
+      body: JSON.stringify({}),
     });
     return res.data;
   },

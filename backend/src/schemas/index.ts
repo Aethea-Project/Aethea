@@ -51,6 +51,15 @@ export const verifyProfileUpdateSchema = z.object({
   updates: updateProfileSchema,
 }).strict();
 
+export const requestPasswordChangeSchema = z.object({
+  currentPassword: z.string().min(1).optional(),
+  captchaToken: z.string().trim().min(1).optional(),
+}).strict();
+
+export const verifyPasswordChangeSchema = z.object({
+  code: z.string().trim().regex(/^\d{6}$/, 'Code must be 6 digits'),
+}).strict();
+
 /**
  * Pagination query params (reusable)
  */
@@ -292,6 +301,8 @@ export const adminUpdateUserProfileSchema = z.object({
 export const adminResetTemporaryPasswordSchema = z.object({
   temporaryPassword: strongPasswordSchema,
 }).strict();
+
+export const adminSendPasswordResetLinkSchema = z.object({}).strict();
 
 const auditActionEnum = z.enum([
   'user.approve',

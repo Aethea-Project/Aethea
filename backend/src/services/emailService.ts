@@ -40,6 +40,17 @@ interface ProfileUpdateOtpEmailPayload {
   code: string;
   expiresInSeconds: number;
 }
+
+interface PasswordChangeOtpEmailPayload {
+  to: string;
+  code: string;
+  expiresInSeconds: number;
+}
+
+interface AdminPasswordChangedNoticeEmailPayload {
+  to: string;
+}
+
 const isEmailEnabled = (): boolean => {
   const flag = (process.env.EMAIL_NOTIFICATIONS_ENABLED ?? 'true').toLowerCase();
   return ['1', 'true', 'yes', 'on'].includes(flag);
@@ -178,4 +189,29 @@ export async function sendProfileUpdateOtpEmail(payload: ProfileUpdateOtpEmailPa
     'If you did not request this change, please contact support and change your password immediately.',
   ];
   await sendEmail(payload.to, 'Aethea - Profile Update Verification Code', lines.join('\n'));
+}
+
+export async function sendPasswordChangeOtpEmail(payload: PasswordChangeOtpEmailPayload): Promise<void> {
+  const minutes = Math.floor(payload.expiresInSeconds / 60);
+  const lines = [
+    'You have requested to change your password.',
+    '',
+    `Your verification code is: ${payload.code}`,
+    `This code will expire in ${minutes} minutes.`,
+    '',
+    'If you did not request this action, please contact support immediately.',
+  ];
+
+  await sendEmail(payload.to, 'Aethea - Password Change Verification Code', lines.join('\n'));
+}
+
+export async function sendAdminPasswordChangedNoticeEmail(payload: AdminPasswordChangedNoticeEmailPayload): Promise<void> {
+  const lines = [
+    'Your account password was changed by an Aethea administrator.',
+    '',
+    'If this action was expected, sign in using the temporary password provided by the administrator, then change your password immediately.',
+    'If you did not request this action, contact support immediately.',
+  ];
+
+  await sendEmail(payload.to, 'Aethea - Password Changed by Admin', lines.join('\n'));
 }

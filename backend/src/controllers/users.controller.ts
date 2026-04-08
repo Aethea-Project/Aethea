@@ -5,8 +5,13 @@
 import { Request, Response } from 'express';
 import { AppError } from '../lib/AppError.js';
 import { getSupabaseAdminClient } from '../lib/supabaseAdmin.js';
-import { generateProfileUpdateOTP, verifyProfileUpdateOTP } from '../services/otpService.js';
-import { sendProfileUpdateOtpEmail } from '../services/emailService.js';
+import {
+  generatePasswordChangeOTP,
+  generateProfileUpdateOTP,
+  verifyPasswordChangeOTP,
+  verifyProfileUpdateOTP,
+} from '../services/otpService.js';
+import { sendPasswordChangeOtpEmail, sendProfileUpdateOtpEmail } from '../services/emailService.js';
 import { updatePublicProfile } from '../repositories/userRepository.js';
 
 /**
@@ -75,4 +80,65 @@ export const verifyProfileUpdate = async (req: Request, res: Response) => {
   }
 
   res.json({ message: 'Profile updated successfully', user: data.user });
+};
+
+export const requestPasswordChange = async (req: Request, res: Response) => {
+  const { currentPassword, captchaToken } = req.body as { currentPassword?: string; captchaToken?: string };
+  const email = req.user?.email;
+
+  if (!email) {
+    throw AppError.unauthorized('Missing authenticated user email context');
+  }
+
+  const mustChangePassword = req.user?.must_change_password === true;
+  if (!mustChangePassword) {
+    if (!currentPassword) {
+      throw AppError.badRequest('Current password is required', 'CURRENT_PASSWORD_REQUIRED');
+    }
+
+    const supabase = getSupabaseAdminClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password: currentPassword,
+      options: captchaToken ? { captchaToken } : undefined,
+    });
+
+    if (error) {
+      const message = error.message || 'Incorrect password';
+      const isCaptchaError = /captcha/i.test(message);
+      throw new AppError(
+        message,
+        isCaptchaError ? 400 : 401,
+        isCaptchaError ? 'CAPTCHA_VERIFICATION_FAILED' : 'INVALID_PASSWORD',
+      );
+    }
+  }
+
+  const challenge = await generatePasswordChangeOTP(req.user!.id);
+  if (!challenge) {
+    throw new AppError('Failed to generate verification code', 500, 'CHALLENGE_FAILED');
+  }
+
+  await sendPasswordChangeOtpEmail({
+    to: email,
+    code: challenge.code,
+    expiresInSeconds: challenge.expiresInSeconds,
+  });
+
+  res.json({
+    message: 'Verification code sent',
+    expiresInSeconds: challenge.expiresInSeconds,
+  });
+};
+
+export const verifyPasswordChange = async (req: Request, res: Response) => {
+  const { code } = req.body as { code: string };
+  const isValid = await verifyPasswordChangeOTP(req.user!.id, code);
+  if (!isValid) {
+    throw new AppError('Invalid or expired code', 401, 'INVALID_OTP_CODE');
+  }
+
+  res.json({
+    verified: true,
+  });
 };

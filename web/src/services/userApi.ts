@@ -14,3 +14,17 @@ export const verifyProfileUpdateOTP = async (code: string, updates: ProfileUpdat
     body: JSON.stringify({ code, updates }),
   });
 };
+
+export const requestPasswordChangeOTP = async (params: { currentPassword?: string; captchaToken?: string }) => {
+  return authFetch('/users/password/change-request', {
+    method: 'POST',
+    body: JSON.stringify(params),
+  });
+};
+
+export const verifyPasswordChangeOTP = async (code: string) => {
+  return authFetch('/users/password/verify-change', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+};

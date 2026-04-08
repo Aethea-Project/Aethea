@@ -14,6 +14,7 @@ import {
   getUserDetail,
   updateUserProfile,
   resetUserTemporaryPassword,
+  sendUserPasswordResetLink,
   changeUserAccountType,
   deleteUserAccount,
   listUsers,
@@ -160,6 +161,36 @@ export const resetAdminUserTemporaryPassword = async (req: Request, res: Respons
   );
 
   res.json({ data });
+};
+
+/**
+ * POST /api/admin/users/:id/password-reset-link
+ */
+export const sendAdminUserPasswordResetLink = async (req: Request, res: Response): Promise<void> => {
+  const rawId = req.params.id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+  const actorId = req.user?.id;
+
+  if (!id || !UUID_V4_REGEX.test(id)) {
+    throw AppError.badRequest('Invalid user id');
+  }
+
+  if (!actorId) {
+    throw AppError.unauthorized('No authenticated user');
+  }
+
+  const data = await sendUserPasswordResetLink(
+    {
+      userId: id,
+      actorId,
+    },
+    {
+      headers: req.headers as Record<string, string | string[] | undefined>,
+      socketAddress: req.socket?.remoteAddress,
+    },
+  );
+
+  res.status(202).json({ data });
 };
 
 /**

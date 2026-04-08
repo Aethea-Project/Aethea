@@ -116,6 +116,10 @@ export default function AdminUserDetailsPage() {
     return !saving && !isSelfProfile && temporaryPasswordValidation.valid;
   }, [saving, isSelfProfile, temporaryPasswordValidation.valid]);
 
+  const canSendPasswordResetLink = useMemo(() => {
+    return !saving && !isSelfProfile;
+  }, [saving, isSelfProfile]);
+
   const buildProfileUpdatePayload = (currentDetail: AdminUserDetail, form: AdminProfileUpdatePayload): AdminProfileUpdatePayload => {
     const payload: AdminProfileUpdatePayload = {};
 
@@ -252,6 +256,32 @@ export default function AdminUserDetailsPage() {
       setMessage(`Temporary password applied. Revoked sessions: ${result.revokedSessions}.`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to set temporary password');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const onSendPasswordResetLink = async () => {
+    if (!id) return;
+
+    if (isSelfProfile) {
+      setError('Use the Forgot Password flow for your own account.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'This will send a password reset email to the user. Continue?',
+    );
+    if (!confirmed) return;
+
+    setSaving(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const result = await adminApi.sendUserPasswordResetLink(id);
+      setMessage(`Password reset link sent to ${result.email}.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send password reset link');
     } finally {
       setSaving(false);
     }
@@ -484,6 +514,14 @@ export default function AdminUserDetailsPage() {
                 ))}
               </ul>
               <div className="temp-password-actions">
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  disabled={!canSendPasswordResetLink}
+                  onClick={() => void onSendPasswordResetLink()}
+                >
+                  Send Reset Link
+                </button>
                 <button
                   type="button"
                   className="btn btn-ghost"

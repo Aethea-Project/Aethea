@@ -485,6 +485,16 @@
   gap: 0.25rem;
 }
 
+.modal-captcha {
+  min-height: 65px;
+  display: flex;
+  align-items: center;
+}
+
+.modal-captcha > div {
+  min-height: 65px;
+}
+
 .modal-field label {
   font-family: 'Sora', sans-serif;
   font-size: 0.8125rem;

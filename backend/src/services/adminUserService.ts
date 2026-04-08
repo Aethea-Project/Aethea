@@ -10,6 +10,7 @@ import logger from '../lib/logger.js';
 import { getSupabaseAdminClient } from '../lib/supabaseAdmin.js';
 import { writeAuditLog, extractRequestMeta, type AuditAction } from './auditService.js';
 import { revokeAllUserSessions } from '../lib/sessionRegistry.js';
+import { sendAdminPasswordChangedNoticeEmail } from './emailService.js';
 import {
   insertUserAccount,
   countActiveAdmins,
@@ -78,6 +79,74 @@ export interface ResetTemporaryPasswordInput {
   temporaryPassword: string;
   actorId: string;
 }
+
+export interface SendPasswordResetLinkInput {
+  userId: string;
+  actorId: string;
+}
+
+const DEFAULT_RESET_PASSWORD_ORIGIN = 'https://aethea.me';
+
+const toNullableEmail = (value: unknown): string | null => {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : null;
+};
+
+const normalizeOrigin = (value: string): string | null => {
+  const normalized = value.trim();
+  if (!normalized) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(normalized);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return null;
+    }
+
+    return `${parsed.protocol}//${parsed.host}`;
+  } catch {
+    return null;
+  }
+};
+
+const isApiOrigin = (origin: string): boolean => {
+  try {
+    return /^api\./i.test(new URL(origin).hostname);
+  } catch {
+    return false;
+  }
+};
+
+const isLocalOrigin = (origin: string): boolean => {
+  try {
+    const hostname = new URL(origin).hostname.toLowerCase();
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0';
+  } catch {
+    return false;
+  }
+};
+
+const resolvePasswordResetRedirectUrl = (): string => {
+  const configuredOrigins = (process.env.CORS_ORIGIN ?? '')
+    .split(',')
+    .map((entry) => normalizeOrigin(entry))
+    .filter((entry): entry is string => Boolean(entry));
+
+  const webOrigins = configuredOrigins.filter((origin) => !isApiOrigin(origin));
+  const candidates = webOrigins.length > 0 ? webOrigins : configuredOrigins;
+
+  const selectedOrigin = process.env.NODE_ENV === 'production'
+    ? candidates.find((origin) => !isLocalOrigin(origin))
+    : candidates.find((origin) => isLocalOrigin(origin)) ?? candidates[0];
+
+  const baseOrigin = selectedOrigin ?? DEFAULT_RESET_PASSWORD_ORIGIN;
+  return `${baseOrigin.replace(/\/+$/, '')}/reset-password`;
+};
 
 /* ─── Service functions ─── */
 
@@ -310,8 +379,12 @@ export async function resetUserTemporaryPassword(
     );
   }
 
-  const current = await getAccountStatus(userId);
-  if (!current) {
+  const [current, userDetail] = await Promise.all([
+    getAccountStatus(userId),
+    findUserById(userId),
+  ]);
+
+  if (!current || !userDetail) {
     throw AppError.notFound('User account not found');
   }
 
@@ -342,6 +415,13 @@ export async function resetUserTemporaryPassword(
     );
   }
 
+  const targetEmail = toNullableEmail(userDetail.email);
+  if (targetEmail) {
+    await sendAdminPasswordChangedNoticeEmail({
+      to: targetEmail,
+    });
+  }
+
   const { ipAddress, userAgent } = extractRequestMeta(meta.headers, meta.socketAddress);
   try {
     await writeAuditLog({
@@ -355,6 +435,7 @@ export async function resetUserTemporaryPassword(
       newValue: {
         mustChangePassword: updated.must_change_password,
         revokedSessions,
+        emailNotificationRequested: Boolean(targetEmail),
       },
       ipAddress,
       userAgent,
@@ -370,6 +451,79 @@ export async function resetUserTemporaryPassword(
     id: updated.id,
     mustChangePassword: updated.must_change_password,
     revokedSessions,
+  };
+}
+
+export async function sendUserPasswordResetLink(
+  input: SendPasswordResetLinkInput,
+  meta: RequestMeta,
+) {
+  const { userId, actorId } = input;
+
+  if (userId === actorId) {
+    throw AppError.badRequest(
+      'Use your own profile to reset your password.',
+      'ADMIN_SELF_PASSWORD_RESET_LINK_FORBIDDEN',
+    );
+  }
+
+  const [current, userDetail] = await Promise.all([
+    getAccountStatus(userId),
+    findUserById(userId),
+  ]);
+
+  if (!current || !userDetail) {
+    throw AppError.notFound('User account not found');
+  }
+
+  const email = toNullableEmail(userDetail.email);
+  if (!email) {
+    throw AppError.badRequest(
+      'User account does not have a valid email address.',
+      'ADMIN_PASSWORD_RESET_EMAIL_MISSING',
+    );
+  }
+
+  const supabaseAdmin = getSupabaseAdminClient();
+  const redirectTo = resolvePasswordResetRedirectUrl();
+  const { error } = await supabaseAdmin.auth.resetPasswordForEmail(email, {
+    redirectTo,
+  });
+
+  if (error) {
+    throw AppError.badRequest(
+      error.message || 'Unable to send password reset email',
+      'ADMIN_PASSWORD_RESET_LINK_FAILED',
+    );
+  }
+
+  const { ipAddress, userAgent } = extractRequestMeta(meta.headers, meta.socketAddress);
+  try {
+    await writeAuditLog({
+      actorId,
+      action: 'user.force_password_reset',
+      targetType: 'user_account',
+      targetId: userId,
+      oldValue: {
+        mustChangePassword: current.must_change_password,
+      },
+      newValue: {
+        delivery: 'reset_link_email',
+        email,
+      },
+      ipAddress,
+      userAgent,
+    });
+  } catch (auditError) {
+    logger.warn(
+      { err: auditError, actorId, userId },
+      'Failed to write audit log for password reset link delivery',
+    );
+  }
+
+  return {
+    id: userId,
+    email,
   };
 }
 
