@@ -40,7 +40,7 @@ export const validatePassword = (password: string): { valid: boolean; error?: st
   }
 
   // Check for special characters
-  const hasSpecialCharacter = /[^A-Za-z0-9]/.test(password);
+  const hasSpecialCharacter = /[^A-Za-z0-9\s]/.test(password);
   if (PASSWORD_RULES.REQUIRE_SPECIAL && !hasSpecialCharacter) {
     return {
       valid: false,

@@ -65,10 +65,17 @@ export interface AdminUserDetail {
   mustChangePassword: boolean;
   approvedBy: string | null;
   approvedAt: string | null;
+  lastSignInAt: string | null;
   rejectedReason: string | null;
   suspendedReason: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface AdminResetTemporaryPasswordResult {
+  id: string;
+  mustChangePassword: boolean;
+  revokedSessions: number;
 }
 
 export interface AdminProfileUpdatePayload {
@@ -134,6 +141,14 @@ export const adminApi = {
     const res = await authFetch<{ data: AdminUserDetail }>(`/v1/admin/users/${userId}/profile`, {
       method: 'PATCH',
       body: JSON.stringify(payload),
+    });
+    return res.data;
+  },
+
+  async resetUserTemporaryPassword(userId: string, temporaryPassword: string): Promise<AdminResetTemporaryPasswordResult> {
+    const res = await authFetch<{ data: AdminResetTemporaryPasswordResult }>(`/v1/admin/users/${userId}/temporary-password`, {
+      method: 'PATCH',
+      body: JSON.stringify({ temporaryPassword }),
     });
     return res.data;
   },

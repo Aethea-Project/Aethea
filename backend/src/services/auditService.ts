@@ -11,6 +11,7 @@ export type AuditAction =
   | 'user.suspend'
   | 'user.reject'
   | 'user.create'
+  | 'user.force_password_reset'
   | 'staff.review_approve'
   | 'staff.review_reject';
 

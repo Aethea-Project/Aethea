@@ -43,6 +43,7 @@ ALTER TABLE public.admin_audit_log
       'user.suspend',
       'user.reject',
       'user.create',
+      'user.force_password_reset',
       'staff.review_approve',
       'staff.review_reject'
     )),

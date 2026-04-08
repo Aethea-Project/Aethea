@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { validatePassword } from '@core/auth/auth-utils';
 import { FeatureHeader } from '../../components/FeatureHeader';
 import { imageAssets } from '../../constants/imageAssets';
 import { useAdminUsers } from '../../hooks/useAdminUsers';
@@ -36,6 +37,7 @@ export default function AdminUsersPage() {
   const [statusReasons, setStatusReasons] = useState<Record<string, string>>({});
   const [reviewNotes, setReviewNotes] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [queueStatus, setQueueStatus] = useState<VerificationStatus>('under_review');
   const [queueLoading, setQueueLoading] = useState(true);
   const [queueError, setQueueError] = useState<string | null>(null);
@@ -70,9 +72,20 @@ export default function AdminUsersPage() {
 
   const onCreate = async (event: React.FormEvent) => {
     event.preventDefault();
+    setActionError(null);
+
+    const passwordValidation = validatePassword(createForm.temporaryPassword.trim());
+    if (!passwordValidation.valid) {
+      setActionError(passwordValidation.error ?? 'Temporary password does not meet the required policy.');
+      return;
+    }
+
     setSubmitting(true);
     try {
-      await createStaffUser(createForm);
+      await createStaffUser({
+        ...createForm,
+        temporaryPassword: createForm.temporaryPassword.trim(),
+      });
       setCreateForm({
         email: '',
         temporaryPassword: '',
@@ -80,6 +93,8 @@ export default function AdminUsersPage() {
         firstName: '',
         lastName: '',
       });
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Failed to create staff user.');
     } finally {
       setSubmitting(false);
     }
@@ -125,7 +140,7 @@ export default function AdminUsersPage() {
         imageAlt="Admin staff management"
       />
 
-      {error && <div className="error-banner">{error}</div>}
+      {(error || actionError) && <div className="error-banner">{actionError ?? error}</div>}
 
       <section className="admin-card">
         <h3>Create Staff Account</h3>
@@ -145,7 +160,7 @@ export default function AdminUsersPage() {
               type="password"
               value={createForm.temporaryPassword}
               onChange={(e) => setCreateForm((p) => ({ ...p, temporaryPassword: e.target.value }))}
-              minLength={12}
+              minLength={8}
               required
             />
           </div>

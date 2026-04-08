@@ -6,16 +6,20 @@
  */
 
 import { AppError } from '../lib/AppError.js';
+import logger from '../lib/logger.js';
 import { getSupabaseAdminClient } from '../lib/supabaseAdmin.js';
 import { writeAuditLog, extractRequestMeta, type AuditAction } from './auditService.js';
+import { revokeAllUserSessions } from '../lib/sessionRegistry.js';
 import {
   insertUserAccount,
   countActiveAdmins,
   getAccountStatus,
   updateAccountStatus,
   findUserById,
+  findLastUserSignInAt,
   updateUserProfileByAdmin,
   updateUserAccountType,
+  updateUserMustChangePassword,
   countUsers,
   findUsers,
   countAuditLogs,
@@ -66,6 +70,12 @@ export interface UpdateAccountTypeInput {
 
 export interface DeleteUserInput {
   userId: string;
+  actorId: string;
+}
+
+export interface ResetTemporaryPasswordInput {
+  userId: string;
+  temporaryPassword: string;
   actorId: string;
 }
 
@@ -209,7 +219,11 @@ export async function listUsers(filters: ListUsersFilters, page: number, limit: 
 }
 
 export async function getUserDetail(userId: string) {
-  const row = await findUserById(userId);
+  const [row, lastSignInAt] = await Promise.all([
+    findUserById(userId),
+    findLastUserSignInAt(userId),
+  ]);
+
   if (!row) {
     throw AppError.notFound('User account not found');
   }
@@ -234,6 +248,7 @@ export async function getUserDetail(userId: string) {
     mustChangePassword: row.must_change_password,
     approvedBy: row.approved_by,
     approvedAt: row.approved_at,
+    lastSignInAt,
     rejectedReason: row.rejected_reason,
     suspendedReason: row.suspended_reason,
     createdAt: row.created_at,
@@ -280,6 +295,82 @@ export async function updateUserProfile(
   });
 
   return updated;
+}
+
+export async function resetUserTemporaryPassword(
+  input: ResetTemporaryPasswordInput,
+  meta: RequestMeta,
+) {
+  const { userId, temporaryPassword, actorId } = input;
+
+  if (userId === actorId) {
+    throw AppError.badRequest(
+      'Use your own profile to change your password.',
+      'ADMIN_SELF_PASSWORD_RESET_FORBIDDEN',
+    );
+  }
+
+  const current = await getAccountStatus(userId);
+  if (!current) {
+    throw AppError.notFound('User account not found');
+  }
+
+  const supabaseAdmin = getSupabaseAdminClient();
+  const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+    password: temporaryPassword,
+  });
+
+  if (error) {
+    throw AppError.badRequest(
+      error.message || 'Unable to reset password',
+      'ADMIN_TEMP_PASSWORD_RESET_FAILED',
+    );
+  }
+
+  const updated = await updateUserMustChangePassword(userId, true);
+  if (!updated) {
+    throw AppError.notFound('User account not found');
+  }
+
+  let revokedSessions = 0;
+  try {
+    revokedSessions = await revokeAllUserSessions({ userId });
+  } catch (sessionError) {
+    logger.warn(
+      { err: sessionError, userId },
+      'Failed to revoke user sessions after temporary password reset',
+    );
+  }
+
+  const { ipAddress, userAgent } = extractRequestMeta(meta.headers, meta.socketAddress);
+  try {
+    await writeAuditLog({
+      actorId,
+      action: 'user.force_password_reset',
+      targetType: 'user_account',
+      targetId: userId,
+      oldValue: {
+        mustChangePassword: current.must_change_password,
+      },
+      newValue: {
+        mustChangePassword: updated.must_change_password,
+        revokedSessions,
+      },
+      ipAddress,
+      userAgent,
+    });
+  } catch (auditError) {
+    logger.warn(
+      { err: auditError, actorId, userId },
+      'Failed to write audit log for temporary password reset',
+    );
+  }
+
+  return {
+    id: updated.id,
+    mustChangePassword: updated.must_change_password,
+    revokedSessions,
+  };
 }
 
 export async function changeUserAccountType(

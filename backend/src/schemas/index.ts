@@ -230,6 +230,15 @@ export const markNotificationsReadSchema = z.object({
  */
 const accountTypeEnum = z.enum(['patient', 'doctor', 'pharmacist', 'admin']);
 const accountStatusEnum = z.enum(['pending', 'active', 'suspended', 'rejected']);
+const emptyToUndefined = (value: unknown): unknown => (value === '' || value === null ? undefined : value);
+
+const strongPasswordSchema = z.string()
+  .min(8)
+  .max(128)
+  .refine((value) => /[a-z]/.test(value), 'Password must include at least one lowercase letter.')
+  .refine((value) => /[A-Z]/.test(value), 'Password must include at least one uppercase letter.')
+  .refine((value) => /[0-9]/.test(value), 'Password must include at least one number.')
+  .refine((value) => /[^A-Za-z0-9\s]/.test(value), 'Password must include at least one special character.');
 
 export const adminListUsersQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1).optional(),
@@ -241,7 +250,7 @@ export const adminListUsersQuerySchema = z.object({
 
 export const adminCreateUserSchema = z.object({
   email: z.string().trim().email().max(254),
-  temporaryPassword: z.string().min(12).max(128),
+  temporaryPassword: strongPasswordSchema,
   accountType: accountTypeEnum,
   firstName: z.string().trim().min(2).max(50),
   lastName: z.string().trim().min(2).max(50),
@@ -266,18 +275,22 @@ export const adminUpdateUserAccountTypeSchema = z.object({
 }).strict();
 
 export const adminUpdateUserProfileSchema = z.object({
-  firstName: z.string().trim().min(2).max(50).optional(),
-  lastName: z.string().trim().min(2).max(50).optional(),
-  gender: z.enum(['male', 'female']).optional(),
-  phone: z.string().trim().max(20).optional(),
-  dateOfBirth: z.string().date().optional(),
-  bloodType: z.enum(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']).optional(),
-  allergies: z.string().trim().max(500).optional(),
-  chronicConditions: z.string().trim().max(500).optional(),
-  heightCm: z.number().min(30).max(300).optional(),
-  weightKg: z.number().min(1).max(500).optional(),
-  emergencyContactName: z.string().trim().max(100).optional(),
-  emergencyContactPhone: z.string().trim().max(20).optional(),
+  firstName: z.preprocess(emptyToUndefined, z.string().trim().min(2).max(50).optional()),
+  lastName: z.preprocess(emptyToUndefined, z.string().trim().min(2).max(50).optional()),
+  gender: z.preprocess(emptyToUndefined, z.enum(['male', 'female']).optional()),
+  phone: z.preprocess(emptyToUndefined, z.string().trim().max(20).optional()),
+  dateOfBirth: z.preprocess(emptyToUndefined, z.string().date().optional()),
+  bloodType: z.preprocess(emptyToUndefined, z.enum(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']).optional()),
+  allergies: z.preprocess(emptyToUndefined, z.string().trim().max(500).optional()),
+  chronicConditions: z.preprocess(emptyToUndefined, z.string().trim().max(500).optional()),
+  heightCm: z.preprocess(emptyToUndefined, z.coerce.number().min(30).max(300).optional()),
+  weightKg: z.preprocess(emptyToUndefined, z.coerce.number().min(1).max(500).optional()),
+  emergencyContactName: z.preprocess(emptyToUndefined, z.string().trim().max(100).optional()),
+  emergencyContactPhone: z.preprocess(emptyToUndefined, z.string().trim().max(20).optional()),
+}).strict();
+
+export const adminResetTemporaryPasswordSchema = z.object({
+  temporaryPassword: strongPasswordSchema,
 }).strict();
 
 const auditActionEnum = z.enum([
@@ -285,6 +298,7 @@ const auditActionEnum = z.enum([
   'user.suspend',
   'user.reject',
   'user.create',
+  'user.force_password_reset',
   'staff.review_approve',
   'staff.review_reject',
 ]);

@@ -7,6 +7,7 @@ import {
   updateAdminUserStatus,
   getAdminUserById,
   updateAdminUserProfile,
+  resetAdminUserTemporaryPassword,
   updateAdminUserAccountType,
   deleteAdminUser,
   getAuditLog,
@@ -15,6 +16,7 @@ import {
   adminCreateUserSchema,
   adminListUsersQuerySchema,
   adminUpdateUserProfileSchema,
+  adminResetTemporaryPasswordSchema,
   adminUpdateUserAccountTypeSchema,
   adminUpdateUserStatusSchema,
   adminAuditLogQuerySchema,
@@ -39,6 +41,7 @@ export const createAdminRoutes = (authMiddleware: RequestHandler): Router => {
   router.post('/users', adminAuth, validateBody(adminCreateUserSchema), asyncHandler(createAdminUser));
   router.get('/users/:id', adminAuth, asyncHandler(getAdminUserById));
   router.patch('/users/:id/profile', adminAuth, validateBody(adminUpdateUserProfileSchema), asyncHandler(updateAdminUserProfile));
+  router.patch('/users/:id/temporary-password', adminAuth, validateBody(adminResetTemporaryPasswordSchema), asyncHandler(resetAdminUserTemporaryPassword));
   router.patch('/users/:id/account-type', adminAuth, validateBody(adminUpdateUserAccountTypeSchema), asyncHandler(updateAdminUserAccountType));
   router.patch('/users/:id/status', adminAuth, validateBody(adminUpdateUserStatusSchema), asyncHandler(updateAdminUserStatus));
   router.delete('/users/:id', adminAuth, asyncHandler(deleteAdminUser));

@@ -1,21 +1,52 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '@core/auth/useAuth';
+import { validatePassword } from '@core/auth/auth-utils';
 import { FeatureHeader } from '../../components/FeatureHeader';
 import { imageAssets } from '../../constants/imageAssets';
 import { adminApi, type AccountType, type AdminProfileUpdatePayload, type AdminUserDetail } from '../../services/adminApi';
 import './styles.css';
 
 const accountTypes: AccountType[] = ['patient', 'doctor', 'pharmacist', 'admin'];
+const TEMP_PASSWORD_MIN = 8;
+const bloodTypeOptions = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const;
+
+interface PasswordRequirement {
+  id: 'length' | 'uppercase' | 'lowercase' | 'number' | 'special';
+  label: string;
+  met: boolean;
+}
+
+const normalizeDateOnly = (value: string | null | undefined): string | undefined => {
+  if (!value) {
+    return undefined;
+  }
+
+  return String(value).slice(0, 10);
+};
+
+const normalizeGender = (value: unknown): 'male' | 'female' | undefined => {
+  return value === 'male' || value === 'female' ? value : undefined;
+};
+
+const normalizeBloodType = (value: unknown): AdminProfileUpdatePayload['bloodType'] => {
+  return bloodTypeOptions.includes(value as (typeof bloodTypeOptions)[number])
+    ? (value as AdminProfileUpdatePayload['bloodType'])
+    : undefined;
+};
 
 export default function AdminUserDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [detail, setDetail] = useState<AdminUserDetail | null>(null);
+  const [temporaryPassword, setTemporaryPassword] = useState('');
+  const [showTemporaryPassword, setShowTemporaryPassword] = useState(false);
 
   const [profileForm, setProfileForm] = useState<AdminProfileUpdatePayload>({});
   const [nextAccountType, setNextAccountType] = useState<AccountType>('patient');
@@ -32,10 +63,10 @@ export default function AdminUserDetailsPage() {
       setProfileForm({
         firstName: data.firstName ?? '',
         lastName: data.lastName ?? '',
-        gender: data.gender ?? undefined,
+        gender: normalizeGender(data.gender),
         phone: data.phone ?? '',
-        dateOfBirth: data.dateOfBirth ? String(data.dateOfBirth).slice(0, 10) : '',
-        bloodType: (data.bloodType as AdminProfileUpdatePayload['bloodType']) ?? undefined,
+        dateOfBirth: normalizeDateOnly(data.dateOfBirth) ?? '',
+        bloodType: normalizeBloodType(data.bloodType),
         allergies: data.allergies ?? '',
         chronicConditions: data.chronicConditions ?? '',
         heightCm: data.heightCm ?? undefined,
@@ -59,31 +90,115 @@ export default function AdminUserDetailsPage() {
     return Boolean(profileForm.firstName?.trim() && profileForm.lastName?.trim());
   }, [profileForm.firstName, profileForm.lastName]);
 
+  const isSelfProfile = useMemo(() => {
+    return Boolean(detail?.id && user?.id && detail.id === user.id);
+  }, [detail?.id, user?.id]);
+
+  const normalizedTemporaryPassword = useMemo(() => temporaryPassword.trim(), [temporaryPassword]);
+
+  const temporaryPasswordRequirements = useMemo<PasswordRequirement[]>(() => {
+    const value = normalizedTemporaryPassword;
+    return [
+      { id: 'length', label: 'At least 8 characters', met: value.length >= TEMP_PASSWORD_MIN },
+      { id: 'uppercase', label: 'One uppercase letter', met: /[A-Z]/.test(value) },
+      { id: 'lowercase', label: 'One lowercase letter', met: /[a-z]/.test(value) },
+      { id: 'number', label: 'One number', met: /[0-9]/.test(value) },
+      { id: 'special', label: 'One special character', met: /[^A-Za-z0-9\s]/.test(value) },
+    ];
+  }, [normalizedTemporaryPassword]);
+
+  const temporaryPasswordValidation = useMemo(
+    () => validatePassword(normalizedTemporaryPassword),
+    [normalizedTemporaryPassword],
+  );
+
+  const canApplyTemporaryPassword = useMemo(() => {
+    return !saving && !isSelfProfile && temporaryPasswordValidation.valid;
+  }, [saving, isSelfProfile, temporaryPasswordValidation.valid]);
+
+  const buildProfileUpdatePayload = (currentDetail: AdminUserDetail, form: AdminProfileUpdatePayload): AdminProfileUpdatePayload => {
+    const payload: AdminProfileUpdatePayload = {};
+
+    const firstName = form.firstName?.trim() ?? '';
+    const lastName = form.lastName?.trim() ?? '';
+    const phone = form.phone?.trim() ?? '';
+    const allergies = form.allergies?.trim() ?? '';
+    const chronicConditions = form.chronicConditions?.trim() ?? '';
+    const emergencyContactName = form.emergencyContactName?.trim() ?? '';
+    const emergencyContactPhone = form.emergencyContactPhone?.trim() ?? '';
+    const dateOfBirth = normalizeDateOnly(form.dateOfBirth);
+    const detailDateOfBirth = normalizeDateOnly(currentDetail.dateOfBirth);
+
+    if (firstName && firstName !== (currentDetail.firstName?.trim() ?? '')) payload.firstName = firstName;
+    if (lastName && lastName !== (currentDetail.lastName?.trim() ?? '')) payload.lastName = lastName;
+
+    const gender = normalizeGender(form.gender);
+    const detailGender = normalizeGender(currentDetail.gender);
+    if (gender && gender !== detailGender) payload.gender = gender;
+
+    if (phone && phone !== (currentDetail.phone?.trim() ?? '')) payload.phone = phone;
+
+    const bloodType = normalizeBloodType(form.bloodType);
+    const detailBloodType = normalizeBloodType(currentDetail.bloodType);
+    if (bloodType && bloodType !== detailBloodType) payload.bloodType = bloodType;
+
+    if (dateOfBirth && dateOfBirth !== detailDateOfBirth) payload.dateOfBirth = dateOfBirth;
+
+    if (allergies && allergies !== (currentDetail.allergies?.trim() ?? '')) payload.allergies = allergies;
+    if (chronicConditions && chronicConditions !== (currentDetail.chronicConditions?.trim() ?? '')) {
+      payload.chronicConditions = chronicConditions;
+    }
+
+    if (typeof form.heightCm === 'number' && Number.isFinite(form.heightCm) && form.heightCm !== currentDetail.heightCm) {
+      payload.heightCm = form.heightCm;
+    }
+
+    if (typeof form.weightKg === 'number' && Number.isFinite(form.weightKg) && form.weightKg !== currentDetail.weightKg) {
+      payload.weightKg = form.weightKg;
+    }
+
+    if (emergencyContactName && emergencyContactName !== (currentDetail.emergencyContactName?.trim() ?? '')) {
+      payload.emergencyContactName = emergencyContactName;
+    }
+
+    if (emergencyContactPhone && emergencyContactPhone !== (currentDetail.emergencyContactPhone?.trim() ?? '')) {
+      payload.emergencyContactPhone = emergencyContactPhone;
+    }
+
+    return payload;
+  };
+
   const onSaveProfile = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!id || !canSubmitProfile) return;
+    if (!id || !detail || !canSubmitProfile) return;
 
     setSaving(true);
     setError(null);
     setMessage(null);
     try {
-      const payload: AdminProfileUpdatePayload = {
-        firstName: profileForm.firstName?.trim() || undefined,
-        lastName: profileForm.lastName?.trim() || undefined,
-        gender: profileForm.gender,
-        phone: profileForm.phone?.trim() || undefined,
-        dateOfBirth: profileForm.dateOfBirth || undefined,
-        bloodType: profileForm.bloodType,
-        allergies: profileForm.allergies?.trim() || undefined,
-        chronicConditions: profileForm.chronicConditions?.trim() || undefined,
-        heightCm: profileForm.heightCm,
-        weightKg: profileForm.weightKg,
-        emergencyContactName: profileForm.emergencyContactName?.trim() || undefined,
-        emergencyContactPhone: profileForm.emergencyContactPhone?.trim() || undefined,
-      };
+      const payload = buildProfileUpdatePayload(detail, profileForm);
+
+      if (Object.keys(payload).length === 0) {
+        setMessage('No profile changes to save.');
+        return;
+      }
 
       const updated = await adminApi.updateUserProfile(id, payload);
       setDetail(updated);
+      setProfileForm({
+        firstName: updated.firstName ?? '',
+        lastName: updated.lastName ?? '',
+        gender: normalizeGender(updated.gender),
+        phone: updated.phone ?? '',
+        dateOfBirth: normalizeDateOnly(updated.dateOfBirth) ?? '',
+        bloodType: normalizeBloodType(updated.bloodType),
+        allergies: updated.allergies ?? '',
+        chronicConditions: updated.chronicConditions ?? '',
+        heightCm: updated.heightCm ?? undefined,
+        weightKg: updated.weightKg ?? undefined,
+        emergencyContactName: updated.emergencyContactName ?? '',
+        emergencyContactPhone: updated.emergencyContactPhone ?? '',
+      });
       setMessage('Profile updated successfully.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update profile');
@@ -104,6 +219,39 @@ export default function AdminUserDetailsPage() {
       setMessage('Account type updated successfully.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update account type');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const onResetTemporaryPassword = async () => {
+    if (!id) return;
+
+    if (isSelfProfile) {
+      setError('You cannot set a temporary password for your own admin account.');
+      return;
+    }
+
+    if (!temporaryPasswordValidation.valid) {
+      setError(temporaryPasswordValidation.error ?? 'Temporary password does not meet the required policy.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'This will revoke all active sessions for this user and force a password change at next sign-in. Continue?',
+    );
+    if (!confirmed) return;
+
+    setSaving(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const result = await adminApi.resetUserTemporaryPassword(id, normalizedTemporaryPassword);
+      setTemporaryPassword('');
+      await loadUser();
+      setMessage(`Temporary password applied. Revoked sessions: ${result.revokedSessions}.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to set temporary password');
     } finally {
       setSaving(false);
     }
@@ -147,6 +295,7 @@ export default function AdminUserDetailsPage() {
             <div className="details-row"><strong>User ID</strong><span>{detail.id}</span></div>
             <div className="details-row"><strong>Email</strong><span>{detail.email ?? '—'}</span></div>
             <div className="details-row"><strong>Status</strong><span className={`status-chip ${detail.accountStatus}`}>{detail.accountStatus}</span></div>
+            <div className="details-row"><strong>Last Sign-In</strong><span>{detail.lastSignInAt ? new Date(detail.lastSignInAt).toLocaleString() : 'Never signed in'}</span></div>
             <div className="details-row"><strong>Created</strong><span>{new Date(detail.createdAt).toLocaleString()}</span></div>
           </section>
 
@@ -292,6 +441,61 @@ export default function AdminUserDetailsPage() {
               >
                 Update Account Type
               </button>
+            </div>
+
+            <div className="temp-password-box">
+              <label>
+                Temporary Password
+                <div className="temp-password-input-wrap">
+                  <input
+                    type={showTemporaryPassword ? 'text' : 'password'}
+                    autoComplete="new-password"
+                    minLength={TEMP_PASSWORD_MIN}
+                    value={temporaryPassword}
+                    onChange={(e) => setTemporaryPassword(e.target.value)}
+                    placeholder="Set a temporary password"
+                  />
+                  <button
+                    type="button"
+                    className="temp-password-icon-btn"
+                    aria-label={showTemporaryPassword ? 'Hide password' : 'Show password'}
+                    onClick={() => setShowTemporaryPassword((prev) => !prev)}
+                  >
+                    {showTemporaryPassword ? (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                      </svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </label>
+              <ul className="temp-password-checklist" aria-label="Temporary password requirements">
+                {temporaryPasswordRequirements.map((requirement) => (
+                  <li key={requirement.id} className={requirement.met ? 'met' : ''}>
+                    <span className="check-icon" aria-hidden="true">{requirement.met ? '✓' : '✗'}</span>
+                    {requirement.label}
+                  </li>
+                ))}
+              </ul>
+              <div className="temp-password-actions">
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  disabled={!canApplyTemporaryPassword}
+                  onClick={() => void onResetTemporaryPassword()}
+                >
+                  Set Temporary Password
+                </button>
+              </div>
+              {isSelfProfile && (
+                <p className="temp-password-hint">For your account, use the Change Password flow from your profile page.</p>
+              )}
             </div>
 
             <div className="danger-zone">

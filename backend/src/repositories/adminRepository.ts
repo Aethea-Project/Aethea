@@ -214,6 +214,47 @@ export async function findUserById(userId: string): Promise<AdminUserDetailRow |
   return rows[0];
 }
 
+const isMissingSessionSchemaError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const raw = error as { code?: unknown; meta?: { code?: unknown; cause?: unknown }; message?: unknown };
+  const code = raw.code ?? raw.meta?.code;
+  const cause = raw.meta?.cause;
+  const message = typeof raw.message === 'string' ? raw.message : '';
+
+  return (
+    code === '42P01' ||
+    code === '42703' ||
+    code === '42501' ||
+    (typeof cause === 'string' && cause.includes('user_sessions')) ||
+    message.includes('user_sessions')
+  );
+};
+
+export async function findLastUserSignInAt(userId: string): Promise<string | null> {
+  try {
+    const rows = await prisma.$queryRaw<Array<{ last_sign_in_at: string | null }>>(
+      Prisma.sql`
+        SELECT MAX("lastSeenAt")::text AS last_sign_in_at
+        FROM public.user_sessions
+        WHERE "userId" = ${userId}::uuid
+      `
+    );
+
+    return rows[0]?.last_sign_in_at ?? null;
+  } catch (error) {
+    // Last sign-in is optional metadata in the admin profile.
+    // Never fail the whole profile endpoint if this lookup fails.
+    if (isMissingSessionSchemaError(error)) {
+      return null;
+    }
+
+    return null;
+  }
+}
+
 export async function updateUserProfileByAdmin(userId: string, input: AdminProfileUpdateInput): Promise<void> {
   await prisma.$executeRaw`
     UPDATE public.profiles
@@ -252,6 +293,22 @@ export async function updateUserAccountType(
       approved_at = CASE WHEN ${accountStatus} = 'active' THEN now() ELSE approved_at END,
       rejected_reason = NULL,
       suspended_reason = NULL,
+      updated_at = now()
+    WHERE id = ${userId}::uuid
+    RETURNING id, account_type, account_status, must_change_password, approved_by, approved_at, rejected_reason, suspended_reason, updated_at
+  `;
+
+  return rows[0];
+}
+
+export async function updateUserMustChangePassword(
+  userId: string,
+  mustChangePassword: boolean,
+): Promise<AccountStatusRow | undefined> {
+  const rows = await prisma.$queryRaw<AccountStatusRow[]>`
+    UPDATE public.user_accounts
+    SET
+      must_change_password = ${mustChangePassword},
       updated_at = now()
     WHERE id = ${userId}::uuid
     RETURNING id, account_type, account_status, must_change_password, approved_by, approved_at, rejected_reason, suspended_reason, updated_at

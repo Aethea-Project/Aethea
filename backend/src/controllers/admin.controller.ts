@@ -13,6 +13,7 @@ import {
   changeUserStatus,
   getUserDetail,
   updateUserProfile,
+  resetUserTemporaryPassword,
   changeUserAccountType,
   deleteUserAccount,
   listUsers,
@@ -121,6 +122,37 @@ export const updateAdminUserProfile = async (req: Request, res: Response): Promi
     id,
     req.body,
     actorId,
+    {
+      headers: req.headers as Record<string, string | string[] | undefined>,
+      socketAddress: req.socket?.remoteAddress,
+    },
+  );
+
+  res.json({ data });
+};
+
+/**
+ * PATCH /api/admin/users/:id/temporary-password
+ */
+export const resetAdminUserTemporaryPassword = async (req: Request, res: Response): Promise<void> => {
+  const rawId = req.params.id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+  const actorId = req.user?.id;
+
+  if (!id || !UUID_V4_REGEX.test(id)) {
+    throw AppError.badRequest('Invalid user id');
+  }
+
+  if (!actorId) {
+    throw AppError.unauthorized('No authenticated user');
+  }
+
+  const data = await resetUserTemporaryPassword(
+    {
+      userId: id,
+      temporaryPassword: req.body.temporaryPassword as string,
+      actorId,
+    },
     {
       headers: req.headers as Record<string, string | string[] | undefined>,
       socketAddress: req.socket?.remoteAddress,
