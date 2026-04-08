@@ -165,6 +165,8 @@ export const mapsNearbyQuerySchema = z.object({
   type: z.enum(['doctor', 'hospital', 'pharmacy']),
   radius: z.coerce.number().int().min(200).max(10000).default(4000).optional(),
   limit: z.coerce.number().int().min(1).max(20).default(10).optional(),
+  search: z.string().trim().min(1).max(120).optional(),
+  specialty: z.string().trim().min(1).max(120).optional(),
   language: z.string().trim().min(2).max(10).optional(),
 }).strict();
 

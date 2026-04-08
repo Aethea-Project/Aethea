@@ -107,6 +107,8 @@ function buildDoctorWhere(filters: DoctorListFilters) {
       { firstName: { contains: filters.search, mode: 'insensitive' } },
       { lastName: { contains: filters.search, mode: 'insensitive' } },
       { clinicName: { contains: filters.search, mode: 'insensitive' } },
+      { address: { contains: filters.search, mode: 'insensitive' } },
+      { city: { contains: filters.search, mode: 'insensitive' } },
       { specialty: { contains: filters.search, mode: 'insensitive' } },
     ];
   }

@@ -19,6 +19,8 @@ export const getNearbyPlaces = async (req: Request, res: Response): Promise<void
     type: query.type as 'doctor' | 'hospital' | 'pharmacy',
     radius: Number(query.radius ?? 4000),
     limit: Number(query.limit ?? 10),
+    search: query.search,
+    specialty: query.specialty,
     language: query.language,
   });
 
