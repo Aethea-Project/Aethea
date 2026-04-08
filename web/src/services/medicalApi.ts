@@ -318,6 +318,12 @@ export const medicalApi = {
       radius: String(params.radius ?? 4000),
       limit: String(params.limit ?? 10),
     });
+    if (params.search) {
+      qs.set('search', params.search);
+    }
+    if (params.specialty) {
+      qs.set('specialty', params.specialty);
+    }
     if (params.language) {
       qs.set('language', params.language);
     }
@@ -637,6 +643,8 @@ export interface NearbyPlacesQuery {
   type: NearbyPlaceType;
   radius?: number;
   limit?: number;
+  search?: string;
+  specialty?: string;
   language?: string;
 }
 

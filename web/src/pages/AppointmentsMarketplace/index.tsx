@@ -422,7 +422,12 @@ export default function AppointmentsMarketplacePage() {
       )}
 
       {selectedPost && (
-        <Modal isOpen={Boolean(selectedPost)} onClose={() => setSelectedPost(null)}>
+        <Modal
+          isOpen={Boolean(selectedPost)}
+          onClose={() => setSelectedPost(null)}
+          contentClassName="appointments-marketplace-modal-content"
+          ariaLabel="Reserve appointment slot"
+        >
           {bookingSuccess ? (
             <div className="booking-success">
               <p>✓ Booking confirmed. You can review it in your appointments list.</p>

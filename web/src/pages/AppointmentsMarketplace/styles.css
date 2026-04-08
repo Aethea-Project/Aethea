@@ -345,23 +345,67 @@
   cursor: not-allowed;
 }
 
-/* MODAL STYLES OVERRIDE FOR UNCODIXIFY */
-.modal-overlay {
+/* Marketplace modal shell */
+.appointments-marketplace-page .modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0.5);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: 1000;
   padding: 1rem;
+  overflow-y: auto;
 }
 
-.modal-content {
+.modal-content.appointments-marketplace-modal-content {
   background: #fff;
   border-radius: 8px;
   width: 100%;
-  max-width: 480px;
+  max-width: 560px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
+  margin: auto 0;
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+}
+
+.modal-content.appointments-marketplace-modal-content .marketplace-modal {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.modal-content.appointments-marketplace-modal-content .marketplace-slot-list {
+  max-height: min(30dvh, 240px);
+  overflow-y: auto;
+  align-content: start;
+  padding-right: 0.15rem;
+}
+
+.modal-content.appointments-marketplace-modal-content .modal-actions {
+  position: sticky;
+  bottom: 0;
+  background: #ffffff;
+  z-index: 1;
+  box-shadow: 0 -8px 14px -12px rgba(15, 23, 42, 0.4);
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+@media (max-width: 640px) {
+  .modal-content.appointments-marketplace-modal-content {
+    padding: 1rem;
+  }
+
+  .modal-content.appointments-marketplace-modal-content .marketplace-slot-list {
+    max-height: min(26dvh, 180px);
+  }
+
+  .modal-content.appointments-marketplace-modal-content .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-content.appointments-marketplace-modal-content .modal-actions button {
+    width: 100%;
+  }
 }

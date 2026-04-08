@@ -13,10 +13,16 @@ interface NearbyMedicalPlacesState {
   pharmacies: NearbyPlace[];
   loading: boolean;
   error: string | null;
+  routeError: string | null;
   routeByPlaceId: Record<string, FastestRoute | undefined>;
   routeLoadingPlaceId: string | null;
   refresh: () => Promise<void>;
   fetchFastestRoute: (place: NearbyPlace, mode?: 'driving' | 'walking') => Promise<void>;
+}
+
+interface NearbyMedicalPlacesOptions {
+  doctorSearch?: string;
+  doctorSpecialty?: string;
 }
 
 const DEFAULT_CENTER: LatLng = { lat: 30.0444, lng: 31.2357 };
@@ -35,7 +41,7 @@ const getCurrentPositionAsync = () =>
     );
   });
 
-export function useNearbyMedicalPlaces(): NearbyMedicalPlacesState {
+export function useNearbyMedicalPlaces(options: NearbyMedicalPlacesOptions = {}): NearbyMedicalPlacesState {
   const [userLocation, setUserLocation] = useState<LatLng>(DEFAULT_CENTER);
   const userLocationRef = useRef<LatLng>(DEFAULT_CENTER);
   const [doctors, setDoctors] = useState<NearbyPlace[]>([]);
@@ -43,12 +49,23 @@ export function useNearbyMedicalPlaces(): NearbyMedicalPlacesState {
   const [pharmacies, setPharmacies] = useState<NearbyPlace[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [routeError, setRouteError] = useState<string | null>(null);
   const [routeByPlaceId, setRouteByPlaceId] = useState<Record<string, FastestRoute | undefined>>({});
   const [routeLoadingPlaceId, setRouteLoadingPlaceId] = useState<string | null>(null);
 
+  const normalizedDoctorSearch = options.doctorSearch?.trim() || undefined;
+  const normalizedDoctorSpecialty = options.doctorSpecialty?.trim() || undefined;
+
   const loadNearby = useCallback(async (location: LatLng) => {
     const [doctorPlaces, hospitalPlaces, pharmacyPlaces] = await Promise.all([
-      medicalApi.fetchNearbyPlaces({ ...location, type: 'doctor', radius: 4000, limit: 10 }),
+      medicalApi.fetchNearbyPlaces({
+        ...location,
+        type: 'doctor',
+        radius: 4000,
+        limit: 10,
+        search: normalizedDoctorSearch,
+        specialty: normalizedDoctorSpecialty,
+      }),
       medicalApi.fetchNearbyPlaces({ ...location, type: 'hospital', radius: 4000, limit: 10 }),
       medicalApi.fetchNearbyPlaces({ ...location, type: 'pharmacy', radius: 4000, limit: 10 }),
     ]);
@@ -56,11 +73,12 @@ export function useNearbyMedicalPlaces(): NearbyMedicalPlacesState {
     setDoctors(doctorPlaces);
     setHospitals(hospitalPlaces);
     setPharmacies(pharmacyPlaces);
-  }, []);
+  }, [normalizedDoctorSearch, normalizedDoctorSpecialty]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setRouteError(null);
 
     try {
       let location = userLocationRef.current;
@@ -83,6 +101,7 @@ export function useNearbyMedicalPlaces(): NearbyMedicalPlacesState {
   const fetchFastestRoute = useCallback(
     async (place: NearbyPlace, mode: 'driving' | 'walking' = 'driving') => {
       setRouteLoadingPlaceId(place.id);
+      setRouteError(null);
       try {
         const route = await medicalApi.fetchFastestRoute({
           originLat: userLocation.lat,
@@ -97,7 +116,7 @@ export function useNearbyMedicalPlaces(): NearbyMedicalPlacesState {
           [place.id]: route,
         }));
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to calculate route ETA');
+        setRouteError(err instanceof Error ? err.message : 'Failed to calculate route ETA');
       } finally {
         setRouteLoadingPlaceId(null);
       }
@@ -116,6 +135,7 @@ export function useNearbyMedicalPlaces(): NearbyMedicalPlacesState {
     pharmacies,
     loading,
     error,
+    routeError,
     routeByPlaceId,
     routeLoadingPlaceId,
     refresh,

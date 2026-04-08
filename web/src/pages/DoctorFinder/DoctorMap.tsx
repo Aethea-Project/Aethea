@@ -9,6 +9,7 @@ interface LatLng {
 interface DoctorMapProps {
   loading: boolean;
   error: string | null;
+  routeError: string | null;
   userLocation: LatLng;
   nearbyDoctors: NearbyPlace[];
   nearbyHospitals: NearbyPlace[];
@@ -113,7 +114,7 @@ function PlacesSection({
               >
                 <div className="finder-nearby-main">
                   <p className="finder-nearby-name">{place.name}</p>
-                  <p className="finder-nearby-address">{place.address}</p>
+                  <p className="finder-nearby-address">{place.address || 'Address not available'}</p>
                 </div>
                 <div className="finder-nearby-meta">
                   <span>{place.distanceKm.toFixed(1)} km</span>
@@ -162,6 +163,7 @@ function PlacesSection({
 export const DoctorMap: React.FC<DoctorMapProps> = ({
   loading,
   error,
+  routeError,
   userLocation,
   nearbyDoctors,
   nearbyHospitals,
@@ -222,6 +224,8 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
   const selectedPlaceRoute = selectedPlace ? routeByPlaceId[selectedPlace.id] : undefined;
 
   const nearestDoctor = filteredDoctors[0] ?? null;
+  const hasAnyNearby = allFilteredPlaces.length > 0;
+  const mapFocusLocation = selectedPlace?.location ?? userLocation;
 
   return (
     <div className="finder-map-shell" aria-busy={loading}>
@@ -290,14 +294,17 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
 
       {loading && <p className="loading">Loading nearby medical places...</p>}
       {error && <p className="error">{error}</p>}
+      {routeError && <p className="error">{routeError}</p>}
 
-      {!loading && !error && (
+      {!loading && (!error || hasAnyNearby) && (
         <>
-          {selectedPlace && (
-            <section className="finder-selected-map" aria-label="Selected place on map">
-              <div className="finder-selected-map-meta">
-                <h3>{selectedPlace.name}</h3>
-                <p className="finder-nearby-address">{selectedPlace.address}</p>
+          <section className="finder-selected-map" aria-label="Selected place on map">
+            <div className="finder-selected-map-meta">
+              <h3>{selectedPlace ? selectedPlace.name : 'Your area'}</h3>
+              <p className="finder-nearby-address">
+                {selectedPlace?.address || 'Select any nearby place to focus the map and estimate route.'}
+              </p>
+              {selectedPlace && (
                 <div className="finder-nearby-meta">
                   <span>{selectedPlace.distanceKm.toFixed(1)} km away</span>
                   <span>Rating: {selectedPlace.rating?.toFixed(1) ?? 'N/A'}</span>
@@ -309,22 +316,22 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
                         : 'Status unknown'}
                   </span>
                 </div>
-                {selectedPlaceRoute && (
-                  <p className="finder-route-pill" aria-live="polite">
-                    ETA: {selectedPlaceRoute.durationText} • {selectedPlaceRoute.distanceText}
-                  </p>
-                )}
-              </div>
-              <div className="finder-selected-map-frame-wrap">
-                <iframe
-                  title={`Map for ${selectedPlace.name}`}
-                  src={mapEmbedLink(selectedPlace.location)}
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                />
-              </div>
-            </section>
-          )}
+              )}
+              {selectedPlaceRoute && (
+                <p className="finder-route-pill" aria-live="polite">
+                  ETA: {selectedPlaceRoute.durationText} • {selectedPlaceRoute.distanceText}
+                </p>
+              )}
+            </div>
+            <div className="finder-selected-map-frame-wrap">
+              <iframe
+                title={selectedPlace ? `Map for ${selectedPlace.name}` : 'Map around your location'}
+                src={mapEmbedLink(mapFocusLocation)}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+          </section>
 
           <div className="finder-nearby-grid">
             <PlacesSection

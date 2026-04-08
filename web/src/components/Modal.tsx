@@ -9,7 +9,7 @@
  * — pass extra classes via `contentClassName`.
  */
 
-import React, { useCallback, useEffect, type ReactNode } from 'react';
+import React, { useCallback, useEffect, type CSSProperties, type ReactNode } from 'react';
 
 export interface ModalProps {
   /** Whether the modal is visible. */
@@ -53,10 +53,22 @@ export const Modal: React.FC<ModalProps> = ({
     ? `modal-content ${contentClassName}`
     : 'modal-content';
 
+  const overlayStyle: CSSProperties = {
+    padding: '1rem',
+    overflowY: 'auto',
+  };
+
+  const contentStyle: CSSProperties = {
+    margin: 'auto',
+    maxHeight: 'calc(100dvh - 2rem)',
+    overflowY: 'auto',
+  };
+
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={onClose} style={overlayStyle}>
       <div
         className={contentCls}
+        style={contentStyle}
         role="dialog"
         aria-modal="true"
         aria-label={ariaLabelledBy ? undefined : ariaLabel}

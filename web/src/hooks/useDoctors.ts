@@ -44,9 +44,15 @@ export function useDoctors(initialParams?: DoctorListParams): UseDoctorsResult {
   }, []);
 
   useEffect(() => {
-    search(initialParams ?? {});
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    void search(initialParams ?? {});
+  }, [
+    search,
+    initialParams?.search,
+    initialParams?.specialty,
+    initialParams?.city,
+    initialParams?.page,
+    initialParams?.limit,
+  ]);
 
   return { doctors, total, loading, error, search };
 }

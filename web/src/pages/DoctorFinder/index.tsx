@@ -42,10 +42,14 @@ export default function DoctorFinderPage() {
     pharmacies: nearbyPharmacies,
     loading: nearbyLoading,
     error: nearbyError,
+    routeError,
     routeByPlaceId,
     routeLoadingPlaceId,
     fetchFastestRoute,
-  } = useNearbyMedicalPlaces();
+  } = useNearbyMedicalPlaces({
+    doctorSearch: debouncedSearch || undefined,
+    doctorSpecialty: selectedSpecialty === 'All Specialties' ? undefined : selectedSpecialty,
+  });
 
   return (
     <div className="doctor-finder-page">
@@ -98,6 +102,7 @@ export default function DoctorFinderPage() {
         <DoctorMap
           loading={nearbyLoading}
           error={nearbyError}
+          routeError={routeError}
           userLocation={userLocation}
           nearbyDoctors={nearbyDoctors}
           nearbyHospitals={nearbyHospitals}
