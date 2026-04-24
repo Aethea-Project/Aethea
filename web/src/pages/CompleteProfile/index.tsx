@@ -5,6 +5,7 @@ import { isValidName, isValidPhone, validatePassword, doPasswordsMatch } from '@
 import { GENDER_OPTIONS } from '@core/auth/auth-types';
 import type { Gender } from '@core/auth/auth-types';
 import { useUiNotifications } from '../../contexts/UiNotificationsProvider';
+import { cn } from '../../lib/utils';
 
 const CompleteProfilePage: React.FC = () => {
   const { profile, updateProfile, updatePassword, refreshProfile } = useAuth();
@@ -134,146 +135,130 @@ const CompleteProfilePage: React.FC = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', padding: '2rem 1rem', background: '#f8fafc', display: 'flex', justifyContent: 'center' }}>
-      <div style={{ width: '100%', maxWidth: '600px' }}>
-        
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 600, color: '#0f172a' }}>Complete your profile</h2>
-          <p style={{ marginTop: '0.5rem', color: '#64748b', fontSize: '0.95rem' }}>
+    <div className="min-h-screen bg-slate-50 px-4 py-8 flex justify-center">
+      <div className="w-full max-w-[600px]">
+        <div className="text-center mb-8">
+          <h2 className="m-0 text-2xl font-semibold text-slate-900">Complete your profile</h2>
+          <p className="mt-2 text-sm text-slate-500">
             Before accessing the platform, please provide your remaining details and set a local password.
           </p>
         </div>
 
-        <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.5rem' }}>
+        <div className="bg-white border border-slate-200 rounded-xl p-6">
           {globalError && (
-            <div style={{ padding: '0.75rem', background: '#fef2f2', color: '#b91c1c', borderRadius: '6px', fontSize: '0.875rem', marginBottom: '1.25rem' }}>
+            <div className="mb-5 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
               {globalError}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem' }}>
-            
-            {/* Email (Read-only) */}
+          <form onSubmit={handleSubmit} className="grid gap-4">
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#334155', marginBottom: '0.25rem' }}>Email Address</label>
-              <input 
-                type="email" 
-                value={profile?.email || ''} 
-                disabled 
-                style={{ width: '100%', padding: '0.625rem', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#f8fafc', color: '#64748b', cursor: 'not-allowed' }}
+              <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+              <input
+                type="email"
+                value={profile?.email || ''}
+                disabled
+                className="w-full rounded-md border border-slate-300 bg-slate-50 px-2.5 py-2 text-slate-500 cursor-not-allowed"
               />
             </div>
 
-            {/* Name Fields */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#334155', marginBottom: '0.25rem' }}>First Name</label>
-                <input 
-                  type="text" 
+                <label className="block text-sm font-medium text-slate-700 mb-1">First Name</label>
+                <input
+                  type="text"
                   value={firstName}
                   onChange={e => setFirstName(e.target.value)}
-                  style={{ width: '100%', padding: '0.625rem', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                  className="w-full rounded-md border border-slate-300 px-2.5 py-2"
                 />
-                {errors.firstName && <span style={{ color: '#b91c1c', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{errors.firstName}</span>}
+                {errors.firstName && <span className="mt-1 block text-xs text-red-600">{errors.firstName}</span>}
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#334155', marginBottom: '0.25rem' }}>Last Name</label>
-                <input 
-                  type="text" 
+                <label className="block text-sm font-medium text-slate-700 mb-1">Last Name</label>
+                <input
+                  type="text"
                   value={lastName}
                   onChange={e => setLastName(e.target.value)}
-                  style={{ width: '100%', padding: '0.625rem', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                  className="w-full rounded-md border border-slate-300 px-2.5 py-2"
                 />
-                {errors.lastName && <span style={{ color: '#b91c1c', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{errors.lastName}</span>}
+                {errors.lastName && <span className="mt-1 block text-xs text-red-600">{errors.lastName}</span>}
               </div>
             </div>
 
-            {/* Phone & Gender */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#334155', marginBottom: '0.25rem' }}>Phone Number</label>
-                <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#64748b', fontSize: '0.875rem' }}>+20</span>
-                  <input 
+                <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-500">+20</span>
+                  <input
                     type="tel"
                     placeholder="10XXXXX..."
                     value={phone}
                     onChange={e => setPhone(e.target.value)}
-                    style={{ width: '100%', padding: '0.625rem 0.625rem 0.625rem 2.5rem', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                    className="w-full rounded-md border border-slate-300 px-2.5 py-2 pl-10"
                   />
                 </div>
-                {errors.phone && <span style={{ color: '#b91c1c', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{errors.phone}</span>}
+                {errors.phone && <span className="mt-1 block text-xs text-red-600">{errors.phone}</span>}
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#334155', marginBottom: '0.25rem' }}>Gender</label>
-                <select 
+                <label className="block text-sm font-medium text-slate-700 mb-1">Gender</label>
+                <select
                   value={gender}
                   onChange={e => setGender(e.target.value as Gender)}
-                  style={{ width: '100%', padding: '0.625rem', border: '1px solid #cbd5e1', borderRadius: '6px', background: '#fff' }}
+                  className="w-full rounded-md border border-slate-300 bg-white px-2.5 py-2"
                 >
                   <option value="" disabled>Select gender</option>
                   {GENDER_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                 </select>
-                {errors.gender && <span style={{ color: '#b91c1c', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{errors.gender}</span>}
+                {errors.gender && <span className="mt-1 block text-xs text-red-600">{errors.gender}</span>}
               </div>
             </div>
 
-            {/* Date of Birth */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#334155', marginBottom: '0.25rem' }}>Date of Birth</label>
-              <input 
+              <label className="block text-sm font-medium text-slate-700 mb-1">Date of Birth</label>
+              <input
                 type="date"
                 value={dateOfBirth}
                 onChange={e => setDateOfBirth(e.target.value)}
-                style={{ width: '100%', padding: '0.625rem', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                className="w-full rounded-md border border-slate-300 px-2.5 py-2"
               />
-              {errors.dateOfBirth && <span style={{ color: '#b91c1c', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{errors.dateOfBirth}</span>}
+              {errors.dateOfBirth && <span className="mt-1 block text-xs text-red-600">{errors.dateOfBirth}</span>}
             </div>
 
-            {/* Password Fields */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.5rem' }}>
+            <div className="mt-2 grid gap-4 sm:grid-cols-2">
               <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#334155', marginBottom: '0.25rem' }}>Set Password</label>
-                <input 
+                <label className="block text-sm font-medium text-slate-700 mb-1">Set Password</label>
+                <input
                   type="password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  style={{ width: '100%', padding: '0.625rem', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                  className="w-full rounded-md border border-slate-300 px-2.5 py-2"
                 />
-                {errors.password && <span style={{ color: '#b91c1c', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{errors.password}</span>}
+                {errors.password && <span className="mt-1 block text-xs text-red-600">{errors.password}</span>}
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: '#334155', marginBottom: '0.25rem' }}>Confirm Password</label>
-                <input 
+                <label className="block text-sm font-medium text-slate-700 mb-1">Confirm Password</label>
+                <input
                   type="password"
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
-                  style={{ width: '100%', padding: '0.625rem', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                  className="w-full rounded-md border border-slate-300 px-2.5 py-2"
                 />
-                {errors.confirmPassword && <span style={{ color: '#b91c1c', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{errors.confirmPassword}</span>}
+                {errors.confirmPassword && <span className="mt-1 block text-xs text-red-600">{errors.confirmPassword}</span>}
               </div>
             </div>
-            {/* Password conditions hint */}
-            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+            <div className="text-xs text-slate-500">
               At least 8 characters, containing uppercase, lowercase, number, and special character.
             </div>
 
-            {/* Submit */}
-            <div style={{ marginTop: '1rem' }}>
-              <button 
-                type="submit" 
+            <div className="mt-4">
+              <button
+                type="submit"
                 disabled={loading}
-                style={{
-                  width: '100%',
-                  padding: '0.75rem',
-                  background: loading ? '#cbd5e1' : '#0f766e',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontWeight: 600,
-                  cursor: loading ? 'not-allowed' : 'pointer'
-                }}
+                className={cn(
+                  'w-full rounded-md px-3 py-3 text-sm font-semibold text-white transition-colors',
+                  loading ? 'bg-slate-300 cursor-not-allowed' : 'bg-teal-700 hover:bg-teal-800',
+                )}
               >
                 {loading ? 'Saving...' : 'Save & Continue'}
               </button>

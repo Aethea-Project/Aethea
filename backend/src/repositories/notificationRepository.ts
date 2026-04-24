@@ -3,8 +3,12 @@
  */
 
 import prisma from '../lib/prisma.js';
-import { Prisma } from '../generated/prisma/client.js';
-import { NotificationType } from '../generated/prisma/client.js';
+import { Prisma } from '../generated/prisma/index.js';
+import { NotificationType } from '../generated/prisma/index.js';
+
+import { EventEmitter } from 'events';
+
+export const notificationEmitter = new EventEmitter();
 
 export async function createNotification(
   userId: string,
@@ -13,7 +17,7 @@ export async function createNotification(
   body: string,
   metadata?: Record<string, unknown>,
 ) {
-  return prisma.notification.create({
+  const notification = await prisma.notification.create({
     data: {
       userId,
       type,
@@ -22,6 +26,13 @@ export async function createNotification(
       ...(metadata ? { metadata: metadata as Prisma.InputJsonValue } : {}),
     },
   });
+
+  notificationEmitter.emit('new_notification', {
+    userId,
+    notification,
+  });
+
+  return notification;
 }
 
 export async function listNotifications(userId: string, skip: number, take: number) {

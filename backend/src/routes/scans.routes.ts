@@ -14,7 +14,7 @@ export const createScanRoutes = (authMiddleware: RequestHandler): Router => {
   const router = Router();
 
   // Fail fast on auth claims/status before touching Prisma.
-  const auth = [authMiddleware, requireTrustedClaims, requireActiveAccount, requirePasswordChanged, requireLocalUser];
+  const auth = [authMiddleware, requireLocalUser, requireTrustedClaims, requireActiveAccount, requirePasswordChanged];
 
   router.get('/', auth, validateQuery(paginationSchema), asyncHandler(listScans));
   router.post('/', auth, validateBody(createScanSchema), asyncHandler(createScan));

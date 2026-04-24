@@ -65,10 +65,9 @@ backend/src/test-db.ts
 backend/src/testUpdate*.ts
 backend/test-script2.ts
 backend/web/
-backend/{
-patch.js
-temp_landing.js
-tmp_res.tsx
+backend/patch.js
+backend/temp_landing.js
+backend/tmp_res.tsx
 backend/jest-summary.json
 
 # ── OS generated files ───────────────────────────────────────────

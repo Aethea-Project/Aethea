@@ -5,7 +5,7 @@
  * so controllers and services never see raw SQL directly.
  */
 
-import { Prisma } from '../generated/prisma/client';
+import { Prisma } from '../generated/prisma/index.js';
 import prisma from '../lib/prisma.js';
 
 /* ─── Shared types ─── */

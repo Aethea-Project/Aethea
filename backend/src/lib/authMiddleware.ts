@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { getAuthenticatedUser, ensureLocalUser } from './authUser.js';
 import { AppError } from './AppError.js';
-import { getClientIp, isSessionRevoked, upsertUserSession } from './sessionRegistry.js';
+import { getClientIp, validateAndUpsertUserSession } from './sessionRegistry.js';
 
 /**
  * Middleware that ensures a user is authenticated via Supabase/JWT
@@ -17,32 +17,58 @@ export const requireLocalUser = async (req: Request, _res: Response, next: NextF
       throw new AppError('Unauthorized - No valid session found', 401);
     }
 
-    // Ensure the Supabase user exists in our local Postgres DB
-    const user = await ensureLocalUser(authUser);
-
+    // Batch user upsert and session validation to reduce first-request latency
     const sessionId = req.user?.sessionId;
+    let user;
+
     if (sessionId) {
       const rememberMeHeader = req.headers['x-remember-me'];
       const rememberMeValue = Array.isArray(rememberMeHeader) ? rememberMeHeader[0] : rememberMeHeader;
       const rememberMe = typeof rememberMeValue === 'string' && ['1', 'true', 'yes', 'on'].includes(rememberMeValue.toLowerCase());
 
-      const revoked = await isSessionRevoked(user.id, sessionId);
-      if (revoked) {
-        throw AppError.unauthorized('Session revoked. Please sign in again');
+      const rawUserAgent = req.headers['user-agent'];
+      
+      const [ensureResult, sessionResult] = await Promise.all([
+        ensureLocalUser(authUser),
+        validateAndUpsertUserSession({
+          userId: authUser.id,
+          sessionId,
+          userAgent: Array.isArray(rawUserAgent) ? rawUserAgent[0] : rawUserAgent,
+          ipAddress: getClientIp(req.headers['x-forwarded-for'] ?? req.socket.remoteAddress),
+          rememberMe,
+        }).catch(_err => {
+          // Explicitly map timeout/network errors from the session registry to 503
+          throw new AppError('Session registry unavailable', 503);
+        })
+      ]);
+
+      user = ensureResult;
+
+      // Fail-closed: If session result is null (e.g. schema error fail-open earlier), force fail-closed
+      if (!sessionResult) {
+        throw new AppError('Session registry unavailable', 503);
       }
 
-      const rawUserAgent = req.headers['user-agent'];
-      await upsertUserSession({
-        userId: user.id,
-        sessionId,
-        userAgent: Array.isArray(rawUserAgent) ? rawUserAgent[0] : rawUserAgent,
-        ipAddress: getClientIp(req.headers['x-forwarded-for'] ?? req.socket.remoteAddress),
-        rememberMe,
-      });
+      if (sessionResult.revoked) {
+        throw AppError.unauthorized('Session revoked. Please sign in again');
+      }
+    } else {
+      user = await ensureLocalUser(authUser);
     }
     
     // Attach to request for controllers
     req.localUser = user;
+
+    // Self-healing: If JWT is missing claims but we have them locally, enrich req.user
+    // so that downstream middleware (requireTrustedClaims) doesn't reject a valid user.
+    if (req.user) {
+      if (!req.user.account_type && user.accountType) {
+        req.user.account_type = user.accountType as any;
+      }
+      if (!req.user.account_status && user.accountStatus) {
+        req.user.account_status = user.accountStatus as any;
+      }
+    }
     
     next();
   } catch (error) {

@@ -6,11 +6,8 @@ import {
   getMyVerificationProfile,
   submitVerificationProfile,
 } from '../controllers/staffVerification.controller.js';
-import {
-  requireAccountTypeWithStatuses,
-  requirePasswordChanged,
-  requireTrustedClaims,
-} from '../middleware/requireAccountType.js';
+import { requireAccountTypeWithStatuses, requirePasswordChanged, requireTrustedClaims } from '../middleware/requireAccountType.js';
+import { requireLocalUser } from '../lib/authMiddleware.js';
 import {
   staffVerificationUploadUrlSchema,
   staffVerificationSubmitSchema,
@@ -21,6 +18,7 @@ export const createStaffVerificationRoutes = (authMiddleware: RequestHandler): R
 
   const staffAuth = [
     authMiddleware,
+    requireLocalUser,
     requireTrustedClaims,
     requirePasswordChanged,
     requireAccountTypeWithStatuses(['doctor', 'pharmacist'], ['pending', 'active']),

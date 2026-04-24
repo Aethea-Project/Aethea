@@ -11,10 +11,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../lib/AppError.js';
 import logger from '../lib/logger.js';
+import { sendErrorAlert } from '../services/emailService.js';
 
 export const errorHandler = (
   err: Error,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction
 ): void => {
@@ -23,7 +24,16 @@ export const errorHandler = (
     err,
     message: err.message,
     stack: err.stack,
+    url: req.url,
+    method: req.method,
   }, 'Unhandled error');
+
+  // Notify admin via email for unexpected 500 errors
+  if (!(err instanceof AppError && err.isOperational)) {
+    void sendErrorAlert(err, `${req.method} ${req.url}`).catch(e => {
+      logger.error({ e }, 'Failed to send error email alert');
+    });
+  }
 
   // Known operational errors (AppError) — safe to expose message
   if (err instanceof AppError && err.isOperational) {

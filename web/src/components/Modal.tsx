@@ -3,13 +3,10 @@
  *
  * Provides backdrop-click-to-close, stopPropagation on content,
  * accessibility attributes, and the common overlay + content shell
- * used across many pages.
- *
- * Pages keep their own CSS for `.modal-content` extensions (e.g. `.scan-modal`)
- * — pass extra classes via `contentClassName`.
+ * used across many pages. Pass extra classes via `contentClassName`.
  */
 
-import React, { useCallback, useEffect, type CSSProperties, type ReactNode } from 'react';
+import React, { useCallback, useEffect, type ReactNode } from 'react';
 
 export interface ModalProps {
   /** Whether the modal is visible. */
@@ -49,26 +46,17 @@ export const Modal: React.FC<ModalProps> = ({
 
   if (!isOpen) return null;
 
+  const overlayCls =
+    'modal-overlay fixed inset-0 z-50 flex items-start justify-center bg-black/40 p-4 overflow-y-auto';
+
   const contentCls = contentClassName
-    ? `modal-content ${contentClassName}`
-    : 'modal-content';
-
-  const overlayStyle: CSSProperties = {
-    padding: '1rem',
-    overflowY: 'auto',
-  };
-
-  const contentStyle: CSSProperties = {
-    margin: 'auto',
-    maxHeight: 'calc(100dvh - 2rem)',
-    overflowY: 'auto',
-  };
+    ? `modal-content w-full max-w-xl bg-white border border-gray-200 rounded-lg shadow-sm ${contentClassName}`
+    : 'modal-content w-full max-w-xl bg-white border border-gray-200 rounded-lg shadow-sm';
 
   return (
-    <div className="modal-overlay" onClick={onClose} style={overlayStyle}>
+    <div className={overlayCls} onClick={onClose}>
       <div
-        className={contentCls}
-        style={contentStyle}
+        className={`${contentCls} m-auto max-h-[calc(100dvh-2rem)] overflow-y-auto`}
         role="dialog"
         aria-modal="true"
         aria-label={ariaLabelledBy ? undefined : ariaLabel}

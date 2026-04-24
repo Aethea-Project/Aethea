@@ -22,7 +22,33 @@ import {
   ScanStatus,
   ScanType,
 } from '@core/types/medical';
-import { authFetch } from '../lib/apiClient';
+import { authFetch, authFetchStream } from '../lib/apiClient';
+
+export interface PatientCondition {
+  id: string;
+  patientId: string;
+  condition: string;
+  source: string;
+  detectedAt: string;
+}
+
+export interface Feedback {
+  id: string;
+  userId: string;
+  condition: string;
+  riskLevel: string;
+  relatedMedicines: string[];
+  doctorAnalysis?: string;
+  patientSummary?: string;
+  createdAt: string;
+}
+
+export interface PatientHealthData {
+  labTests: LabTest[];
+  scans: MedicalScan[];
+  conditions: PatientCondition[];
+  feedbacks: Feedback[];
+}
 
 /* ─── Raw server shapes ─── */
 
@@ -80,6 +106,7 @@ type RawReservation = {
       address?: string | null;
       city?: string | null;
       photoUrl?: string | null;
+      consultFee?: number | null;
     };
   };
 };
@@ -223,6 +250,7 @@ const toReservation = (item: RawReservation): Reservation => ({
         address: item.doctorSchedule.doctorProfile.address ?? null,
         city: item.doctorSchedule.doctorProfile.city ?? null,
         photoUrl: item.doctorSchedule.doctorProfile.photoUrl ?? null,
+        consultFee: item.doctorSchedule.doctorProfile.consultFee ?? null,
       }
     : undefined,
 });
@@ -276,6 +304,11 @@ export const medicalApi = {
     return items.map(toLabTest);
   },
 
+  async fetchLabFeedbacks(): Promise<any[]> {
+    const data = await authFetch<{ data?: any[] }>('/lab-tests/feedbacks');
+    return data.data ?? [];
+  },
+
   /* ── Scans ── */
   async fetchScans(): Promise<(MedicalScan & { scanDate?: Date })[]> {
     const data = await authFetch<{ data?: RawMedicalScan[]; scans?: RawMedicalScan[] }>('/scans');
@@ -307,6 +340,10 @@ export const medicalApi = {
       method: 'POST',
       body: JSON.stringify({ doctorScheduleId }),
     });
+  },
+
+  async fetchPatientDataForReservation(reservationId: string): Promise<PatientHealthData> {
+    return authFetch<PatientHealthData>(`/reservations/${reservationId}/patient-data`);
   },
 
   /* ── Maps proxy (secured by backend) ── */
@@ -464,6 +501,15 @@ export const medicalApi = {
       body: JSON.stringify({ ids }),
     });
   },
+
+  async uploadLabResult(file: File): Promise<Response> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return authFetchStream('/lab-tests/upload', {
+      method: 'POST',
+      body: formData,
+    });
+  },
 };
 
 /* ─── Domain types (exported for use in hooks and pages) ─── */
@@ -494,6 +540,7 @@ export interface Reservation {
     address: string | null;
     city: string | null;
     photoUrl: string | null;
+    consultFee: number | null;
   };
 }
 

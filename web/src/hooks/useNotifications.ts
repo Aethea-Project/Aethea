@@ -6,6 +6,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { medicalApi, Notification } from '../services/medicalApi';
+import { useAuth } from '@core/auth/useAuth';
+import { API_BASE } from '../lib/apiClient';
 
 export interface UseNotificationsResult {
   notifications: Notification[];
@@ -17,6 +19,7 @@ export interface UseNotificationsResult {
 }
 
 export function useNotifications(): UseNotificationsResult {
+  const { session, loading: authLoading } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -40,8 +43,39 @@ export function useNotifications(): UseNotificationsResult {
   }, []);
 
   useEffect(() => {
+    if (authLoading || !session) return;
     fetchData();
-  }, [fetchData]);
+
+    // Setup Server-Sent Events for real-time notifications
+    const token = session.access_token;
+    const sseUrl = `${API_BASE}/notifications/stream?token=${encodeURIComponent(token)}`;
+    
+    const eventSource = new EventSource(sseUrl);
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'ping') return; // Ignore ping
+        
+        // Ensure data is a valid Notification before appending
+        if (data && data.id && data.type) {
+          setNotifications((prev) => [data as Notification, ...prev]);
+          setUnreadCount((prev) => prev + 1);
+        }
+      } catch (err) {
+        console.error('Failed to parse SSE message', err);
+      }
+    };
+
+    eventSource.onerror = () => {
+      // EventSource automatically reconnects on drop. We only log it.
+      console.warn('SSE connection error. Retrying...');
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, [fetchData, authLoading, session]);
 
   const markRead = useCallback(async (ids: string[]): Promise<void> => {
     await medicalApi.markNotificationsRead(ids);

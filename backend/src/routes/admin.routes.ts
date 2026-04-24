@@ -28,12 +28,14 @@ import {
   requirePasswordChanged,
   requireTrustedClaims,
 } from '../middleware/requireAccountType.js';
+import { requireLocalUser } from '../lib/authMiddleware.js';
 
 export const createAdminRoutes = (authMiddleware: RequestHandler): Router => {
   const router = Router();
 
   const adminAuth = [
     authMiddleware,
+    requireLocalUser,
     requireTrustedClaims,
     requirePasswordChanged,
     requireAccountType('admin'),

@@ -5,7 +5,6 @@ import { validatePassword } from '@core/auth/auth-utils';
 import { FeatureHeader } from '../../components/FeatureHeader';
 import { imageAssets } from '../../constants/imageAssets';
 import { adminApi, type AccountType, type AdminProfileUpdatePayload, type AdminUserDetail } from '../../services/adminApi';
-import './styles.css';
 
 const accountTypes: AccountType[] = ['patient', 'doctor', 'pharmacist', 'admin'];
 const TEMP_PASSWORD_MIN = 8;
@@ -304,8 +303,14 @@ export default function AdminUserDetailsPage() {
     }
   };
 
+  const statusTone = detail?.accountStatus === 'active'
+    ? 'bg-green-50 text-green-700'
+    : detail?.accountStatus === 'pending'
+      ? 'bg-gray-50 text-gray-700'
+      : 'bg-red-50 text-red-700';
+
   return (
-    <div className="admin-user-details-page">
+    <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
       <FeatureHeader
         title="User Account Details"
         subtitle="Review, edit, convert account type, or remove account"
@@ -314,71 +319,108 @@ export default function AdminUserDetailsPage() {
         imageAlt="User account details"
       />
 
-      {error && <div className="error-banner">{error}</div>}
-      {message && <div className="success-banner">{message}</div>}
+      {error && (
+        <div className="rounded-lg border border-gray-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+          {error}
+        </div>
+      )}
+      {message && (
+        <div className="rounded-lg border border-gray-200 bg-green-50 p-3 text-sm text-green-700" role="status">
+          {message}
+        </div>
+      )}
 
       {loading || !detail ? (
-        <p className="loading">Loading user details...</p>
+        <p className="text-sm text-gray-600">Loading user details...</p>
       ) : (
         <>
-          <section className="details-card">
-            <div className="details-row"><strong>User ID</strong><span>{detail.id}</span></div>
-            <div className="details-row"><strong>Email</strong><span>{detail.email ?? '—'}</span></div>
-            <div className="details-row"><strong>Status</strong><span className={`status-chip ${detail.accountStatus}`}>{detail.accountStatus}</span></div>
-            <div className="details-row"><strong>Last Sign-In</strong><span>{detail.lastSignInAt ? new Date(detail.lastSignInAt).toLocaleString() : 'Never signed in'}</span></div>
-            <div className="details-row"><strong>Created</strong><span>{new Date(detail.createdAt).toLocaleString()}</span></div>
+          <section className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <span className="text-sm font-medium text-gray-900">User ID</span>
+              <span className="text-sm text-gray-600 sm:col-span-2">{detail.id}</span>
+            </div>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <span className="text-sm font-medium text-gray-900">Email</span>
+              <span className="text-sm text-gray-600 sm:col-span-2">{detail.email ?? '—'}</span>
+            </div>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <span className="text-sm font-medium text-gray-900">Status</span>
+              <span className="sm:col-span-2">
+                <span className={`inline-flex items-center rounded-md border border-gray-200 px-2 py-1 text-xs font-medium ${statusTone}`}>
+                  {detail.accountStatus}
+                </span>
+              </span>
+            </div>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <span className="text-sm font-medium text-gray-900">Last Sign-In</span>
+              <span className="text-sm text-gray-600 sm:col-span-2">
+                {detail.lastSignInAt ? new Date(detail.lastSignInAt).toLocaleString() : 'Never signed in'}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <span className="text-sm font-medium text-gray-900">Created</span>
+              <span className="text-sm text-gray-600 sm:col-span-2">
+                {new Date(detail.createdAt).toLocaleString()}
+              </span>
+            </div>
           </section>
 
-          <section className="details-card">
-            <h3>Edit Profile</h3>
-            <form className="details-form-grid" onSubmit={onSaveProfile}>
-              <label>
+          <section className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+            <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider">Edit Profile</h3>
+            <form className="grid grid-cols-1 gap-4 sm:grid-cols-2" onSubmit={onSaveProfile}>
+              <label className="space-y-1 text-sm font-medium text-gray-700">
                 First Name
                 <input
                   value={profileForm.firstName ?? ''}
                   onChange={(e) => setProfileForm((prev) => ({ ...prev, firstName: e.target.value }))}
                   required
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-gray-300 focus:outline-none"
                 />
               </label>
-              <label>
+              <label className="space-y-1 text-sm font-medium text-gray-700">
                 Last Name
                 <input
                   value={profileForm.lastName ?? ''}
                   onChange={(e) => setProfileForm((prev) => ({ ...prev, lastName: e.target.value }))}
                   required
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-gray-300 focus:outline-none"
                 />
               </label>
-              <label>
+              <label className="space-y-1 text-sm font-medium text-gray-700">
                 Gender
                 <select
                   value={profileForm.gender ?? ''}
                   onChange={(e) => setProfileForm((prev) => ({ ...prev, gender: (e.target.value || undefined) as 'male' | 'female' | undefined }))}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-gray-300 focus:outline-none"
                 >
                   <option value="">Not set</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
                 </select>
               </label>
-              <label>
+              <label className="space-y-1 text-sm font-medium text-gray-700">
                 Phone
                 <input
                   value={profileForm.phone ?? ''}
                   onChange={(e) => setProfileForm((prev) => ({ ...prev, phone: e.target.value }))}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-gray-300 focus:outline-none"
                 />
               </label>
-              <label>
+              <label className="space-y-1 text-sm font-medium text-gray-700">
                 Date of Birth
                 <input
                   type="date"
                   value={profileForm.dateOfBirth ?? ''}
                   onChange={(e) => setProfileForm((prev) => ({ ...prev, dateOfBirth: e.target.value }))}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-gray-300 focus:outline-none"
                 />
               </label>
-              <label>
+              <label className="space-y-1 text-sm font-medium text-gray-700">
                 Blood Type
                 <select
                   value={profileForm.bloodType ?? ''}
                   onChange={(e) => setProfileForm((prev) => ({ ...prev, bloodType: (e.target.value || undefined) as AdminProfileUpdatePayload['bloodType'] }))}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-gray-300 focus:outline-none"
                 >
                   <option value="">Not set</option>
                   <option value="A+">A+</option>
@@ -391,7 +433,7 @@ export default function AdminUserDetailsPage() {
                   <option value="O-">O-</option>
                 </select>
               </label>
-              <label>
+              <label className="space-y-1 text-sm font-medium text-gray-700">
                 Height (cm)
                 <input
                   type="number"
@@ -399,9 +441,10 @@ export default function AdminUserDetailsPage() {
                   max={300}
                   value={profileForm.heightCm ?? ''}
                   onChange={(e) => setProfileForm((prev) => ({ ...prev, heightCm: e.target.value ? Number(e.target.value) : undefined }))}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-gray-300 focus:outline-none"
                 />
               </label>
-              <label>
+              <label className="space-y-1 text-sm font-medium text-gray-700">
                 Weight (kg)
                 <input
                   type="number"
@@ -409,54 +452,64 @@ export default function AdminUserDetailsPage() {
                   max={500}
                   value={profileForm.weightKg ?? ''}
                   onChange={(e) => setProfileForm((prev) => ({ ...prev, weightKg: e.target.value ? Number(e.target.value) : undefined }))}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-gray-300 focus:outline-none"
                 />
               </label>
-              <label>
+              <label className="space-y-1 text-sm font-medium text-gray-700">
                 Emergency Contact Name
                 <input
                   value={profileForm.emergencyContactName ?? ''}
                   onChange={(e) => setProfileForm((prev) => ({ ...prev, emergencyContactName: e.target.value }))}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-gray-300 focus:outline-none"
                 />
               </label>
-              <label>
+              <label className="space-y-1 text-sm font-medium text-gray-700">
                 Emergency Contact Phone
                 <input
                   value={profileForm.emergencyContactPhone ?? ''}
                   onChange={(e) => setProfileForm((prev) => ({ ...prev, emergencyContactPhone: e.target.value }))}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-gray-300 focus:outline-none"
                 />
               </label>
-              <label className="full-width">
+              <label className="space-y-1 text-sm font-medium text-gray-700 sm:col-span-2">
                 Allergies
                 <textarea
                   rows={2}
                   value={profileForm.allergies ?? ''}
                   onChange={(e) => setProfileForm((prev) => ({ ...prev, allergies: e.target.value }))}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-gray-300 focus:outline-none"
                 />
               </label>
-              <label className="full-width">
+              <label className="space-y-1 text-sm font-medium text-gray-700 sm:col-span-2">
                 Chronic Conditions
                 <textarea
                   rows={2}
                   value={profileForm.chronicConditions ?? ''}
                   onChange={(e) => setProfileForm((prev) => ({ ...prev, chronicConditions: e.target.value }))}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-gray-300 focus:outline-none"
                 />
               </label>
-              <div className="details-actions full-width">
-                <button type="submit" className="btn btn-primary" disabled={saving || !canSubmitProfile}>
+              <div className="sm:col-span-2 flex justify-end">
+                <button
+                  type="submit"
+                  className="bg-teal-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={saving || !canSubmitProfile}
+                >
                   {saving ? 'Saving...' : 'Save Profile'}
                 </button>
               </div>
             </form>
           </section>
 
-          <section className="details-card">
-            <h3>Account Controls</h3>
-            <div className="details-control-row">
-              <label>
+          <section className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+            <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider">Account Controls</h3>
+            <div className="flex flex-wrap items-end gap-4">
+              <label className="space-y-1 text-sm font-medium text-gray-700">
                 Account Type
                 <select
                   value={nextAccountType}
                   onChange={(e) => setNextAccountType(e.target.value as AccountType)}
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:border-gray-300 focus:outline-none"
                 >
                   {accountTypes.map((type) => (
                     <option key={type} value={type}>{type}</option>
@@ -465,7 +518,7 @@ export default function AdminUserDetailsPage() {
               </label>
               <button
                 type="button"
-                className="btn btn-ghost"
+                className="border border-gray-300 text-gray-700 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={saving || nextAccountType === detail.accountType}
                 onClick={() => void onChangeAccountType()}
               >
@@ -473,10 +526,10 @@ export default function AdminUserDetailsPage() {
               </button>
             </div>
 
-            <div className="temp-password-box">
-              <label>
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 space-y-3">
+              <label className="space-y-1 text-sm font-medium text-gray-700">
                 Temporary Password
-                <div className="temp-password-input-wrap">
+                <div className="relative">
                   <input
                     type={showTemporaryPassword ? 'text' : 'password'}
                     autoComplete="new-password"
@@ -484,10 +537,11 @@ export default function AdminUserDetailsPage() {
                     value={temporaryPassword}
                     onChange={(e) => setTemporaryPassword(e.target.value)}
                     placeholder="Set a temporary password"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2 pr-10 text-sm text-gray-900 focus:border-gray-300 focus:outline-none"
                   />
                   <button
                     type="button"
-                    className="temp-password-icon-btn"
+                    className="absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 rounded-md text-gray-500 hover:bg-gray-200 hover:text-gray-900"
                     aria-label={showTemporaryPassword ? 'Hide password' : 'Show password'}
                     onClick={() => setShowTemporaryPassword((prev) => !prev)}
                   >
@@ -505,18 +559,21 @@ export default function AdminUserDetailsPage() {
                   </button>
                 </div>
               </label>
-              <ul className="temp-password-checklist" aria-label="Temporary password requirements">
+              <ul className="space-y-1" aria-label="Temporary password requirements">
                 {temporaryPasswordRequirements.map((requirement) => (
-                  <li key={requirement.id} className={requirement.met ? 'met' : ''}>
-                    <span className="check-icon" aria-hidden="true">{requirement.met ? '✓' : '✗'}</span>
+                  <li
+                    key={requirement.id}
+                    className={`flex items-center gap-2 text-xs font-semibold ${requirement.met ? 'text-green-700' : 'text-red-700'}`}
+                  >
+                    <span className="w-4 text-center" aria-hidden="true">{requirement.met ? '✓' : '✗'}</span>
                     {requirement.label}
                   </li>
                 ))}
               </ul>
-              <div className="temp-password-actions">
+              <div className="flex flex-wrap justify-end gap-2">
                 <button
                   type="button"
-                  className="btn btn-ghost"
+                  className="border border-gray-300 text-gray-700 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                   disabled={!canSendPasswordResetLink}
                   onClick={() => void onSendPasswordResetLink()}
                 >
@@ -524,7 +581,7 @@ export default function AdminUserDetailsPage() {
                 </button>
                 <button
                   type="button"
-                  className="btn btn-ghost"
+                  className="border border-gray-300 text-gray-700 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                   disabled={!canApplyTemporaryPassword}
                   onClick={() => void onResetTemporaryPassword()}
                 >
@@ -532,13 +589,18 @@ export default function AdminUserDetailsPage() {
                 </button>
               </div>
               {isSelfProfile && (
-                <p className="temp-password-hint">For your account, use the Change Password flow from your profile page.</p>
+                <p className="text-sm text-gray-600">For your account, use the Change Password flow from your profile page.</p>
               )}
             </div>
 
-            <div className="danger-zone">
-              <p>Permanently remove this account and linked records.</p>
-              <button type="button" className="btn btn-danger" disabled={saving} onClick={() => void onDeleteAccount()}>
+            <div className="rounded-lg border border-gray-200 bg-red-50 p-4 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-gray-700">Permanently remove this account and linked records.</p>
+              <button
+                type="button"
+                className="bg-red-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-red-700 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={saving}
+                onClick={() => void onDeleteAccount()}
+              >
                 Delete Account
               </button>
             </div>

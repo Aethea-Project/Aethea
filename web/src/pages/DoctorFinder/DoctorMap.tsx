@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { FastestRoute, NearbyPlace } from '../../services/medicalApi';
+import { cn } from '../../lib/utils';
 
 interface LatLng {
   lat: number;
@@ -79,6 +80,16 @@ function applyFilters(
   });
 }
 
+/* ── Reusable Tailwind class tokens ───────────── */
+const actionBtnClass =
+  'rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:border-slate-400 disabled:opacity-50 disabled:cursor-not-allowed';
+const actionLinkClass =
+  'no-underline rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 text-center transition-colors hover:bg-slate-50 hover:border-slate-400';
+const quickBtnClass =
+  'rounded-lg bg-teal-600 px-3.5 py-2 text-xs font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed';
+const quickLinkClass =
+  'no-underline rounded-lg bg-teal-600 px-3.5 py-2 text-xs font-semibold text-white text-center transition-colors hover:bg-teal-700';
+
 function PlacesSection({
   title,
   places,
@@ -97,12 +108,12 @@ function PlacesSection({
   onEstimateRoute: (place: NearbyPlace) => void;
 }) {
   return (
-    <section className="finder-nearby-section" aria-label={title}>
-      <h3>{title}</h3>
+    <section aria-label={title}>
+      <h3 className="mb-3 text-base font-bold text-slate-900">{title}</h3>
       {places.length === 0 ? (
-        <p className="finder-nearby-empty">No nearby places matching current filters.</p>
+        <p className="text-sm text-slate-500">No nearby places matching current filters.</p>
       ) : (
-        <div className="finder-nearby-list">
+        <div className="flex flex-col gap-3">
           {places.map((place) => {
             const route = routeByPlaceId[place.id];
             const isSelected = selectedPlaceId === place.id;
@@ -110,40 +121,45 @@ function PlacesSection({
             return (
               <article
                 key={place.id}
-                className={`finder-nearby-card${isSelected ? ' finder-nearby-card-selected' : ''}`}
+                className={cn(
+                  'rounded-xl border bg-white p-4 transition-colors',
+                  isSelected ? 'border-teal-500 ring-1 ring-teal-500' : 'border-slate-200',
+                )}
               >
-                <div className="finder-nearby-main">
-                  <p className="finder-nearby-name">{place.name}</p>
-                  <p className="finder-nearby-address">{place.address || 'Address not available'}</p>
+                <div className="mb-2">
+                  <p className="text-sm font-semibold text-slate-900">{place.name}</p>
+                  <p className="mt-0.5 text-xs text-slate-500">{place.address || 'Address not available'}</p>
                 </div>
-                <div className="finder-nearby-meta">
-                  <span>{place.distanceKm.toFixed(1)} km</span>
-                  <span>Rating: {place.rating?.toFixed(1) ?? 'N/A'}</span>
-                  <span>{place.openNow === true ? 'Open now' : place.openNow === false ? 'Closed now' : 'Status unknown'}</span>
+                <div className="mb-3 flex flex-wrap gap-2 text-xs text-slate-600">
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5">{place.distanceKm.toFixed(1)} km</span>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5">Rating: {place.rating?.toFixed(1) ?? 'N/A'}</span>
+                  <span className={cn('rounded-full px-2 py-0.5', place.openNow === true ? 'bg-emerald-100 text-emerald-700' : place.openNow === false ? 'bg-red-100 text-red-700' : 'bg-slate-100')}>
+                    {place.openNow === true ? 'Open now' : place.openNow === false ? 'Closed now' : 'Status unknown'}
+                  </span>
                 </div>
                 {route && (
-                  <p className="finder-route-pill" aria-live="polite">
+                  <p className="mb-3 inline-flex rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold text-teal-800" aria-live="polite">
                     ETA: {route.durationText} • {route.distanceText}
                   </p>
                 )}
-                <div className="finder-nearby-actions">
+                <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    className="finder-action-btn"
+                    className={actionBtnClass}
                     onClick={() => onSelectPlace(place)}
                   >
                     {isSelected ? 'Selected on Map' : 'Show on Map'}
                   </button>
                   <button
                     type="button"
-                    className="finder-action-btn"
+                    className={actionBtnClass}
                     onClick={() => onEstimateRoute(place)}
                     disabled={routeLoadingPlaceId === place.id}
                   >
                     {routeLoadingPlaceId === place.id ? 'Calculating...' : 'Fastest Route'}
                   </button>
                   <a
-                    className="finder-action-btn finder-action-link"
+                    className={actionLinkClass}
                     href={mapDirectionsLink(place.location)}
                     target="_blank"
                     rel="noreferrer"
@@ -228,9 +244,10 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
   const mapFocusLocation = selectedPlace?.location ?? userLocation;
 
   return (
-    <div className="finder-map-shell" aria-busy={loading}>
-      <div className="finder-filter-row">
-        <label>
+    <div className="mt-4" aria-busy={loading}>
+      {/* ── Filter row ────────────────── */}
+      <div className="flex flex-wrap items-end gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
           Max distance (km)
           <input
             type="range"
@@ -238,12 +255,17 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
             max={30}
             value={maxDistanceKm}
             onChange={(event) => setMaxDistanceKm(Number(event.target.value))}
+            className="accent-teal-600"
           />
-          <span>{maxDistanceKm} km</span>
+          <span className="text-xs text-slate-500">{maxDistanceKm} km</span>
         </label>
-        <label>
+        <label className="flex flex-col gap-1 text-sm font-medium text-slate-700">
           Min rating
-          <select value={minRating} onChange={(event) => setMinRating(Number(event.target.value))}>
+          <select
+            value={minRating}
+            onChange={(event) => setMinRating(Number(event.target.value))}
+            className="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm"
+          >
             <option value={0}>Any</option>
             <option value={3}>3.0+</option>
             <option value={3.5}>3.5+</option>
@@ -251,28 +273,30 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
             <option value={4.5}>4.5+</option>
           </select>
         </label>
-        <label className="finder-checkbox-filter">
+        <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
           <input
             type="checkbox"
             checked={openNowOnly}
             onChange={(event) => setOpenNowOnly(event.target.checked)}
+            className="h-4 w-4 accent-teal-600"
           />
           Open now only
         </label>
       </div>
 
+      {/* ── Quick actions ─────────────── */}
       {nearestDoctor && (
-        <div className="finder-quick-actions" role="region" aria-label="Quick actions">
+        <div className="mt-4 flex flex-wrap gap-2" role="region" aria-label="Quick actions">
           <button
             type="button"
-            className="finder-quick-btn"
+            className={quickBtnClass}
             onClick={() => setSelectedPlaceId(nearestDoctor.id)}
           >
             Select Nearest Doctor
           </button>
           <button
             type="button"
-            className="finder-quick-btn"
+            className={quickBtnClass}
             onClick={() => {
               const place = selectedPlace ?? nearestDoctor;
               setSelectedPlaceId(place.id);
@@ -285,30 +309,36 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
             href={mapDirectionsLink((selectedPlace ?? nearestDoctor).location)}
             target="_blank"
             rel="noreferrer"
-            className="finder-quick-btn finder-action-link"
+            className={quickLinkClass}
           >
             Open Direction
           </a>
         </div>
       )}
 
-      {loading && <p className="loading">Loading nearby medical places...</p>}
-      {error && <p className="error">{error}</p>}
-      {routeError && <p className="error">{routeError}</p>}
+      {/* ── Loading / errors ──────────── */}
+      {loading && <p className="mt-4 text-sm text-slate-500">Loading nearby medical places...</p>}
+      {error && (
+        <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">{error}</p>
+      )}
+      {routeError && (
+        <p className="mt-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">{routeError}</p>
+      )}
 
+      {/* ── Map + place lists ─────────── */}
       {!loading && (!error || hasAnyNearby) && (
         <>
-          <section className="finder-selected-map" aria-label="Selected place on map">
-            <div className="finder-selected-map-meta">
-              <h3>{selectedPlace ? selectedPlace.name : 'Your area'}</h3>
-              <p className="finder-nearby-address">
+          <section className="mt-5 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden" aria-label="Selected place on map">
+            <div className="p-4">
+              <h3 className="text-base font-bold text-slate-900">{selectedPlace ? selectedPlace.name : 'Your area'}</h3>
+              <p className="mt-0.5 text-xs text-slate-500">
                 {selectedPlace?.address || 'Select any nearby place to focus the map and estimate route.'}
               </p>
               {selectedPlace && (
-                <div className="finder-nearby-meta">
-                  <span>{selectedPlace.distanceKm.toFixed(1)} km away</span>
-                  <span>Rating: {selectedPlace.rating?.toFixed(1) ?? 'N/A'}</span>
-                  <span>
+                <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-600">
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5">{selectedPlace.distanceKm.toFixed(1)} km away</span>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5">Rating: {selectedPlace.rating?.toFixed(1) ?? 'N/A'}</span>
+                  <span className={cn('rounded-full px-2 py-0.5', selectedPlace.openNow === true ? 'bg-emerald-100 text-emerald-700' : selectedPlace.openNow === false ? 'bg-red-100 text-red-700' : 'bg-slate-100')}>
                     {selectedPlace.openNow === true
                       ? 'Open now'
                       : selectedPlace.openNow === false
@@ -318,13 +348,14 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
                 </div>
               )}
               {selectedPlaceRoute && (
-                <p className="finder-route-pill" aria-live="polite">
+                <p className="mt-2 inline-flex rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold text-teal-800" aria-live="polite">
                   ETA: {selectedPlaceRoute.durationText} • {selectedPlaceRoute.distanceText}
                 </p>
               )}
             </div>
-            <div className="finder-selected-map-frame-wrap">
+            <div className="relative w-full" style={{ paddingBottom: '45%' }}>
               <iframe
+                className="absolute inset-0 h-full w-full border-t border-slate-200"
                 title={selectedPlace ? `Map for ${selectedPlace.name}` : 'Map around your location'}
                 src={mapEmbedLink(mapFocusLocation)}
                 loading="lazy"
@@ -333,7 +364,7 @@ export const DoctorMap: React.FC<DoctorMapProps> = ({
             </div>
           </section>
 
-          <div className="finder-nearby-grid">
+          <div className="mt-6 grid gap-6 lg:grid-cols-3">
             <PlacesSection
               title="Nearby Doctors"
               places={filteredDoctors}

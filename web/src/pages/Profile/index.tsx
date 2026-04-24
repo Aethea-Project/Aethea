@@ -32,7 +32,6 @@ import {
 } from '../../services/userApi';
 import { useUiNotifications } from '../../contexts/UiNotificationsProvider';
 import { useTurnstile } from '../../hooks/useTurnstile';
-import './styles.css';
 
 // ── Validation ──────────────────────────────
 interface ValidationErrors {
@@ -93,6 +92,28 @@ function getErrorMessage(error: unknown, fallback: string): string {
 
   return fallback;
 }
+
+const inputBaseClass =
+  'w-full rounded-lg border bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2';
+const inputDefaultClass = `${inputBaseClass} border-slate-300 focus:border-teal-600 focus:ring-teal-100`;
+const inputErrorClass = `${inputBaseClass} border-red-500 focus:border-red-500 focus:ring-red-100`;
+
+const buttonBaseClass =
+  'inline-flex items-center gap-2 rounded-lg text-sm font-semibold px-4 py-2 transition-colors disabled:cursor-not-allowed disabled:opacity-60';
+const buttonPrimaryClass = `${buttonBaseClass} bg-teal-700 text-white hover:bg-teal-800`;
+const buttonSecondaryClass = `${buttonBaseClass} bg-slate-200 text-slate-700 hover:bg-slate-300`;
+const buttonEditClass = `${buttonBaseClass} border border-teal-200 bg-teal-50 text-teal-700 hover:border-teal-400 hover:bg-teal-100`;
+const buttonAccountClass =
+  'inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-900 transition-colors hover:border-teal-300 hover:bg-teal-50 hover:text-teal-700';
+
+const toastBaseClass = 'flex items-center gap-2 rounded-lg border px-4 py-3 text-sm';
+const modalHeaderClass = 'flex items-center justify-between px-6 py-4 border-b border-slate-100';
+const modalBodyClass = 'px-6 py-5 space-y-4';
+const modalFooterClass = 'flex justify-end gap-3 px-6 py-4 border-t border-slate-100';
+const modalCloseClass = 'text-slate-400 hover:text-slate-600 rounded-md p-1';
+const modalFieldClass = 'space-y-1';
+const modalInputRowClass = 'relative flex items-center';
+const modalToggleClass = 'absolute right-2 text-sm text-slate-500 hover:text-slate-700';
 
 const ProfilePage: React.FC = () => {
   const { profile, loading, updatePassword, refreshProfile, user, session } = useAuth();
@@ -436,23 +457,23 @@ const ProfilePage: React.FC = () => {
   // ── Loading state (Skeleton) ───────────────
   if (loading) {
     return (
-      <div className="profile-page">
-        <div className="profile-container">
-          <div className="profile-skeleton-header">
-            <div className="skeleton skeleton-avatar" />
-            <div className="skeleton-text-group">
-              <div className="skeleton skeleton-name" />
-              <div className="skeleton skeleton-meta" />
+      <div className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex flex-wrap items-center gap-4 mb-6">
+            <div className="h-[72px] w-[72px] rounded-full bg-slate-200 animate-pulse" />
+            <div className="flex-1 space-y-2">
+              <div className="h-6 w-2/5 rounded-md bg-slate-200 animate-pulse" />
+              <div className="h-4 w-1/3 rounded-md bg-slate-200 animate-pulse" />
             </div>
           </div>
           {[1, 2, 3].map((i) => (
-            <div key={i} className="profile-card">
-              <div className="skeleton skeleton-section-title" />
-              <div className="profile-grid">
-                <div className="skeleton skeleton-field" />
-                <div className="skeleton skeleton-field" />
-                <div className="skeleton skeleton-field" />
-                <div className="skeleton skeleton-field" />
+            <div key={i} className="bg-white border border-slate-200 rounded-xl p-6 mb-4 shadow-sm">
+              <div className="h-5 w-1/3 rounded-md bg-slate-200 animate-pulse mb-4" />
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="h-12 rounded-md bg-slate-200 animate-pulse" />
+                <div className="h-12 rounded-md bg-slate-200 animate-pulse" />
+                <div className="h-12 rounded-md bg-slate-200 animate-pulse" />
+                <div className="h-12 rounded-md bg-slate-200 animate-pulse" />
               </div>
             </div>
           ))}
@@ -463,22 +484,25 @@ const ProfilePage: React.FC = () => {
 
   // ── Render ─────────────────────────────────
   return (
-    <div className="profile-page">
-      <div className="profile-container">
+    <div className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6">
+      <div className="max-w-4xl mx-auto">
         {/* ── Avatar + Identity Header ────────── */}
-        <div className="profile-identity">
-          <div className="profile-avatar" aria-label={`Profile picture for ${getFullName()}`}>
+        <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:flex-wrap sm:items-center">
+          <div
+            className="h-[72px] w-[72px] rounded-full bg-gradient-to-br from-teal-600 to-teal-800 text-white text-xl font-semibold flex items-center justify-center tracking-[0.03em] shadow-sm shrink-0"
+            aria-label={`Profile picture for ${getFullName()}`}
+          >
             {getInitials()}
           </div>
-          <div className="profile-identity-info">
-            <h1>{getFullName()}</h1>
-            <p className="profile-email">{user?.email ?? profile?.email}</p>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl font-semibold text-slate-900">{getFullName()}</h1>
+            <p className="text-sm text-slate-500">{user?.email ?? profile?.email}</p>
             {getMemberSince() && (
-              <p className="profile-member-since">Member since {getMemberSince()}</p>
+              <p className="text-xs text-slate-400">Member since {getMemberSince()}</p>
             )}
           </div>
           {!isEditing && (
-            <button className="btn btn-edit" onClick={handleEdit} aria-label="Edit profile">
+            <button className={`${buttonEditClass} w-full sm:w-auto sm:ml-auto justify-center`} onClick={handleEdit} aria-label="Edit profile">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M11.13 1.87a1.75 1.75 0 0 1 2.47 0l.53.53a1.75 1.75 0 0 1 0 2.47l-8.36 8.36a1.75 1.75 0 0 1-.82.46l-2.88.72a.75.75 0 0 1-.91-.91l.72-2.88c.08-.31.24-.59.46-.82l8.79-8.79Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -489,13 +513,14 @@ const ProfilePage: React.FC = () => {
 
         {/* Forced password change banner for new admin accounts */}
         {mustChangePassword && (
-          <div className="profile-toast profile-toast-warning" role="alert">
+          <div className={`${toastBaseClass} mb-4 border-amber-200 bg-amber-50 text-amber-700`} role="alert">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
               <path d="M9 1L1 16h16L9 1z" stroke="#92400e" strokeWidth="1.5" strokeLinejoin="round"/>
               <path d="M9 7v4M9 13h.01" stroke="#92400e" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
             You must change your temporary password before accessing the platform.
-            <button className="btn btn-account-action" style={{ marginLeft: 'auto' }}
+            <button
+              className="ml-auto inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm font-medium text-amber-700 transition-colors hover:border-amber-300 hover:bg-amber-100"
               onClick={openPasswordModal}
             >Change Password Now</button>
           </div>
@@ -503,7 +528,7 @@ const ProfilePage: React.FC = () => {
 
         {/* Feedback messages */}
         {successMsg && (
-          <div className="profile-toast profile-toast-success" role="status">
+          <div className={`${toastBaseClass} mb-4 border-emerald-200 bg-emerald-50 text-emerald-700`} role="status">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
               <circle cx="9" cy="9" r="8" stroke="#166534" strokeWidth="1.5"/>
               <path d="M5.5 9.5L7.5 11.5L12.5 6.5" stroke="#166534" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -512,7 +537,7 @@ const ProfilePage: React.FC = () => {
           </div>
         )}
         {errorMsg && (
-          <div className="profile-toast profile-toast-error" role="alert">
+          <div className={`${toastBaseClass} mb-4 border-red-200 bg-red-50 text-red-700`} role="alert">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
               <circle cx="9" cy="9" r="8" stroke="#991b1b" strokeWidth="1.5"/>
               <path d="M9 5.5V9.5M9 12.5H9.01" stroke="#991b1b" strokeWidth="1.5" strokeLinecap="round"/>
@@ -522,15 +547,15 @@ const ProfilePage: React.FC = () => {
         )}
 
         {/* ── Section 1: Personal Information ────── */}
-        <section className="profile-card" aria-labelledby="section-personal">
-          <h2 id="section-personal">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <section className="bg-white border border-slate-200 rounded-xl p-6 mb-4 shadow-sm" aria-labelledby="section-personal">
+          <h2 id="section-personal" className="flex items-center gap-2 text-base font-semibold text-teal-800 border-b border-slate-100 pb-2 mb-4">
+            <svg className="text-teal-600" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
               <circle cx="10" cy="7" r="4" stroke="currentColor" strokeWidth="1.5"/>
               <path d="M3 18c0-3.31 3.13-6 7-6s7 2.69 7 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
             Personal Information
           </h2>
-          <div className="profile-grid">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field
               label="First Name"
               value={form.firstName}
@@ -589,16 +614,16 @@ const ProfilePage: React.FC = () => {
         </section>
 
         {/* ── Section 2: Medical Information ──────── */}
-        <section className="profile-card" aria-labelledby="section-medical">
-          <h2 id="section-medical">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <section className="bg-white border border-slate-200 rounded-xl p-6 mb-4 shadow-sm" aria-labelledby="section-medical">
+          <h2 id="section-medical" className="flex items-center gap-2 text-base font-semibold text-teal-800 border-b border-slate-100 pb-2 mb-4">
+            <svg className="text-teal-600" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
               <rect x="6" y="2" width="8" height="16" rx="2" stroke="currentColor" strokeWidth="1.5"/>
               <path d="M10 6V10M8 8H12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               <path d="M6 14H14" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
             </svg>
             Medical Information
           </h2>
-          <div className="profile-grid">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <SelectField
               label="Blood Type"
               value={form.bloodType ?? ''}
@@ -624,8 +649,8 @@ const ProfilePage: React.FC = () => {
               onChange={(v) => handleChange('weightKg', v)}
               error={validationErrors.weightKg}
             />
-            <div className="profile-field full-width">
-              <label>Allergies</label>
+            <div className="space-y-1 col-span-full">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Allergies</label>
               {isEditing ? (
                 <ChipSelect
                   options={ALLERGY_OPTIONS}
@@ -633,19 +658,19 @@ const ProfilePage: React.FC = () => {
                   onChange={(items) => handleChange('allergies', items.join(', '))}
                 />
               ) : (
-                <span className={`field-value ${!form.allergies ? 'empty' : ''}`}>
+                <span className={form.allergies ? 'text-sm text-slate-900' : 'text-sm text-slate-400 italic'}>
                   {form.allergies ? (
-                    <span className="chip-display">
+                    <span className="flex flex-wrap gap-2">
                       {parseCommaSeparated(form.allergies).map((a) => (
-                        <span key={a} className="chip chip-readonly">{a}</span>
+                        <span key={a} className="inline-flex items-center rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-medium text-teal-700">{a}</span>
                       ))}
                     </span>
                   ) : 'Not specified'}
                 </span>
               )}
             </div>
-            <div className="profile-field full-width">
-              <label>Chronic Conditions</label>
+            <div className="space-y-1 col-span-full">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Chronic Conditions</label>
               {isEditing ? (
                 <ChipSelect
                   options={CHRONIC_CONDITION_OPTIONS}
@@ -653,11 +678,11 @@ const ProfilePage: React.FC = () => {
                   onChange={(items) => handleChange('chronicConditions', items.join(', '))}
                 />
               ) : (
-                <span className={`field-value ${!form.chronicConditions ? 'empty' : ''}`}>
+                <span className={form.chronicConditions ? 'text-sm text-slate-900' : 'text-sm text-slate-400 italic'}>
                   {form.chronicConditions ? (
-                    <span className="chip-display">
+                    <span className="flex flex-wrap gap-2">
                       {parseCommaSeparated(form.chronicConditions).map((c) => (
-                        <span key={c} className="chip chip-readonly">{c}</span>
+                        <span key={c} className="inline-flex items-center rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-medium text-teal-700">{c}</span>
                       ))}
                     </span>
                   ) : 'Not specified'}
@@ -668,14 +693,14 @@ const ProfilePage: React.FC = () => {
         </section>
 
         {/* ── Section 3: Emergency Contact ────────── */}
-        <section className="profile-card" aria-labelledby="section-emergency">
-          <h2 id="section-emergency">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <section className="bg-white border border-slate-200 rounded-xl p-6 mb-4 shadow-sm" aria-labelledby="section-emergency">
+          <h2 id="section-emergency" className="flex items-center gap-2 text-base font-semibold text-teal-800 border-b border-slate-100 pb-2 mb-4">
+            <svg className="text-teal-600" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
               <path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h2.02a1 1 0 0 1 .95.68l.74 2.22a1 1 0 0 1-.27 1.03L7.38 8.48a10.46 10.46 0 0 0 4.14 4.14l1.55-1.55a1 1 0 0 1 1.03-.27l2.22.74a1 1 0 0 1 .68.95V14.5a2.5 2.5 0 0 1-2.5 2.5A13.5 13.5 0 0 1 3 5.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             Emergency Contact
           </h2>
-          <div className="profile-grid">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field
               label="Contact Name"
               value={form.emergencyContactName}
@@ -697,18 +722,18 @@ const ProfilePage: React.FC = () => {
         </section>
 
         {/* ── Section 4: Account Actions ──────────── */}
-        <section className="profile-card profile-card-account" aria-labelledby="section-account">
-          <h2 id="section-account">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+        <section className="bg-slate-50 border border-slate-200 rounded-xl p-6 mb-4 shadow-sm" aria-labelledby="section-account">
+          <h2 id="section-account" className="flex items-center gap-2 text-base font-semibold text-teal-800 border-b border-slate-100 pb-2 mb-4">
+            <svg className="text-teal-600" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
               <rect x="4" y="8" width="12" height="9" rx="2" stroke="currentColor" strokeWidth="1.5"/>
               <path d="M7 8V6a3 3 0 1 1 6 0v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               <circle cx="10" cy="12.5" r="1" fill="currentColor"/>
             </svg>
             Account &amp; Security
           </h2>
-          <div className="profile-account-actions">
+          <div className="flex flex-wrap gap-3">
             <button
-              className="btn btn-account-action"
+              className={buttonAccountClass}
               onClick={openPasswordModal}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -722,11 +747,11 @@ const ProfilePage: React.FC = () => {
 
         {/* ── Action buttons (edit mode) ──────────── */}
         {isEditing && (
-          <div className="profile-actions">
-            <button className="btn btn-primary" onClick={handleSave}>
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <button className={buttonPrimaryClass} onClick={handleSave}>
               Save Changes
             </button>
-            <button className="btn btn-secondary" onClick={handleCancel}>
+            <button className={buttonSecondaryClass} onClick={handleCancel}>
               Cancel
             </button>
           </div>
@@ -738,35 +763,36 @@ const ProfilePage: React.FC = () => {
         isOpen={showStepUpPassword}
         onClose={() => !stepUpLoading && setShowStepUpPassword(false)}
         ariaLabelledBy="stepup-password-title"
+        contentClassName="max-w-md"
       >
-        <div className="modal-header">
-          <h3 id="stepup-password-title">Verify Your Identity</h3>
-          <button className="modal-close" onClick={() => setShowStepUpPassword(false)} aria-label="Close">
+        <div className={modalHeaderClass}>
+          <h3 id="stepup-password-title" className="text-lg font-semibold text-slate-900">Verify Your Identity</h3>
+          <button className={modalCloseClass} onClick={() => setShowStepUpPassword(false)} aria-label="Close">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 4.5L13.5 13.5M4.5 13.5L13.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
           </button>
         </div>
-        <div className="modal-body">
-          <p className="text-muted" style={{ marginBottom: '16px' }}>For your security, please enter your password to save profile changes.</p>
+        <div className={modalBodyClass}>
+          <p className="text-sm text-slate-500">For your security, please enter your password to save profile changes.</p>
           {stepUpError && (
-            <div className="alert alert-error" role="alert">
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
               {stepUpError}
             </div>
           )}
-          <div className="form-group">
-            <label htmlFor="stepup-password">Current Password</label>
+          <div className={modalFieldClass}>
+            <label className="text-xs font-medium text-slate-500" htmlFor="stepup-password">Current Password</label>
             <input
               id="stepup-password"
               type="password"
               value={stepUpPassword}
               onChange={(e) => setStepUpPassword(e.target.value)}
               disabled={stepUpLoading}
-              style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid var(--border, #000)' }}
+              className={inputDefaultClass}
             />
           </div>
         </div>
-        <div className="profile-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', padding: '16px', borderTop: '1px solid var(--border)' }}>
-          <button className="btn btn-secondary" onClick={() => setShowStepUpPassword(false)} disabled={stepUpLoading}>Cancel</button>
-          <button className="btn btn-primary" onClick={submitStepUpPassword} disabled={stepUpLoading}>
+        <div className={modalFooterClass}>
+          <button className={buttonSecondaryClass} onClick={() => setShowStepUpPassword(false)} disabled={stepUpLoading}>Cancel</button>
+          <button className={buttonPrimaryClass} onClick={submitStepUpPassword} disabled={stepUpLoading}>
             {stepUpLoading ? 'Verifying...' : 'Continue'}
           </button>
         </div>
@@ -776,22 +802,23 @@ const ProfilePage: React.FC = () => {
         isOpen={showStepUpOtp}
         onClose={() => !stepUpLoading && setShowStepUpOtp(false)}
         ariaLabelledBy="stepup-otp-title"
+        contentClassName="max-w-md"
       >
-        <div className="modal-header">
-          <h3 id="stepup-otp-title">Email Verification</h3>
-          <button className="modal-close" onClick={() => setShowStepUpOtp(false)} aria-label="Close">
+        <div className={modalHeaderClass}>
+          <h3 id="stepup-otp-title" className="text-lg font-semibold text-slate-900">Email Verification</h3>
+          <button className={modalCloseClass} onClick={() => setShowStepUpOtp(false)} aria-label="Close">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 4.5L13.5 13.5M4.5 13.5L13.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
           </button>
         </div>
-        <div className="modal-body">
-          <p className="text-muted" style={{ marginBottom: '16px' }}>A 6-digit code has been sent to your email. It will expire in 10 minutes.</p>
+        <div className={modalBodyClass}>
+          <p className="text-sm text-slate-500">A 6-digit code has been sent to your email. It will expire in 10 minutes.</p>
           {stepUpError && (
-            <div className="alert alert-error" role="alert">
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
               {stepUpError}
             </div>
           )}
-          <div className="form-group">
-            <label htmlFor="stepup-otp">Verification Code</label>
+          <div className={modalFieldClass}>
+            <label className="text-xs font-medium text-slate-500" htmlFor="stepup-otp">Verification Code</label>
             <input
               id="stepup-otp"
               type="text"
@@ -799,13 +826,13 @@ const ProfilePage: React.FC = () => {
               value={stepUpOtp}
               onChange={(e) => setStepUpOtp(e.target.value)}
               disabled={stepUpLoading}
-              style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid var(--border, #000)', letterSpacing: '2px', fontSize: '1.2rem', textAlign: 'center' }}
+              className={`${inputDefaultClass} tracking-[2px] text-center text-base`}
             />
           </div>
         </div>
-        <div className="profile-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', padding: '16px', borderTop: '1px solid var(--border)' }}>
-          <button className="btn btn-secondary" onClick={() => setShowStepUpOtp(false)} disabled={stepUpLoading}>Cancel</button>
-          <button className="btn btn-primary" onClick={submitStepUpOtp} disabled={stepUpLoading}>
+        <div className={modalFooterClass}>
+          <button className={buttonSecondaryClass} onClick={() => setShowStepUpOtp(false)} disabled={stepUpLoading}>Cancel</button>
+          <button className={buttonPrimaryClass} onClick={submitStepUpOtp} disabled={stepUpLoading}>
             {stepUpLoading ? 'Verifying...' : 'Verify & Save'}
           </button>
         </div>
@@ -816,20 +843,25 @@ const ProfilePage: React.FC = () => {
         isOpen={showPasswordModal}
         onClose={() => !passwordSaving && closePasswordModal()}
         ariaLabelledBy="password-modal-title"
+        contentClassName="max-w-md"
       >
-            <div className="modal-header">
-              <h3 id="password-modal-title">Change Password</h3>
-              <button className="modal-close" onClick={closePasswordModal} aria-label="Close">
+            <div className={modalHeaderClass}>
+              <h3 id="password-modal-title" className="text-lg font-semibold text-slate-900">Change Password</h3>
+              <button className={modalCloseClass} onClick={closePasswordModal} aria-label="Close">
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 4.5L13.5 13.5M4.5 13.5L13.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
               </button>
             </div>
-            <div className="modal-body">
-              {passwordSuccess && <div className="profile-toast profile-toast-success">{passwordSuccess}</div>}
-              {passwordError && <div className="profile-toast profile-toast-error">{passwordError}</div>}
+            <div className={modalBodyClass}>
+              {passwordSuccess && (
+                <div className={`${toastBaseClass} border-emerald-200 bg-emerald-50 text-emerald-700`}>{passwordSuccess}</div>
+              )}
+              {passwordError && (
+                <div className={`${toastBaseClass} border-red-200 bg-red-50 text-red-700`}>{passwordError}</div>
+              )}
               {!mustChangePassword ? (
-                <div className="modal-field">
-                  <label htmlFor="current-password">Current Password</label>
-                  <div className="modal-input-row">
+                <div className={modalFieldClass}>
+                  <label className="text-xs font-medium text-slate-500" htmlFor="current-password">Current Password</label>
+                  <div className={modalInputRowClass}>
                     <input
                       id="current-password"
                       type={showCurrentPassword ? 'text' : 'password'}
@@ -837,33 +869,34 @@ const ProfilePage: React.FC = () => {
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       autoComplete="current-password"
                       placeholder="Enter current password"
+                      className={`${inputDefaultClass} pr-10`}
                     />
-                    <button type="button" className="modal-toggle-pw" onClick={() => setShowCurrentPassword(v => !v)} aria-label={showCurrentPassword ? 'Hide' : 'Show'}>
+                    <button type="button" className={modalToggleClass} onClick={() => setShowCurrentPassword(v => !v)} aria-label={showCurrentPassword ? 'Hide' : 'Show'}>
                       {showCurrentPassword ? '🙈' : '👁'}
                     </button>
                   </div>
                 </div>
               ) : (
-                <p className="field-hint" style={{ marginTop: 0, marginBottom: '8px' }}>
+                <p className="text-xs text-slate-400">
                   You are signed in with a temporary password. Set a new password to continue.
                 </p>
               )}
               {!mustChangePassword && (
-                <div className="modal-field">
-                  <label>Security Verification</label>
+                <div className={modalFieldClass}>
+                  <label className="text-xs font-medium text-slate-500">Security Verification</label>
                   <PasswordChangeCaptcha
                     onTokenChange={setPasswordCaptchaToken}
                     onErrorChange={setPasswordCaptchaError}
                     resetVersion={passwordCaptchaResetVersion}
                   />
                   {passwordCaptchaError && (
-                    <span className="field-error" role="alert">{passwordCaptchaError}</span>
+                    <span className="text-xs text-red-600" role="alert">{passwordCaptchaError}</span>
                   )}
                 </div>
               )}
-              <div className="modal-field">
-                <label htmlFor="new-password">New Password</label>
-                <div className="modal-input-row">
+              <div className={modalFieldClass}>
+                <label className="text-xs font-medium text-slate-500" htmlFor="new-password">New Password</label>
+                <div className={modalInputRowClass}>
                   <input
                     id="new-password"
                     type={showNewPassword ? 'text' : 'password'}
@@ -871,37 +904,38 @@ const ProfilePage: React.FC = () => {
                     onChange={(e) => setNewPassword(e.target.value)}
                     autoComplete="new-password"
                     placeholder="Min 8 characters"
+                    className={`${inputDefaultClass} pr-10`}
                   />
-                  <button type="button" className="modal-toggle-pw" onClick={() => setShowNewPassword(v => !v)} aria-label={showNewPassword ? 'Hide' : 'Show'}>
+                  <button type="button" className={modalToggleClass} onClick={() => setShowNewPassword(v => !v)} aria-label={showNewPassword ? 'Hide' : 'Show'}>
                     {showNewPassword ? '🙈' : '👁'}
                   </button>
                 </div>
-                <ul className="password-checklist" aria-label="Password requirements">
-                  <li className={newPassword.length >= 8 ? 'met' : ''}>
-                    <span className="check-icon" aria-hidden="true">{newPassword.length >= 8 ? '✓' : '✗'}</span>
+                <ul className="mt-2 space-y-1 text-xs" aria-label="Password requirements">
+                  <li className={`flex items-center gap-2 ${newPassword.length >= 8 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                    <span className={`text-xs font-bold ${newPassword.length >= 8 ? 'text-emerald-600' : 'text-slate-300'}`} aria-hidden="true">{newPassword.length >= 8 ? '✓' : '✗'}</span>
                     At least 8 characters
                   </li>
-                  <li className={/[A-Z]/.test(newPassword) ? 'met' : ''}>
-                    <span className="check-icon" aria-hidden="true">{/[A-Z]/.test(newPassword) ? '✓' : '✗'}</span>
+                  <li className={`flex items-center gap-2 ${/[A-Z]/.test(newPassword) ? 'text-emerald-600' : 'text-slate-400'}`}>
+                    <span className={`text-xs font-bold ${/[A-Z]/.test(newPassword) ? 'text-emerald-600' : 'text-slate-300'}`} aria-hidden="true">{/[A-Z]/.test(newPassword) ? '✓' : '✗'}</span>
                     One uppercase letter
                   </li>
-                  <li className={/[a-z]/.test(newPassword) ? 'met' : ''}>
-                    <span className="check-icon" aria-hidden="true">{/[a-z]/.test(newPassword) ? '✓' : '✗'}</span>
+                  <li className={`flex items-center gap-2 ${/[a-z]/.test(newPassword) ? 'text-emerald-600' : 'text-slate-400'}`}>
+                    <span className={`text-xs font-bold ${/[a-z]/.test(newPassword) ? 'text-emerald-600' : 'text-slate-300'}`} aria-hidden="true">{/[a-z]/.test(newPassword) ? '✓' : '✗'}</span>
                     One lowercase letter
                   </li>
-                  <li className={/\d/.test(newPassword) ? 'met' : ''}>
-                    <span className="check-icon" aria-hidden="true">{/\d/.test(newPassword) ? '✓' : '✗'}</span>
+                  <li className={`flex items-center gap-2 ${/\d/.test(newPassword) ? 'text-emerald-600' : 'text-slate-400'}`}>
+                    <span className={`text-xs font-bold ${/\d/.test(newPassword) ? 'text-emerald-600' : 'text-slate-300'}`} aria-hidden="true">{/\d/.test(newPassword) ? '✓' : '✗'}</span>
                     One number
                   </li>
-                  <li className={/[^a-zA-Z0-9]/.test(newPassword) ? 'met' : ''}>
-                    <span className="check-icon" aria-hidden="true">{/[^a-zA-Z0-9]/.test(newPassword) ? '✓' : '✗'}</span>
+                  <li className={`flex items-center gap-2 ${/[^a-zA-Z0-9]/.test(newPassword) ? 'text-emerald-600' : 'text-slate-400'}`}>
+                    <span className={`text-xs font-bold ${/[^a-zA-Z0-9]/.test(newPassword) ? 'text-emerald-600' : 'text-slate-300'}`} aria-hidden="true">{/[^a-zA-Z0-9]/.test(newPassword) ? '✓' : '✗'}</span>
                     One special character
                   </li>
                 </ul>
               </div>
-              <div className="modal-field">
-                <label htmlFor="confirm-new-password">Confirm New Password</label>
-                <div className="modal-input-row">
+              <div className={modalFieldClass}>
+                <label className="text-xs font-medium text-slate-500" htmlFor="confirm-new-password">Confirm New Password</label>
+                <div className={modalInputRowClass}>
                   <input
                     id="confirm-new-password"
                     type={showConfirmPassword ? 'text' : 'password'}
@@ -909,21 +943,22 @@ const ProfilePage: React.FC = () => {
                     onChange={(e) => setConfirmNewPassword(e.target.value)}
                     autoComplete="new-password"
                     placeholder="Re-enter new password"
+                    className={`${inputDefaultClass} pr-10`}
                   />
-                  <button type="button" className="modal-toggle-pw" onClick={() => setShowConfirmPassword(v => !v)} aria-label={showConfirmPassword ? 'Hide' : 'Show'}>
+                  <button type="button" className={modalToggleClass} onClick={() => setShowConfirmPassword(v => !v)} aria-label={showConfirmPassword ? 'Hide' : 'Show'}>
                     {showConfirmPassword ? '🙈' : '👁'}
                   </button>
                 </div>
                 {confirmNewPassword && !doPasswordsMatch(newPassword, confirmNewPassword) && (
-                  <span className="field-error" role="alert">Passwords do not match</span>
+                  <span className="text-xs text-red-600" role="alert">Passwords do not match</span>
                 )}
               </div>
             </div>
-            <div className="modal-footer">
-              <button className="btn btn-primary" onClick={handleSendPasswordVerificationCode} disabled={passwordSaving}>
+            <div className={modalFooterClass}>
+              <button className={buttonPrimaryClass} onClick={handleSendPasswordVerificationCode} disabled={passwordSaving}>
                 {passwordSaving ? 'Sending code…' : 'Send Verification Code'}
               </button>
-              <button className="btn btn-secondary" onClick={closePasswordModal} disabled={passwordSaving}>
+              <button className={buttonSecondaryClass} onClick={closePasswordModal} disabled={passwordSaving}>
                 Cancel
               </button>
             </div>
@@ -933,21 +968,26 @@ const ProfilePage: React.FC = () => {
         isOpen={showPasswordOtpModal}
         onClose={() => !passwordSaving && backToPasswordDetailsModal()}
         ariaLabelledBy="password-otp-modal-title"
+        contentClassName="max-w-md"
       >
-        <div className="modal-header">
-          <h3 id="password-otp-modal-title">Email Verification</h3>
-          <button className="modal-close" onClick={backToPasswordDetailsModal} aria-label="Close">
+        <div className={modalHeaderClass}>
+          <h3 id="password-otp-modal-title" className="text-lg font-semibold text-slate-900">Email Verification</h3>
+          <button className={modalCloseClass} onClick={backToPasswordDetailsModal} aria-label="Close">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 4.5L13.5 13.5M4.5 13.5L13.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
           </button>
         </div>
-        <div className="modal-body">
-          {passwordSuccess && <div className="profile-toast profile-toast-success">{passwordSuccess}</div>}
-          {passwordOtpError && <div className="profile-toast profile-toast-error">{passwordOtpError}</div>}
-          <p className="field-hint" style={{ marginTop: 0, marginBottom: '8px' }}>
+        <div className={modalBodyClass}>
+          {passwordSuccess && (
+            <div className={`${toastBaseClass} border-emerald-200 bg-emerald-50 text-emerald-700`}>{passwordSuccess}</div>
+          )}
+          {passwordOtpError && (
+            <div className={`${toastBaseClass} border-red-200 bg-red-50 text-red-700`}>{passwordOtpError}</div>
+          )}
+          <p className="text-xs text-slate-400">
             A 6-digit code has been sent to your email. It will expire in 10 minutes.
           </p>
-          <div className="modal-field">
-            <label htmlFor="password-change-otp">Verification Code</label>
+          <div className={modalFieldClass}>
+            <label className="text-xs font-medium text-slate-500" htmlFor="password-change-otp">Verification Code</label>
             <input
               id="password-change-otp"
               type="text"
@@ -957,14 +997,15 @@ const ProfilePage: React.FC = () => {
               value={passwordOtpCode}
               onChange={(e) => setPasswordOtpCode(e.target.value.replace(/\D/g, ''))}
               placeholder="Enter 6-digit code"
+              className={inputDefaultClass}
             />
           </div>
         </div>
-        <div className="modal-footer">
-          <button className="btn btn-secondary" onClick={backToPasswordDetailsModal} disabled={passwordSaving}>
+        <div className={modalFooterClass}>
+          <button className={buttonSecondaryClass} onClick={backToPasswordDetailsModal} disabled={passwordSaving}>
             Back
           </button>
-          <button className="btn btn-primary" onClick={handleVerifyPasswordCodeAndChange} disabled={passwordSaving}>
+          <button className={buttonPrimaryClass} onClick={handleVerifyPasswordCodeAndChange} disabled={passwordSaving}>
             {passwordSaving ? 'Updating…' : 'Verify Code & Update Password'}
           </button>
         </div>
@@ -1009,8 +1050,8 @@ const PasswordChangeCaptcha: React.FC<PasswordChangeCaptchaProps> = ({
   }, [onTokenChange, resetCaptcha, resetVersion]);
 
   return (
-    <div className="modal-captcha">
-      <div ref={turnstileRef} />
+    <div className="min-h-[65px] flex items-center">
+      <div ref={turnstileRef} className="min-h-[65px]" />
     </div>
   );
 };
@@ -1032,18 +1073,22 @@ const ChipSelect: React.FC<ChipSelectProps> = ({ options, selected, onChange }) 
   };
 
   return (
-    <div className="chip-select">
+    <div className="flex flex-wrap gap-2 py-2">
       {options.map((opt) => {
         const isActive = selected.includes(opt);
         return (
           <button
             key={opt}
             type="button"
-            className={`chip ${isActive ? 'chip-active' : ''}`}
+            className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+              isActive
+                ? 'border-teal-500 bg-teal-100 text-teal-800 font-semibold'
+                : 'border-slate-300 bg-white text-slate-600 hover:border-teal-400 hover:bg-teal-50'
+            }`}
             onClick={() => toggle(opt)}
             aria-pressed={isActive}
           >
-            {isActive && <span className="chip-check">✓</span>}
+            {isActive && <span className="text-xs font-bold">✓</span>}
             {opt}
           </button>
         );
@@ -1065,33 +1110,37 @@ interface FieldProps {
   onChange?: (value: string) => void;
 }
 
-const Field: React.FC<FieldProps> = ({ label, value, editing, type = 'text', placeholder, hint, error, icon, autoComplete, onChange }) => (
-  <div className={`profile-field ${error ? 'has-error' : ''}`}>
-    <label>{label}</label>
-    {editing && onChange ? (
-      <>
-        <input
-          type={type}
-          value={value ?? ''}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          autoComplete={autoComplete}
-          aria-invalid={!!error}
-          aria-describedby={error ? `${label}-error` : undefined}
-        />
-        {error && <span className="field-error" id={`${label}-error`} role="alert">{error}</span>}
-      </>
-    ) : (
-      <div className="field-value-row">
-        {icon && <span className="field-icon">{icon}</span>}
-        <span className={`field-value ${!value ? 'empty' : ''}`}>
-          {value || 'Not specified'}
-        </span>
-        {hint && <span className="field-hint">{hint}</span>}
-      </div>
-    )}
-  </div>
-);
+const Field: React.FC<FieldProps> = ({ label, value, editing, type = 'text', placeholder, hint, error, icon, autoComplete, onChange }) => {
+  const inputClassName = error ? inputErrorClass : inputDefaultClass;
+  return (
+    <div className="space-y-1">
+      <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</label>
+      {editing && onChange ? (
+        <>
+          <input
+            className={inputClassName}
+            type={type}
+            value={value ?? ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            autoComplete={autoComplete}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${label}-error` : undefined}
+          />
+          {error && <span className="text-xs text-red-600" id={`${label}-error`} role="alert">{error}</span>}
+        </>
+      ) : (
+        <div className="flex flex-wrap items-center gap-2 py-2">
+          {icon && <span className="flex items-center text-slate-400">{icon}</span>}
+          <span className={value ? 'text-sm text-slate-900' : 'text-sm text-slate-400 italic'}>
+            {value || 'Not specified'}
+          </span>
+          {hint && <span className="text-xs text-slate-400">{hint}</span>}
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface SelectFieldProps {
   label: string;
@@ -1102,10 +1151,10 @@ interface SelectFieldProps {
 }
 
 const SelectField: React.FC<SelectFieldProps> = ({ label, value, editing, options, onChange }) => (
-  <div className="profile-field">
-    <label>{label}</label>
+  <div className="space-y-1">
+    <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</label>
     {editing && onChange ? (
-      <select value={value} onChange={(e) => onChange(e.target.value)}>
+      <select className={inputDefaultClass} value={value} onChange={(e) => onChange(e.target.value)}>
         <option value="">Select…</option>
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>
@@ -1114,7 +1163,7 @@ const SelectField: React.FC<SelectFieldProps> = ({ label, value, editing, option
         ))}
       </select>
     ) : (
-      <span className={`field-value ${!value ? 'empty' : ''}`}>
+      <span className={value ? 'text-sm text-slate-900' : 'text-sm text-slate-400 italic'}>
         {options.find((o) => o.value === value)?.label || value || 'Not specified'}
       </span>
     )}
@@ -1131,31 +1180,35 @@ interface NumberFieldProps {
   onChange?: (value: number | undefined) => void;
 }
 
-const NumberField: React.FC<NumberFieldProps> = ({ label, value, editing, min, max, error, onChange }) => (
-  <div className={`profile-field ${error ? 'has-error' : ''}`}>
-    <label>{label}</label>
-    {editing && onChange ? (
-      <>
-        <input
-          type="number"
-          value={value ?? ''}
-          min={min}
-          max={max}
-          aria-invalid={!!error}
-          onChange={(e) => {
-            const v = e.target.value;
-            onChange(v === '' ? undefined : Number(v));
-          }}
-        />
-        {error && <span className="field-error" role="alert">{error}</span>}
-      </>
-    ) : (
-      <span className={`field-value ${value == null ? 'empty' : ''}`}>
-        {value != null ? value : 'Not specified'}
-      </span>
-    )}
-  </div>
-);
+const NumberField: React.FC<NumberFieldProps> = ({ label, value, editing, min, max, error, onChange }) => {
+  const inputClassName = error ? inputErrorClass : inputDefaultClass;
+  return (
+    <div className="space-y-1">
+      <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</label>
+      {editing && onChange ? (
+        <>
+          <input
+            className={inputClassName}
+            type="number"
+            value={value ?? ''}
+            min={min}
+            max={max}
+            aria-invalid={!!error}
+            onChange={(e) => {
+              const v = e.target.value;
+              onChange(v === '' ? undefined : Number(v));
+            }}
+          />
+          {error && <span className="text-xs text-red-600" role="alert">{error}</span>}
+        </>
+      ) : (
+        <span className={value != null ? 'text-sm text-slate-900' : 'text-sm text-slate-400 italic'}>
+          {value != null ? value : 'Not specified'}
+        </span>
+      )}
+    </div>
+  );
+};
 
 // ── Helpers ──────────────────────────────────
 

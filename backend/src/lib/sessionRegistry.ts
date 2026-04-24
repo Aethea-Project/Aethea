@@ -3,6 +3,19 @@ import { createHash, randomInt } from 'node:crypto';
 
 type SessionRiskLevel = 'low' | 'medium' | 'high';
 
+interface SessionFingerprint {
+  sessionId: string;
+  userAgent: string | null;
+  ipAddress: string | null;
+  riskLevel: string;
+}
+
+interface SessionContextRow extends SessionFingerprint {
+  revokedAt: Date | null;
+  stepUpVerifiedAt: Date | null;
+  lastSeenAt: Date;
+}
+
 interface SessionRecord {
   id: string;
   sessionId: string;
@@ -11,9 +24,6 @@ interface SessionRecord {
   rememberMe: boolean;
   riskLevel: string;
   stepUpRequired: boolean;
-  stepUpCodeHash?: string | null;
-  stepUpCodeExpiresAt?: Date | null;
-  stepUpVerifiedAt?: Date | null;
   lastSeenAt: Date;
   createdAt: Date;
 }
@@ -33,6 +43,12 @@ interface UpsertSessionInput {
   rememberMe?: boolean;
 }
 
+interface UpsertSessionResult {
+  revoked: boolean;
+  riskLevel: SessionRiskLevel;
+  stepUpRequired: boolean;
+}
+
 interface StepUpChallengeResult {
   code: string;
   expiresInSeconds: number;
@@ -50,8 +66,8 @@ const sessionModel = (): SessionModel | undefined => {
 const sha256 = (value: string): string => createHash('sha256').update(value).digest('hex');
 
 const computeRiskLevel = (
-  existingSession: SessionRecord | null,
-  recentSessions: SessionRecord[],
+  existingSession: SessionFingerprint | null,
+  recentSessions: SessionFingerprint[],
   userAgent?: string,
   ipAddress?: string
 ): SessionRiskLevel => {
@@ -83,6 +99,78 @@ const computeRiskLevel = (
   return hasSeenFingerprint ? 'low' : 'high';
 };
 
+const isMissingSessionSchemaError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const raw = error as { code?: unknown; meta?: { code?: unknown; cause?: unknown }; message?: unknown };
+  const code = raw.code ?? raw.meta?.code;
+  const cause = raw.meta?.cause;
+  const message = typeof raw.message === 'string' ? raw.message : '';
+
+  return (
+    code === '42P01' ||
+    code === '42703' ||
+    code === '42501' ||
+    (typeof cause === 'string' && cause.includes('user_sessions')) ||
+    message.includes('user_sessions')
+  );
+};
+
+const loadSessionContext = async (userId: string, sessionId: string): Promise<{
+  existingSession: SessionContextRow | null;
+  recentSessions: SessionContextRow[];
+} | null> => {
+  try {
+    const rows = await prisma.$queryRaw<SessionContextRow[]>`
+      (
+        SELECT
+          "sessionId" AS "sessionId",
+          "userAgent" AS "userAgent",
+          "ipAddress" AS "ipAddress",
+          "riskLevel" AS "riskLevel",
+          "revokedAt" AS "revokedAt",
+          "stepUpVerifiedAt" AS "stepUpVerifiedAt",
+          "lastSeenAt" AS "lastSeenAt"
+        FROM public.user_sessions
+        WHERE "userId" = ${userId}::uuid
+          AND "sessionId" = ${sessionId}::uuid
+        LIMIT 1
+      )
+      UNION ALL
+      (
+        SELECT
+          "sessionId" AS "sessionId",
+          "userAgent" AS "userAgent",
+          "ipAddress" AS "ipAddress",
+          "riskLevel" AS "riskLevel",
+          "revokedAt" AS "revokedAt",
+          "stepUpVerifiedAt" AS "stepUpVerifiedAt",
+          "lastSeenAt" AS "lastSeenAt"
+        FROM public.user_sessions
+        WHERE "userId" = ${userId}::uuid
+          AND "revokedAt" IS NULL
+          AND "sessionId" <> ${sessionId}::uuid
+        ORDER BY "lastSeenAt" DESC
+        LIMIT 10
+      )
+    `;
+
+    const existingSession = rows.find((row) => row.sessionId === sessionId) ?? null;
+    const recentSessions = rows.filter((row) => row.sessionId !== sessionId);
+
+    return { existingSession, recentSessions };
+  } catch (error) {
+    // Optional dependency: some deployments may not have the session registry table yet.
+    // In that case, fail open and skip session tracking.
+    if (isMissingSessionSchemaError(error)) {
+      return null;
+    }
+    throw error;
+  }
+};
+
 export const getClientIp = (requestIp: string | string[] | undefined): string | undefined => {
   if (!requestIp) {
     return undefined;
@@ -97,64 +185,55 @@ export const getClientIp = (requestIp: string | string[] | undefined): string | 
 };
 
 export const upsertUserSession = async (input: UpsertSessionInput): Promise<void> => {
+  // Legacy wrapper kept for compatibility with older call-sites.
+  await validateAndUpsertUserSession(input);
+};
+
+/**
+ * Single entry-point used by the auth middleware.
+ *
+ * Reduces first-request DB work by:
+ * - Loading current-session + recent-session context in ONE query
+ * - Upserting the session record in ONE query
+ *
+ * Total for session registry: 2 SQL statements.
+ */
+export const validateAndUpsertUserSession = async (input: UpsertSessionInput): Promise<UpsertSessionResult | null> => {
   const model = sessionModel();
   if (!model || !input.sessionId) {
-    return;
+    return null;
   }
 
-  const [existingSessionRaw, recentSessionsRaw] = await Promise.all([
-    model.findFirst({
-      where: {
-        userId: input.userId,
-        sessionId: input.sessionId,
-      },
-      select: {
-        id: true,
-        sessionId: true,
-        userAgent: true,
-        ipAddress: true,
-        rememberMe: true,
-        riskLevel: true,
-        stepUpRequired: true,
-        stepUpCodeHash: true,
-        stepUpCodeExpiresAt: true,
-        stepUpVerifiedAt: true,
-        lastSeenAt: true,
-        createdAt: true,
-      },
-    }),
-    model.findMany({
-      where: {
-        userId: input.userId,
-        revokedAt: null,
-        sessionId: { not: input.sessionId },
-      },
-      orderBy: {
-        lastSeenAt: 'desc',
-      },
-      take: 10,
-      select: {
-        id: true,
-        sessionId: true,
-        userAgent: true,
-        ipAddress: true,
-        rememberMe: true,
-        riskLevel: true,
-        stepUpRequired: true,
-        stepUpCodeHash: true,
-        stepUpCodeExpiresAt: true,
-        stepUpVerifiedAt: true,
-        lastSeenAt: true,
-        createdAt: true,
-      },
-    }),
-  ]);
+  const context = await loadSessionContext(input.userId, input.sessionId);
+  if (!context) {
+    return null;
+  }
 
-  const existingSession = (existingSessionRaw ?? null) as SessionRecord | null;
-  const recentSessions = (recentSessionsRaw ?? []) as SessionRecord[];
+  if (context.existingSession?.revokedAt) {
+    return {
+      revoked: true,
+      riskLevel: 'low',
+      stepUpRequired: false,
+    };
+  }
 
-  const riskLevel = computeRiskLevel(existingSession, recentSessions, input.userAgent, input.ipAddress);
-  const stepUpRequired = riskLevel === 'high';
+  const riskLevel = computeRiskLevel(
+    context.existingSession,
+    context.recentSessions,
+    input.userAgent,
+    input.ipAddress
+  );
+
+  const existingSession = context.existingSession;
+  const ipChanged = Boolean(
+    existingSession?.ipAddress && input.ipAddress && existingSession.ipAddress !== input.ipAddress
+  );
+  const uaChanged = Boolean(
+    existingSession?.userAgent && input.userAgent && existingSession.userAgent !== input.userAgent
+  );
+  const fingerprintChanged = ipChanged || uaChanged;
+  const stepUpVerifiedAt = fingerprintChanged ? null : (existingSession?.stepUpVerifiedAt ?? null);
+  const stepUpRequired = riskLevel === 'high' && !stepUpVerifiedAt;
 
   await model.upsert({
     where: { sessionId: input.sessionId },
@@ -164,6 +243,7 @@ export const upsertUserSession = async (input: UpsertSessionInput): Promise<void
       rememberMe: input.rememberMe ?? false,
       riskLevel,
       stepUpRequired,
+      ...(fingerprintChanged ? { stepUpVerifiedAt: null } : {}),
       ...(stepUpRequired ? {} : { stepUpCodeHash: null, stepUpCodeExpiresAt: null }),
       revokedAt: null,
       lastSeenAt: new Date(),
@@ -179,6 +259,12 @@ export const upsertUserSession = async (input: UpsertSessionInput): Promise<void
       lastSeenAt: new Date(),
     },
   });
+
+  return {
+    revoked: false,
+    riskLevel,
+    stepUpRequired,
+  };
 };
 
 export const getSessionStatus = async (userId: string, sessionId: string) => {

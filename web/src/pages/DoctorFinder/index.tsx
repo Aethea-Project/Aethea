@@ -5,7 +5,6 @@ import { useDoctors } from '../../hooks/useDoctors';
 import { DoctorMap } from './DoctorMap';
 import { DoctorCard } from './DoctorCard';
 import { useNearbyMedicalPlaces } from '../../hooks/useNearbyMedicalPlaces';
-import './styles.css';
 
 const SPECIALTIES = [
   'All Specialties',
@@ -52,7 +51,7 @@ export default function DoctorFinderPage() {
   });
 
   return (
-    <div className="doctor-finder-page">
+    <div className="mx-auto max-w-[1240px] px-6 pb-10 pt-6">
       <FeatureHeader
         title="Care Locator"
         subtitle="Find doctors, nearby hospitals, and pharmacies"
@@ -61,9 +60,9 @@ export default function DoctorFinderPage() {
         imageAlt="Care Locator"
       />
 
-      <div className="finder-controls">
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
         <input
-          className="search-input"
+          className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-100"
           type="text"
           placeholder="Search by name, specialty, or city..."
           value={searchTerm}
@@ -72,7 +71,7 @@ export default function DoctorFinderPage() {
         />
 
         <select
-          className="specialty-select"
+          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-100 sm:w-56"
           value={selectedSpecialty}
           onChange={(event) => setSelectedSpecialty(event.target.value)}
           aria-label="Filter by specialty"
@@ -83,22 +82,26 @@ export default function DoctorFinderPage() {
         </select>
       </div>
 
-      {doctorsError && <div className="error">{doctorsError}</div>}
+      {doctorsError && (
+        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+          {doctorsError}
+        </div>
+      )}
 
       {doctorsLoading ? (
-        <p className="loading">Loading doctors...</p>
+        <p className="mt-6 text-sm text-slate-500">Loading doctors...</p>
       ) : doctors.length === 0 ? (
-        <p className="loading">No doctors found matching your criteria.</p>
+        <p className="mt-6 text-sm text-slate-500">No doctors found matching your criteria.</p>
       ) : (
-        <div className="doctors-grid">
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {doctors.map((doctor) => (
             <DoctorCard key={doctor.id} doctor={doctor} />
           ))}
         </div>
       )}
 
-      <section className="map-section" aria-labelledby="nearby-medical-title">
-        <h2 id="nearby-medical-title">Nearest Medical Places</h2>
+      <section className="mt-10" aria-labelledby="nearby-medical-title">
+        <h2 id="nearby-medical-title" className="text-xl font-bold text-slate-900">Nearest Medical Places</h2>
         <DoctorMap
           loading={nearbyLoading}
           error={nearbyError}

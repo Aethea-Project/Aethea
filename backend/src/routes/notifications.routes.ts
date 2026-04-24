@@ -7,6 +7,7 @@ import {
   listNotifications,
   markNotificationsRead,
   getUnreadCount,
+  streamNotifications,
 } from '../controllers/notifications.controller.js';
 import { validateBody, validateQuery } from '../middleware/validate.js';
 import { asyncHandler } from '../middleware/asyncHandler.js';
@@ -17,11 +18,14 @@ import { markNotificationsReadSchema, paginationSchema } from '../schemas/index.
 export const createNotificationRoutes = (authMiddleware: RequestHandler): Router => {
   const router = Router();
 
-  const auth = [authMiddleware, requireTrustedClaims, requireActiveAccount, requirePasswordChanged, requireLocalUser];
+  const auth = [authMiddleware, requireLocalUser, requireTrustedClaims, requireActiveAccount, requirePasswordChanged];
 
   router.get('/', auth, validateQuery(paginationSchema), asyncHandler(listNotifications));
   router.get('/unread-count', auth, asyncHandler(getUnreadCount));
   router.patch('/read', auth, validateBody(markNotificationsReadSchema), asyncHandler(markNotificationsRead));
+  
+  // Use raw handler for stream to bypass asyncHandler so connection isn't closed on return
+  router.get('/stream', auth, streamNotifications);
 
   return router;
 };

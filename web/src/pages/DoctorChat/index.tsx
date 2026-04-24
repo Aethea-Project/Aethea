@@ -1,6 +1,5 @@
 import { FeatureHeader } from '../../components/FeatureHeader';
 import { imageAssets } from '../../constants/imageAssets';
-import './styles.css';
 
 /**
  * Aethea - Doctor Consultation Chat
@@ -9,7 +8,7 @@ import './styles.css';
 
 export default function DoctorChatPage() {
   return (
-    <div className="doctor-chat-page">
+    <div className="mx-auto max-w-[1240px] px-6 pb-10 pt-6">
       <FeatureHeader
         title="Doctor Chat"
         subtitle="Secure messaging and video consultation with your doctor"

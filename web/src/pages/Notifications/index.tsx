@@ -2,10 +2,17 @@ import { useMemo, useState } from 'react';
 import { FeatureHeader } from '../../components/FeatureHeader';
 import { imageAssets } from '../../constants/imageAssets';
 import { useUiNotifications, UiNotificationType } from '../../contexts/UiNotificationsProvider';
-import './styles.css';
+import { cn } from '../../lib/utils';
 
 type ReadFilter = 'all' | 'unread' | 'read';
 type TypeFilter = 'all' | UiNotificationType;
+
+const TYPE_COLORS: Record<string, string> = {
+  success: 'border-l-emerald-500',
+  error: 'border-l-red-500',
+  warning: 'border-l-amber-500',
+  info: 'border-l-sky-500',
+};
 
 function formatDate(value: number): string {
   return new Date(value).toLocaleString(undefined, {
@@ -13,6 +20,8 @@ function formatDate(value: number): string {
     timeStyle: 'short',
   });
 }
+
+const ghostBtnClass = 'rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed';
 
 export default function NotificationsPage() {
   const { entries, unreadCount, markRead, markAllRead, clearAll, remove } = useUiNotifications();
@@ -38,7 +47,7 @@ export default function NotificationsPage() {
   }, [entries, readFilter, search, typeFilter]);
 
   return (
-    <div className="notifications-page">
+    <div className="mx-auto max-w-[900px] px-6 pb-10 pt-6">
       <FeatureHeader
         title="Notifications"
         subtitle="Filter and review all your recent notifications"
@@ -47,18 +56,19 @@ export default function NotificationsPage() {
         imageAlt="Notifications"
       />
 
-      <div className="notifications-toolbar">
-        <div className="notifications-inputs">
+      {/* ── Toolbar ──────────────────── */}
+      <div className="mt-6 flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-1">
           <input
             type="text"
-            className="notifications-search"
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-100 sm:max-w-xs"
             placeholder="Search notifications..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
 
           <select
-            className="notifications-select"
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-100"
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value as TypeFilter)}
           >
@@ -70,7 +80,7 @@ export default function NotificationsPage() {
           </select>
 
           <select
-            className="notifications-select"
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-100"
             value={readFilter}
             onChange={(e) => setReadFilter(e.target.value as ReadFilter)}
           >
@@ -80,42 +90,56 @@ export default function NotificationsPage() {
           </select>
         </div>
 
-        <div className="notifications-actions">
-          <span className="notifications-unread">Unread: {unreadCount}</span>
-          <button type="button" className="btn btn-ghost" onClick={markAllRead} disabled={entries.length === 0}>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-teal-100 px-2.5 py-1 text-xs font-semibold text-teal-800">Unread: {unreadCount}</span>
+          <button type="button" className={ghostBtnClass} onClick={markAllRead} disabled={entries.length === 0}>
             Mark all read
           </button>
-          <button type="button" className="btn btn-ghost" onClick={clearAll} disabled={entries.length === 0}>
+          <button type="button" className={ghostBtnClass} onClick={clearAll} disabled={entries.length === 0}>
             Clear all
           </button>
         </div>
       </div>
 
+      {/* ── List ─────────────────────── */}
       {filteredEntries.length === 0 ? (
-        <p className="notifications-empty">No notifications match your filters.</p>
+        <p className="mt-6 text-sm text-slate-500">No notifications match your filters.</p>
       ) : (
-        <ul className="notifications-list">
+        <ul className="mt-5 flex flex-col gap-3 list-none p-0 m-0">
           {filteredEntries.map((item) => (
-            <li key={item.id} className={`notifications-item ${item.type} ${item.read ? 'read' : 'unread'}`}>
-              <div className="notifications-main">
-                <div className="notifications-title-row">
-                  <h3>{item.title}</h3>
-                  {!item.read && <span className="notifications-dot" aria-label="Unread notification" />}
+            <li
+              key={item.id}
+              className={cn(
+                'rounded-xl border border-l-4 bg-white p-4 shadow-sm transition-colors',
+                TYPE_COLORS[item.type] || 'border-l-slate-300',
+                item.read ? 'border-slate-200 opacity-75' : 'border-slate-200',
+              )}
+            >
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="m-0 text-sm font-semibold text-slate-900">{item.title}</h3>
+                    {!item.read && (
+                      <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-teal-500" aria-label="Unread notification" />
+                    )}
+                  </div>
+                  <p className="m-0 mt-1 text-sm text-slate-600">{item.message}</p>
+                  {item.details && (
+                    <pre className="mt-2 whitespace-pre-wrap rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600 font-mono border border-slate-200 overflow-x-auto">{item.details}</pre>
+                  )}
+                  <small className="mt-2 block text-xs text-slate-400">{formatDate(item.createdAt)}</small>
                 </div>
-                <p>{item.message}</p>
-                {item.details && <pre>{item.details}</pre>}
-                <small>{formatDate(item.createdAt)}</small>
-              </div>
 
-              <div className="notifications-item-actions">
-                {!item.read && (
-                  <button type="button" className="btn btn-ghost" onClick={() => markRead(item.id)}>
-                    Mark read
+                <div className="flex shrink-0 items-center gap-1.5 pt-2 sm:pt-0 sm:pl-3">
+                  {!item.read && (
+                    <button type="button" className={ghostBtnClass} onClick={() => markRead(item.id)}>
+                      Mark read
+                    </button>
+                  )}
+                  <button type="button" className={ghostBtnClass} onClick={() => remove(item.id)}>
+                    Remove
                   </button>
-                )}
-                <button type="button" className="btn btn-ghost" onClick={() => remove(item.id)}>
-                  Remove
-                </button>
+                </div>
               </div>
             </li>
           ))}

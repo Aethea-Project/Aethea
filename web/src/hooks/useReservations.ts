@@ -1,4 +1,4 @@
-﻿/**
+/**
  * useReservations - Use-case hook for reservation data and mutations
  *
  * Owns:
@@ -13,6 +13,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { medicalApi, Reservation, BookReservationPayload } from '../services/medicalApi';
+import { useAuth } from '@core/auth/useAuth';
 
 export interface UseReservationsResult {
   reservations: Reservation[];
@@ -24,6 +25,7 @@ export interface UseReservationsResult {
 }
 
 export function useReservations(): UseReservationsResult {
+  const { session, loading: authLoading } = useAuth();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,8 +44,9 @@ export function useReservations(): UseReservationsResult {
   }, []);
 
   useEffect(() => {
+    if (authLoading || !session) return;
     fetchData();
-  }, [fetchData]);
+  }, [fetchData, authLoading, session]);
 
   const book = useCallback(async (payload: BookReservationPayload): Promise<void> => {
     await medicalApi.bookReservation(payload);

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/auth';
 import { useAuth } from '@core/auth/useAuth';
+import { cn } from '../../lib/utils';
 
 type ConfirmState = 'loading' | 'success' | 'error';
 
@@ -89,48 +90,41 @@ const AuthConfirmPage: React.FC = () => {
   }, [state, authLoading, session, profile, navigate]);
 
   return (
-    <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: '1rem', backgroundColor: 'var(--bg-default)' }}>
-      <div
-        className=""
-        style={{
-          width: '100%',
-          maxWidth: '480px',
-          background: 'var(--bg-surface)',
-          border: '1px solid var(--border)',
-          borderRadius: '12px',
-          padding: '24px',
-          display: 'grid',
-          gap: '16px',
-          textAlign: 'center',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
-        }}
-      >
-        <h1 style={{ margin: 0, fontSize: '1.5rem', color: 'var(--text-primary)' }}>Account Confirmation</h1>
-        
+    <div className="min-h-screen grid place-items-center bg-slate-50 px-4 py-6">
+      <div className="w-full max-w-[480px] rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm grid gap-4">
+        <h1 className="m-0 text-2xl font-semibold text-slate-900">Account Confirmation</h1>
+
         <div
-          style={{
-            color: state === 'error' ? 'var(--error)' : state === 'success' ? 'var(--success)' : 'var(--text-secondary)',
-            fontSize: '1rem',
-            lineHeight: 1.5,
-          }}
+          className={cn(
+            'text-base leading-relaxed',
+            state === 'error' && 'text-red-600',
+            state === 'success' && 'text-emerald-600',
+            state === 'loading' && 'text-slate-600',
+          )}
         >
           {message}
         </div>
 
         {state === 'error' && (
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '16px' }}>
-            <Link to="/login" className="btn btn-primary" style={{ textDecoration: 'none' }}>
+          <div className="flex flex-wrap justify-center gap-3 pt-2">
+            <Link
+              to="/login"
+              className="no-underline inline-flex items-center justify-center rounded-md bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800"
+            >
               Go to Sign in
             </Link>
-            <Link to="/register" className="btn btn-secondary" style={{ textDecoration: 'none' }}>
+            <Link
+              to="/register"
+              className="no-underline inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
               Create new account
             </Link>
           </div>
         )}
-        
+
         {state === 'success' && (
-          <div style={{ marginTop: '16px' }}>
-            <span className="btn-spinner" style={{ width: '20px', height: '20px', display: 'inline-block', borderColor: 'var(--primary) transparent transparent transparent' }} aria-hidden="true" />
+          <div className="pt-2">
+            <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-teal-600 border-t-transparent" aria-hidden="true" />
           </div>
         )}
       </div>

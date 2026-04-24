@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/client"
+import type * as runtime from "@prisma/client/runtime/library"
 import type * as $Enums from "../enums"
 import type * as Prisma from "../internal/prismaNamespace"
 
@@ -37,52 +37,52 @@ export type ReservationSumAggregateOutputType = {
 export type ReservationMinAggregateOutputType = {
   id: string | null
   userId: string | null
-  doctorScheduleId: string | null
-  slotIndex: number | null
-  startAt: Date | null
-  endAt: Date | null
   reason: string | null
+  startAt: Date | null
   status: $Enums.ReservationStatus | null
   notes: string | null
+  createdAt: Date | null
+  updatedAt: Date | null
+  doctorScheduleId: string | null
+  slotIndex: number | null
+  endAt: Date | null
   shareHealthData: boolean | null
   notifyOnCancel: boolean | null
   cancelDeadlineAt: Date | null
-  createdAt: Date | null
-  updatedAt: Date | null
 }
 
 export type ReservationMaxAggregateOutputType = {
   id: string | null
   userId: string | null
-  doctorScheduleId: string | null
-  slotIndex: number | null
-  startAt: Date | null
-  endAt: Date | null
   reason: string | null
+  startAt: Date | null
   status: $Enums.ReservationStatus | null
   notes: string | null
+  createdAt: Date | null
+  updatedAt: Date | null
+  doctorScheduleId: string | null
+  slotIndex: number | null
+  endAt: Date | null
   shareHealthData: boolean | null
   notifyOnCancel: boolean | null
   cancelDeadlineAt: Date | null
-  createdAt: Date | null
-  updatedAt: Date | null
 }
 
 export type ReservationCountAggregateOutputType = {
   id: number
   userId: number
-  doctorScheduleId: number
-  slotIndex: number
-  startAt: number
-  endAt: number
   reason: number
+  startAt: number
   status: number
   notes: number
+  createdAt: number
+  updatedAt: number
+  doctorScheduleId: number
+  slotIndex: number
+  endAt: number
   shareHealthData: number
   notifyOnCancel: number
   cancelDeadlineAt: number
-  createdAt: number
-  updatedAt: number
   _all: number
 }
 
@@ -98,52 +98,52 @@ export type ReservationSumAggregateInputType = {
 export type ReservationMinAggregateInputType = {
   id?: true
   userId?: true
-  doctorScheduleId?: true
-  slotIndex?: true
-  startAt?: true
-  endAt?: true
   reason?: true
+  startAt?: true
   status?: true
   notes?: true
+  createdAt?: true
+  updatedAt?: true
+  doctorScheduleId?: true
+  slotIndex?: true
+  endAt?: true
   shareHealthData?: true
   notifyOnCancel?: true
   cancelDeadlineAt?: true
-  createdAt?: true
-  updatedAt?: true
 }
 
 export type ReservationMaxAggregateInputType = {
   id?: true
   userId?: true
-  doctorScheduleId?: true
-  slotIndex?: true
-  startAt?: true
-  endAt?: true
   reason?: true
+  startAt?: true
   status?: true
   notes?: true
+  createdAt?: true
+  updatedAt?: true
+  doctorScheduleId?: true
+  slotIndex?: true
+  endAt?: true
   shareHealthData?: true
   notifyOnCancel?: true
   cancelDeadlineAt?: true
-  createdAt?: true
-  updatedAt?: true
 }
 
 export type ReservationCountAggregateInputType = {
   id?: true
   userId?: true
-  doctorScheduleId?: true
-  slotIndex?: true
-  startAt?: true
-  endAt?: true
   reason?: true
+  startAt?: true
   status?: true
   notes?: true
+  createdAt?: true
+  updatedAt?: true
+  doctorScheduleId?: true
+  slotIndex?: true
+  endAt?: true
   shareHealthData?: true
   notifyOnCancel?: true
   cancelDeadlineAt?: true
-  createdAt?: true
-  updatedAt?: true
   _all?: true
 }
 
@@ -236,18 +236,18 @@ export type ReservationGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
 export type ReservationGroupByOutputType = {
   id: string
   userId: string
-  doctorScheduleId: string
-  slotIndex: number
-  startAt: Date
-  endAt: Date
   reason: string
+  startAt: Date
   status: $Enums.ReservationStatus
   notes: string | null
+  createdAt: Date
+  updatedAt: Date
+  doctorScheduleId: string
+  slotIndex: number
+  endAt: Date
   shareHealthData: boolean
   notifyOnCancel: boolean
   cancelDeadlineAt: Date
-  createdAt: Date
-  updatedAt: Date
   _count: ReservationCountAggregateOutputType | null
   _avg: ReservationAvgAggregateOutputType | null
   _sum: ReservationSumAggregateOutputType | null
@@ -276,39 +276,39 @@ export type ReservationWhereInput = {
   NOT?: Prisma.ReservationWhereInput | Prisma.ReservationWhereInput[]
   id?: Prisma.UuidFilter<"Reservation"> | string
   userId?: Prisma.UuidFilter<"Reservation"> | string
-  doctorScheduleId?: Prisma.UuidFilter<"Reservation"> | string
-  slotIndex?: Prisma.IntFilter<"Reservation"> | number
-  startAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
-  endAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   reason?: Prisma.StringFilter<"Reservation"> | string
+  startAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   status?: Prisma.EnumReservationStatusFilter<"Reservation"> | $Enums.ReservationStatus
   notes?: Prisma.StringNullableFilter<"Reservation"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
+  doctorScheduleId?: Prisma.UuidFilter<"Reservation"> | string
+  slotIndex?: Prisma.IntFilter<"Reservation"> | number
+  endAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   shareHealthData?: Prisma.BoolFilter<"Reservation"> | boolean
   notifyOnCancel?: Prisma.BoolFilter<"Reservation"> | boolean
   cancelDeadlineAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
-  createdAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   doctorSchedule?: Prisma.XOR<Prisma.DoctorScheduleScalarRelationFilter, Prisma.DoctorScheduleWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type ReservationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  doctorScheduleId?: Prisma.SortOrder
-  slotIndex?: Prisma.SortOrder
-  startAt?: Prisma.SortOrder
-  endAt?: Prisma.SortOrder
   reason?: Prisma.SortOrder
+  startAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+  doctorScheduleId?: Prisma.SortOrder
+  slotIndex?: Prisma.SortOrder
+  endAt?: Prisma.SortOrder
   shareHealthData?: Prisma.SortOrder
   notifyOnCancel?: Prisma.SortOrder
   cancelDeadlineAt?: Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
-  user?: Prisma.UserOrderByWithRelationInput
   doctorSchedule?: Prisma.DoctorScheduleOrderByWithRelationInput
+  user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type ReservationWhereUniqueInput = Prisma.AtLeast<{
@@ -318,37 +318,37 @@ export type ReservationWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.ReservationWhereInput[]
   NOT?: Prisma.ReservationWhereInput | Prisma.ReservationWhereInput[]
   userId?: Prisma.UuidFilter<"Reservation"> | string
-  doctorScheduleId?: Prisma.UuidFilter<"Reservation"> | string
-  slotIndex?: Prisma.IntFilter<"Reservation"> | number
-  startAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
-  endAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   reason?: Prisma.StringFilter<"Reservation"> | string
+  startAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   status?: Prisma.EnumReservationStatusFilter<"Reservation"> | $Enums.ReservationStatus
   notes?: Prisma.StringNullableFilter<"Reservation"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
+  doctorScheduleId?: Prisma.UuidFilter<"Reservation"> | string
+  slotIndex?: Prisma.IntFilter<"Reservation"> | number
+  endAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   shareHealthData?: Prisma.BoolFilter<"Reservation"> | boolean
   notifyOnCancel?: Prisma.BoolFilter<"Reservation"> | boolean
   cancelDeadlineAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
-  createdAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   doctorSchedule?: Prisma.XOR<Prisma.DoctorScheduleScalarRelationFilter, Prisma.DoctorScheduleWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "doctorScheduleId_slotIndex">
 
 export type ReservationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  doctorScheduleId?: Prisma.SortOrder
-  slotIndex?: Prisma.SortOrder
-  startAt?: Prisma.SortOrder
-  endAt?: Prisma.SortOrder
   reason?: Prisma.SortOrder
+  startAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+  doctorScheduleId?: Prisma.SortOrder
+  slotIndex?: Prisma.SortOrder
+  endAt?: Prisma.SortOrder
   shareHealthData?: Prisma.SortOrder
   notifyOnCancel?: Prisma.SortOrder
   cancelDeadlineAt?: Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
   _count?: Prisma.ReservationCountOrderByAggregateInput
   _avg?: Prisma.ReservationAvgOrderByAggregateInput
   _max?: Prisma.ReservationMaxOrderByAggregateInput
@@ -362,135 +362,135 @@ export type ReservationScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ReservationScalarWhereWithAggregatesInput | Prisma.ReservationScalarWhereWithAggregatesInput[]
   id?: Prisma.UuidWithAggregatesFilter<"Reservation"> | string
   userId?: Prisma.UuidWithAggregatesFilter<"Reservation"> | string
-  doctorScheduleId?: Prisma.UuidWithAggregatesFilter<"Reservation"> | string
-  slotIndex?: Prisma.IntWithAggregatesFilter<"Reservation"> | number
-  startAt?: Prisma.DateTimeWithAggregatesFilter<"Reservation"> | Date | string
-  endAt?: Prisma.DateTimeWithAggregatesFilter<"Reservation"> | Date | string
   reason?: Prisma.StringWithAggregatesFilter<"Reservation"> | string
+  startAt?: Prisma.DateTimeWithAggregatesFilter<"Reservation"> | Date | string
   status?: Prisma.EnumReservationStatusWithAggregatesFilter<"Reservation"> | $Enums.ReservationStatus
   notes?: Prisma.StringNullableWithAggregatesFilter<"Reservation"> | string | null
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"Reservation"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Reservation"> | Date | string
+  doctorScheduleId?: Prisma.UuidWithAggregatesFilter<"Reservation"> | string
+  slotIndex?: Prisma.IntWithAggregatesFilter<"Reservation"> | number
+  endAt?: Prisma.DateTimeWithAggregatesFilter<"Reservation"> | Date | string
   shareHealthData?: Prisma.BoolWithAggregatesFilter<"Reservation"> | boolean
   notifyOnCancel?: Prisma.BoolWithAggregatesFilter<"Reservation"> | boolean
   cancelDeadlineAt?: Prisma.DateTimeWithAggregatesFilter<"Reservation"> | Date | string
-  createdAt?: Prisma.DateTimeWithAggregatesFilter<"Reservation"> | Date | string
-  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Reservation"> | Date | string
 }
 
 export type ReservationCreateInput = {
   id?: string
-  slotIndex: number
-  startAt: Date | string
-  endAt: Date | string
   reason: string
+  startAt: Date | string
   status?: $Enums.ReservationStatus
   notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  slotIndex: number
+  endAt: Date | string
   shareHealthData?: boolean
   notifyOnCancel?: boolean
   cancelDeadlineAt: Date | string
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutReservationsInput
   doctorSchedule: Prisma.DoctorScheduleCreateNestedOneWithoutReservationsInput
+  user: Prisma.UserCreateNestedOneWithoutReservationsInput
 }
 
 export type ReservationUncheckedCreateInput = {
   id?: string
   userId: string
-  doctorScheduleId: string
-  slotIndex: number
-  startAt: Date | string
-  endAt: Date | string
   reason: string
+  startAt: Date | string
   status?: $Enums.ReservationStatus
   notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  doctorScheduleId: string
+  slotIndex: number
+  endAt: Date | string
   shareHealthData?: boolean
   notifyOnCancel?: boolean
   cancelDeadlineAt: Date | string
-  createdAt?: Date | string
-  updatedAt?: Date | string
 }
 
 export type ReservationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
-  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reason?: Prisma.StringFieldUpdateOperationsInput | string
+  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shareHealthData?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notifyOnCancel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cancelDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutReservationsNestedInput
   doctorSchedule?: Prisma.DoctorScheduleUpdateOneRequiredWithoutReservationsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutReservationsNestedInput
 }
 
 export type ReservationUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  doctorScheduleId?: Prisma.StringFieldUpdateOperationsInput | string
-  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
-  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reason?: Prisma.StringFieldUpdateOperationsInput | string
+  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  doctorScheduleId?: Prisma.StringFieldUpdateOperationsInput | string
+  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shareHealthData?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notifyOnCancel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cancelDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ReservationCreateManyInput = {
   id?: string
   userId: string
-  doctorScheduleId: string
-  slotIndex: number
-  startAt: Date | string
-  endAt: Date | string
   reason: string
+  startAt: Date | string
   status?: $Enums.ReservationStatus
   notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  doctorScheduleId: string
+  slotIndex: number
+  endAt: Date | string
   shareHealthData?: boolean
   notifyOnCancel?: boolean
   cancelDeadlineAt: Date | string
-  createdAt?: Date | string
-  updatedAt?: Date | string
 }
 
 export type ReservationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
-  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reason?: Prisma.StringFieldUpdateOperationsInput | string
+  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shareHealthData?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notifyOnCancel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cancelDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ReservationUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  doctorScheduleId?: Prisma.StringFieldUpdateOperationsInput | string
-  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
-  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reason?: Prisma.StringFieldUpdateOperationsInput | string
+  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  doctorScheduleId?: Prisma.StringFieldUpdateOperationsInput | string
+  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shareHealthData?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notifyOnCancel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cancelDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ReservationListRelationFilter = {
@@ -511,18 +511,18 @@ export type ReservationDoctorScheduleIdSlotIndexCompoundUniqueInput = {
 export type ReservationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  doctorScheduleId?: Prisma.SortOrder
-  slotIndex?: Prisma.SortOrder
-  startAt?: Prisma.SortOrder
-  endAt?: Prisma.SortOrder
   reason?: Prisma.SortOrder
+  startAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+  doctorScheduleId?: Prisma.SortOrder
+  slotIndex?: Prisma.SortOrder
+  endAt?: Prisma.SortOrder
   shareHealthData?: Prisma.SortOrder
   notifyOnCancel?: Prisma.SortOrder
   cancelDeadlineAt?: Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
 }
 
 export type ReservationAvgOrderByAggregateInput = {
@@ -532,35 +532,35 @@ export type ReservationAvgOrderByAggregateInput = {
 export type ReservationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  doctorScheduleId?: Prisma.SortOrder
-  slotIndex?: Prisma.SortOrder
-  startAt?: Prisma.SortOrder
-  endAt?: Prisma.SortOrder
   reason?: Prisma.SortOrder
+  startAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+  doctorScheduleId?: Prisma.SortOrder
+  slotIndex?: Prisma.SortOrder
+  endAt?: Prisma.SortOrder
   shareHealthData?: Prisma.SortOrder
   notifyOnCancel?: Prisma.SortOrder
   cancelDeadlineAt?: Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
 }
 
 export type ReservationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
-  doctorScheduleId?: Prisma.SortOrder
-  slotIndex?: Prisma.SortOrder
-  startAt?: Prisma.SortOrder
-  endAt?: Prisma.SortOrder
   reason?: Prisma.SortOrder
+  startAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
+  doctorScheduleId?: Prisma.SortOrder
+  slotIndex?: Prisma.SortOrder
+  endAt?: Prisma.SortOrder
   shareHealthData?: Prisma.SortOrder
   notifyOnCancel?: Prisma.SortOrder
   cancelDeadlineAt?: Prisma.SortOrder
-  createdAt?: Prisma.SortOrder
-  updatedAt?: Prisma.SortOrder
 }
 
 export type ReservationSumOrderByAggregateInput = {
@@ -609,16 +609,16 @@ export type ReservationUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.ReservationScalarWhereInput | Prisma.ReservationScalarWhereInput[]
 }
 
+export type EnumReservationStatusFieldUpdateOperationsInput = {
+  set?: $Enums.ReservationStatus
+}
+
 export type IntFieldUpdateOperationsInput = {
   set?: number
   increment?: number
   decrement?: number
   multiply?: number
   divide?: number
-}
-
-export type EnumReservationStatusFieldUpdateOperationsInput = {
-  set?: $Enums.ReservationStatus
 }
 
 export type ReservationCreateNestedManyWithoutDoctorScheduleInput = {
@@ -665,34 +665,34 @@ export type ReservationUncheckedUpdateManyWithoutDoctorScheduleNestedInput = {
 
 export type ReservationCreateWithoutUserInput = {
   id?: string
-  slotIndex: number
-  startAt: Date | string
-  endAt: Date | string
   reason: string
+  startAt: Date | string
   status?: $Enums.ReservationStatus
   notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  slotIndex: number
+  endAt: Date | string
   shareHealthData?: boolean
   notifyOnCancel?: boolean
   cancelDeadlineAt: Date | string
-  createdAt?: Date | string
-  updatedAt?: Date | string
   doctorSchedule: Prisma.DoctorScheduleCreateNestedOneWithoutReservationsInput
 }
 
 export type ReservationUncheckedCreateWithoutUserInput = {
   id?: string
-  doctorScheduleId: string
-  slotIndex: number
-  startAt: Date | string
-  endAt: Date | string
   reason: string
+  startAt: Date | string
   status?: $Enums.ReservationStatus
   notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  doctorScheduleId: string
+  slotIndex: number
+  endAt: Date | string
   shareHealthData?: boolean
   notifyOnCancel?: boolean
   cancelDeadlineAt: Date | string
-  createdAt?: Date | string
-  updatedAt?: Date | string
 }
 
 export type ReservationCreateOrConnectWithoutUserInput = {
@@ -727,50 +727,50 @@ export type ReservationScalarWhereInput = {
   NOT?: Prisma.ReservationScalarWhereInput | Prisma.ReservationScalarWhereInput[]
   id?: Prisma.UuidFilter<"Reservation"> | string
   userId?: Prisma.UuidFilter<"Reservation"> | string
-  doctorScheduleId?: Prisma.UuidFilter<"Reservation"> | string
-  slotIndex?: Prisma.IntFilter<"Reservation"> | number
-  startAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
-  endAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   reason?: Prisma.StringFilter<"Reservation"> | string
+  startAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   status?: Prisma.EnumReservationStatusFilter<"Reservation"> | $Enums.ReservationStatus
   notes?: Prisma.StringNullableFilter<"Reservation"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
+  doctorScheduleId?: Prisma.UuidFilter<"Reservation"> | string
+  slotIndex?: Prisma.IntFilter<"Reservation"> | number
+  endAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
   shareHealthData?: Prisma.BoolFilter<"Reservation"> | boolean
   notifyOnCancel?: Prisma.BoolFilter<"Reservation"> | boolean
   cancelDeadlineAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
-  createdAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Reservation"> | Date | string
 }
 
 export type ReservationCreateWithoutDoctorScheduleInput = {
   id?: string
-  slotIndex: number
-  startAt: Date | string
-  endAt: Date | string
   reason: string
+  startAt: Date | string
   status?: $Enums.ReservationStatus
   notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  slotIndex: number
+  endAt: Date | string
   shareHealthData?: boolean
   notifyOnCancel?: boolean
   cancelDeadlineAt: Date | string
-  createdAt?: Date | string
-  updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutReservationsInput
 }
 
 export type ReservationUncheckedCreateWithoutDoctorScheduleInput = {
   id?: string
   userId: string
-  slotIndex: number
-  startAt: Date | string
-  endAt: Date | string
   reason: string
+  startAt: Date | string
   status?: $Enums.ReservationStatus
   notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  slotIndex: number
+  endAt: Date | string
   shareHealthData?: boolean
   notifyOnCancel?: boolean
   cancelDeadlineAt: Date | string
-  createdAt?: Date | string
-  updatedAt?: Date | string
 }
 
 export type ReservationCreateOrConnectWithoutDoctorScheduleInput = {
@@ -801,130 +801,130 @@ export type ReservationUpdateManyWithWhereWithoutDoctorScheduleInput = {
 
 export type ReservationCreateManyUserInput = {
   id?: string
-  doctorScheduleId: string
-  slotIndex: number
-  startAt: Date | string
-  endAt: Date | string
   reason: string
+  startAt: Date | string
   status?: $Enums.ReservationStatus
   notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  doctorScheduleId: string
+  slotIndex: number
+  endAt: Date | string
   shareHealthData?: boolean
   notifyOnCancel?: boolean
   cancelDeadlineAt: Date | string
-  createdAt?: Date | string
-  updatedAt?: Date | string
 }
 
 export type ReservationUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
-  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reason?: Prisma.StringFieldUpdateOperationsInput | string
+  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shareHealthData?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notifyOnCancel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cancelDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   doctorSchedule?: Prisma.DoctorScheduleUpdateOneRequiredWithoutReservationsNestedInput
 }
 
 export type ReservationUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  doctorScheduleId?: Prisma.StringFieldUpdateOperationsInput | string
-  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
-  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reason?: Prisma.StringFieldUpdateOperationsInput | string
+  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  doctorScheduleId?: Prisma.StringFieldUpdateOperationsInput | string
+  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shareHealthData?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notifyOnCancel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cancelDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ReservationUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  doctorScheduleId?: Prisma.StringFieldUpdateOperationsInput | string
-  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
-  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reason?: Prisma.StringFieldUpdateOperationsInput | string
+  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  doctorScheduleId?: Prisma.StringFieldUpdateOperationsInput | string
+  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shareHealthData?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notifyOnCancel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cancelDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ReservationCreateManyDoctorScheduleInput = {
   id?: string
   userId: string
-  slotIndex: number
-  startAt: Date | string
-  endAt: Date | string
   reason: string
+  startAt: Date | string
   status?: $Enums.ReservationStatus
   notes?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  slotIndex: number
+  endAt: Date | string
   shareHealthData?: boolean
   notifyOnCancel?: boolean
   cancelDeadlineAt: Date | string
-  createdAt?: Date | string
-  updatedAt?: Date | string
 }
 
 export type ReservationUpdateWithoutDoctorScheduleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
-  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reason?: Prisma.StringFieldUpdateOperationsInput | string
+  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shareHealthData?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notifyOnCancel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cancelDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutReservationsNestedInput
 }
 
 export type ReservationUncheckedUpdateWithoutDoctorScheduleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
-  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reason?: Prisma.StringFieldUpdateOperationsInput | string
+  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shareHealthData?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notifyOnCancel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cancelDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ReservationUncheckedUpdateManyWithoutDoctorScheduleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
-  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
-  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reason?: Prisma.StringFieldUpdateOperationsInput | string
+  startAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  slotIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  endAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   shareHealthData?: Prisma.BoolFieldUpdateOperationsInput | boolean
   notifyOnCancel?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cancelDeadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -932,112 +932,112 @@ export type ReservationUncheckedUpdateManyWithoutDoctorScheduleInput = {
 export type ReservationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  doctorScheduleId?: boolean
-  slotIndex?: boolean
-  startAt?: boolean
-  endAt?: boolean
   reason?: boolean
+  startAt?: boolean
   status?: boolean
   notes?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  doctorScheduleId?: boolean
+  slotIndex?: boolean
+  endAt?: boolean
   shareHealthData?: boolean
   notifyOnCancel?: boolean
   cancelDeadlineAt?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   doctorSchedule?: boolean | Prisma.DoctorScheduleDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reservation"]>
 
 export type ReservationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  doctorScheduleId?: boolean
-  slotIndex?: boolean
-  startAt?: boolean
-  endAt?: boolean
   reason?: boolean
+  startAt?: boolean
   status?: boolean
   notes?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  doctorScheduleId?: boolean
+  slotIndex?: boolean
+  endAt?: boolean
   shareHealthData?: boolean
   notifyOnCancel?: boolean
   cancelDeadlineAt?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   doctorSchedule?: boolean | Prisma.DoctorScheduleDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reservation"]>
 
 export type ReservationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   userId?: boolean
-  doctorScheduleId?: boolean
-  slotIndex?: boolean
-  startAt?: boolean
-  endAt?: boolean
   reason?: boolean
+  startAt?: boolean
   status?: boolean
   notes?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  doctorScheduleId?: boolean
+  slotIndex?: boolean
+  endAt?: boolean
   shareHealthData?: boolean
   notifyOnCancel?: boolean
   cancelDeadlineAt?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   doctorSchedule?: boolean | Prisma.DoctorScheduleDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reservation"]>
 
 export type ReservationSelectScalar = {
   id?: boolean
   userId?: boolean
-  doctorScheduleId?: boolean
-  slotIndex?: boolean
-  startAt?: boolean
-  endAt?: boolean
   reason?: boolean
+  startAt?: boolean
   status?: boolean
   notes?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
+  doctorScheduleId?: boolean
+  slotIndex?: boolean
+  endAt?: boolean
   shareHealthData?: boolean
   notifyOnCancel?: boolean
   cancelDeadlineAt?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
 }
 
-export type ReservationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "doctorScheduleId" | "slotIndex" | "startAt" | "endAt" | "reason" | "status" | "notes" | "shareHealthData" | "notifyOnCancel" | "cancelDeadlineAt" | "createdAt" | "updatedAt", ExtArgs["result"]["reservation"]>
+export type ReservationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "reason" | "startAt" | "status" | "notes" | "createdAt" | "updatedAt" | "doctorScheduleId" | "slotIndex" | "endAt" | "shareHealthData" | "notifyOnCancel" | "cancelDeadlineAt", ExtArgs["result"]["reservation"]>
 export type ReservationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   doctorSchedule?: boolean | Prisma.DoctorScheduleDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type ReservationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   doctorSchedule?: boolean | Prisma.DoctorScheduleDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type ReservationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   doctorSchedule?: boolean | Prisma.DoctorScheduleDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
 export type $ReservationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Reservation"
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>
     doctorSchedule: Prisma.$DoctorSchedulePayload<ExtArgs>
+    user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     userId: string
-    doctorScheduleId: string
-    slotIndex: number
-    startAt: Date
-    endAt: Date
     reason: string
+    startAt: Date
     status: $Enums.ReservationStatus
     notes: string | null
+    createdAt: Date
+    updatedAt: Date
+    doctorScheduleId: string
+    slotIndex: number
+    endAt: Date
     shareHealthData: boolean
     notifyOnCancel: boolean
     cancelDeadlineAt: Date
-    createdAt: Date
-    updatedAt: Date
   }, ExtArgs["result"]["reservation"]>
   composites: {}
 }
@@ -1432,8 +1432,8 @@ readonly fields: ReservationFieldRefs;
  */
 export interface Prisma__ReservationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   doctorSchedule<T extends Prisma.DoctorScheduleDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DoctorScheduleDefaultArgs<ExtArgs>>): Prisma.Prisma__DoctorScheduleClient<runtime.Types.Result.GetResult<Prisma.$DoctorSchedulePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1465,18 +1465,18 @@ export interface Prisma__ReservationClient<T, Null = never, ExtArgs extends runt
 export interface ReservationFieldRefs {
   readonly id: Prisma.FieldRef<"Reservation", 'String'>
   readonly userId: Prisma.FieldRef<"Reservation", 'String'>
-  readonly doctorScheduleId: Prisma.FieldRef<"Reservation", 'String'>
-  readonly slotIndex: Prisma.FieldRef<"Reservation", 'Int'>
-  readonly startAt: Prisma.FieldRef<"Reservation", 'DateTime'>
-  readonly endAt: Prisma.FieldRef<"Reservation", 'DateTime'>
   readonly reason: Prisma.FieldRef<"Reservation", 'String'>
+  readonly startAt: Prisma.FieldRef<"Reservation", 'DateTime'>
   readonly status: Prisma.FieldRef<"Reservation", 'ReservationStatus'>
   readonly notes: Prisma.FieldRef<"Reservation", 'String'>
+  readonly createdAt: Prisma.FieldRef<"Reservation", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"Reservation", 'DateTime'>
+  readonly doctorScheduleId: Prisma.FieldRef<"Reservation", 'String'>
+  readonly slotIndex: Prisma.FieldRef<"Reservation", 'Int'>
+  readonly endAt: Prisma.FieldRef<"Reservation", 'DateTime'>
   readonly shareHealthData: Prisma.FieldRef<"Reservation", 'Boolean'>
   readonly notifyOnCancel: Prisma.FieldRef<"Reservation", 'Boolean'>
   readonly cancelDeadlineAt: Prisma.FieldRef<"Reservation", 'DateTime'>
-  readonly createdAt: Prisma.FieldRef<"Reservation", 'DateTime'>
-  readonly updatedAt: Prisma.FieldRef<"Reservation", 'DateTime'>
 }
     
 

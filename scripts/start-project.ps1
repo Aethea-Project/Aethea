@@ -3,7 +3,10 @@ param(
   [switch]$WithTools = $false,
   [switch]$DevMode = $false,
   [switch]$StartTunnel = $false,
-  [switch]$NoTunnel = $false
+  [switch]$NoTunnel = $false,
+  [switch]$Rebuild = $false,
+  [switch]$HardRefresh = $false,
+  [switch]$Stop = $false
 )
 
 $ErrorActionPreference = 'Stop'
@@ -163,9 +166,25 @@ function Test-TunnelRunning {
   return ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($containerId))
 }
 
-Write-Host "Starting Aethea project..." -ForegroundColor Yellow
+Write-Host "Managing Aethea project..." -ForegroundColor Yellow
 
 $projectRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
+
+if ($Stop) {
+  Write-Host "Stopping Aethea project..." -ForegroundColor Yellow
+  Push-Location $projectRoot
+  try {
+    docker compose stop *>$null
+    Write-Host "Project stopped successfully." -ForegroundColor Green
+    exit 0
+  } catch {
+    Write-Host "Error stopping project: $_" -ForegroundColor Red
+    exit 1
+  } finally {
+    Pop-Location
+  }
+}
+
 $backendHostPortRaw = Get-BackendHostPort -ProjectRoot $projectRoot
 $backendHostPort = [int]$backendHostPortRaw
 $autoStartTunnel = Get-BooleanEnvValue -Name "AUTO_START_TUNNEL"
@@ -191,6 +210,12 @@ Push-Location $projectRoot
 
 try {
   Assert-DockerReady
+
+  if ($Stop) {
+    Write-Host "Stop requested. Redirecting to stop-project.ps1..." -ForegroundColor Yellow
+    & powershell -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "stop-project.ps1")
+    exit 0
+  }
 
   if ($shouldStartTunnel) {
     $defaultTunnelCredPath = Join-Path $projectRoot "cloudflared/credentials/de687480-54da-4632-a55e-b3d1b4a8575d.json"
@@ -243,7 +268,21 @@ try {
     if ($Production) { $composeArgs += @("--profile", "prod") }
     if ($WithTools) { $composeArgs += @("--profile", "tools") }
     if ($shouldStartTunnel) { $composeArgs += @("--profile", "tunnel") }
+
+    if ($HardRefresh) {
+      Write-Host "Hard refresh requested. Pre-building images without Docker cache... (This will take a few minutes)" -ForegroundColor Cyan
+      $buildArgs = $composeArgs + @("build", "--no-cache")
+      & docker $buildArgs
+      if ($LASTEXITCODE -ne 0) {
+        throw "Docker compose build --no-cache failed."
+      }
+    }
+
     $composeArgs += @("up", "-d")
+
+    if ($Rebuild -or $HardRefresh) {
+      $composeArgs += @("--build", "--force-recreate", "--renew-anon-volumes")
+    }
 
     # Explicitly name services to avoid starting dev+prod together
     if ($Production) {

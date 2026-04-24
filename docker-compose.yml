@@ -72,6 +72,9 @@ services:
     volumes:
       - ./web/src:/app/web/src
       - ./web/index.html:/app/web/index.html
+      - ./web/vite.config.ts:/app/web/vite.config.ts
+      - ./web/postcss.config.cjs:/app/web/postcss.config.cjs
+      - ./web/tailwind.config.cjs:/app/web/tailwind.config.cjs
       - ./core:/app/core
       - /app/core/node_modules
     depends_on:

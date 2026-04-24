@@ -288,6 +288,8 @@ export class AuthRepository {
             gender: credentials.gender,
             phone: fullPhone,
             date_of_birth: credentials.dateOfBirth,
+            account_type: 'patient',
+            account_status: 'active',
           },
         },
       });

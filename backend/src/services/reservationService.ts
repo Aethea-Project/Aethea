@@ -9,6 +9,7 @@
 
 import { AppError } from '../lib/AppError.js';
 import logger from '../lib/logger.js';
+import prisma from '../lib/prisma.js';
 import {
   createReservation,
   getActiveReservationCountForSchedule,
@@ -96,9 +97,9 @@ export async function bookReservation(patientUserId: string, input: BookReservat
 
   // Notify the doctor
   const doctorUserId = schedule.doctorProfile.userId;
-  const dateStr = slotStartAt.toLocaleDateString('en-US', { dateStyle: 'medium' });
-  const timeStr = slotStartAt.toLocaleTimeString('en-US', { timeStyle: 'short' });
-  const customDateStr = new Date(schedule.scheduleDate).toLocaleDateString('en-US', { dateStyle: 'full' });
+  const dateStr = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'Africa/Cairo' }).format(slotStartAt);
+  const timeStr = new Intl.DateTimeFormat('en-US', { timeStyle: 'short', timeZone: 'Africa/Cairo' }).format(slotStartAt);
+  const customDateStr = new Intl.DateTimeFormat('en-US', { dateStyle: 'full', timeZone: 'Africa/Cairo' }).format(new Date(schedule.scheduleDate));
 
   await createNotification(
     doctorUserId,
@@ -213,7 +214,7 @@ export async function cancelMyReservation(reservationId: string, userId: string)
     // Notify the doctor if the patient opted in
     if (reservation.notifyOnCancel) {
       const doctorUserId = reservation.doctorSchedule.doctorProfile.userId;
-      const dateStr = reservation.startAt.toLocaleDateString('en-US', { dateStyle: 'medium' });
+      const dateStr = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'Africa/Cairo' }).format(reservation.startAt);
       await createNotification(
         doctorUserId,
         'reservation_cancelled',
@@ -230,7 +231,7 @@ export async function cancelMyReservation(reservationId: string, userId: string)
 
     if (alertSubscribers.length > 0) {
       const title = 'Slot Available';
-      const body = `A slot is now available with ${doctorName} on ${reservation.startAt.toLocaleDateString('en-US', { dateStyle: 'medium' })}.`;
+      const body = `A slot is now available with ${doctorName} on ${new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'Africa/Cairo' }).format(reservation.startAt)}.`;
 
       for (const subscriber of alertSubscribers) {
         await createNotification(
@@ -340,4 +341,58 @@ export async function updateSlotStatus(
   }
 
   return repoUpdateStatus(reservationId, status, notes);
+}
+
+/* ─── Doctor: view patient health data ─── */
+
+export async function getPatientHealthData(reservationId: string, doctorUserId: string) {
+  const reservation = await getReservationById(reservationId);
+  if (!reservation) {
+    throw AppError.notFound('Reservation not found');
+  }
+
+  // Authorization: verify this slot belongs to the doctor
+  const profile = await getDoctorProfileByUserId(doctorUserId);
+  if (!profile || profile.id !== reservation.doctorSchedule.doctorProfileId) {
+    throw AppError.forbidden('Not authorized to access this patient data');
+  }
+
+  if (!reservation.shareHealthData) {
+    throw AppError.forbidden('Patient has not shared their health data for this reservation');
+  }
+
+  // Check timeframe: doctor can view data if today is >= start of reservation day AND <= end of reservation day
+  const now = new Date();
+  
+  const startOfDayStartAt = new Date(reservation.startAt);
+  startOfDayStartAt.setHours(0, 0, 0, 0);
+  
+  const endOfDayEndAt = new Date(reservation.endAt);
+  endOfDayEndAt.setHours(23, 59, 59, 999);
+
+  if (now < startOfDayStartAt || now > endOfDayEndAt) {
+    throw AppError.forbidden('Patient data can only be accessed on the day(s) of the reservation');
+  }
+
+  // Fetch patient data securely
+  const [labTests, scans, conditions] = await Promise.all([
+    prisma.labTest.findMany({
+      where: { userId: reservation.userId },
+      orderBy: { measuredAt: 'desc' },
+    }),
+    prisma.scan.findMany({
+      where: { userId: reservation.userId },
+      orderBy: { scanDate: 'desc' },
+    }),
+    prisma.patientCondition.findMany({
+      where: { patientId: reservation.userId },
+      orderBy: { detectedAt: 'desc' },
+    }),
+  ]);
+
+  return {
+    labTests,
+    scans,
+    conditions,
+  };
 }

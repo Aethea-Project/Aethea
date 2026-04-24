@@ -34,13 +34,11 @@ export async function listDoctorSchedules(
   dateFilter.gte = from ?? startOfToday;
   if (to)   dateFilter.lte = to;
 
+  const now = new Date();
+
   const where = {
     doctorProfileId,
-    // Note: since this is used by standard list, keep or add isPublished if needed. 
-    // Usually a doctor should see drafts, but for now we keep the existing condition or remove it if doctor wants to see drafts.
-    // The previous code had isPublished: true, so let's keep it to be safe, or remove it so doctors see all. 
-    // They are fetching their own. Patients fetch via marketplace route anyway!
-    // But they pass through the same controller. We will keep it but filter past dates.
+    endAt: { gt: now }, // Hide from doctor if the schedule has completely ended
     ...(Object.keys(dateFilter).length > 0 ? { scheduleDate: dateFilter } : {}),
   };
 
@@ -72,8 +70,11 @@ export async function listMarketplaceSchedules(
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
+  const now = new Date();
+  
   const where = {
     isPublished: true,
+    endAt: { gt: now }, // Hide schedules that have completely ended
     scheduleDate: filters.date
       ? {
           gte: new Date(new Date(filters.date).setHours(0, 0, 0, 0)),
@@ -133,7 +134,28 @@ export async function listMarketplaceSchedules(
     prisma.doctorSchedule.count({ where }),
   ]);
 
-  return { schedules, total };
+  // Filter out fully booked or completely expired schedules in memory
+  const availableSchedules = schedules.filter((schedule) => {
+    let bookableSlots = 0;
+    const bookedIndexes = new Set(schedule.reservations.map(r => r.slotIndex));
+    const nowMs = Date.now();
+    const startMs = schedule.startAt.getTime();
+    
+    for (let i = 0; i < schedule.maxPatients; i++) {
+      if (bookedIndexes.has(i)) continue;
+      const slotStart = startMs + i * schedule.slotDurationMins * 60_000;
+      if (slotStart > nowMs) {
+        bookableSlots++;
+      }
+    }
+    
+    return bookableSlots > 0;
+  });
+
+  // Re-adjust total for filtered schedules
+  const adjustedTotal = total - (schedules.length - availableSchedules.length);
+
+  return { schedules: availableSchedules, total: adjustedTotal };
 }
 
 export async function getScheduleById(id: string) {

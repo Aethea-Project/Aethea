@@ -41,6 +41,9 @@ import { createAdminVerificationRoutes } from './routes/adminVerification.routes
 import { createDoctorRoutes } from './routes/doctors.routes.js';
 import { createNotificationRoutes } from './routes/notifications.routes.js';
 import { createMapsRoutes } from './routes/maps.routes.js';
+import { createMedicineRoutes } from './routes/medicine.routes.js';
+import prisma from './lib/prisma.js';
+import { requireLocalUser } from './lib/authMiddleware.js';
 import logger from './lib/logger.js';
 
 interface AppConfig {
@@ -53,8 +56,9 @@ interface AppConfig {
 export function createApp(config: AppConfig = {}) {
   const app = express();
 
-  // Trust the first proxy to enable rate limiting behind NGINX or Cloudflare
-  app.set('trust proxy', 1);
+  // Securely trust private proxy networks (e.g. NGINX in Docker) rather than
+  // trusting any hop count, preventing IP spoofing on direct connections.
+  app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal']);
 
   const {
     supabaseUrl,
@@ -77,15 +81,20 @@ export function createApp(config: AppConfig = {}) {
   }
 
   // ─── Security headers (OWASP REST Security Headers) ───
-  // API-only CSP: browsers should never render API responses as HTML
+  // API-only CSP: this is an API backend, not a document server.
+  // We use reportOnly=true so Cloudflare edge scripts don't spam the console.
   app.use(helmet({
     contentSecurityPolicy: {
+      useDefaults: false,
+      reportOnly: true,        // Log violations, never block (Cloudflare challenge scripts live here)
       directives: {
         defaultSrc: ["'none'"],
         frameAncestors: ["'none'"],
+        connectSrc: ["'self'", 'https://*.aethea.me', 'https://aethea.me'],
+        scriptSrc: ["'self'", 'https://aethea.me', 'https://*.cloudflare.com'],
       },
     },
-    crossOriginResourcePolicy: { policy: 'same-origin' },
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
   }));
 
   // ─── CORS with explicit origins (OWASP REST CORS) ───
@@ -120,7 +129,7 @@ export function createApp(config: AppConfig = {}) {
   app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
   // ─── Structured request logging (Pino) ───
-  app.use(pinoHttp({ logger, autoLogging: isProduction ? { ignore: (req) => req.url === '/health' } : true }));
+  app.use(pinoHttp({ logger, autoLogging: { ignore: (req) => req.url === '/health' } }));
 
   // ─── Cache-Control: no-store on all API responses ───
   // Source: OWASP REST Security Headers
@@ -172,6 +181,7 @@ export function createApp(config: AppConfig = {}) {
         admin: '/api/v1/admin/*',
         staffVerification: '/api/v1/staff/verification/*',
         maps: '/api/v1/maps/*',
+        medicines: '/api/v1/medicines/*',
       },
     });
   });
@@ -189,6 +199,7 @@ export function createApp(config: AppConfig = {}) {
   const doctorRoutes = createDoctorRoutes(authMiddleware);
   const notificationRoutes = createNotificationRoutes(authMiddleware);
   const mapsRoutes = createMapsRoutes(authMiddleware);
+  const medicineRoutes = createMedicineRoutes(prisma, requireLocalUser);
 
   // API v1 — explicit versioning (REST best practice)
   app.use('/api/v1/auth', authRoutes);
@@ -202,6 +213,7 @@ export function createApp(config: AppConfig = {}) {
   app.use('/api/v1/doctors', doctorRoutes);
   app.use('/api/v1/notifications', notificationRoutes);
   app.use('/api/v1/maps', mapsRoutes);
+  app.use('/api/v1/medicines', medicineRoutes);
 
   // Backward-compatible aliases (non-versioned paths → v1)
   app.use('/api/auth', authRoutes);
@@ -215,6 +227,7 @@ export function createApp(config: AppConfig = {}) {
   app.use('/api/doctors', doctorRoutes);
   app.use('/api/notifications', notificationRoutes);
   app.use('/api/maps', mapsRoutes);
+  app.use('/api/medicines', medicineRoutes);
 
   // ─── Error handling (must be LAST) ───
   app.use(notFoundHandler);

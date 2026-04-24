@@ -77,9 +77,16 @@ export async function createReservation(userId: string, data: CreateReservationI
 }
 
 export async function listPatientReservations(userId: string, skip: number, take: number) {
+  const now = new Date();
+  const where = {
+    userId,
+    status: { notIn: ['cancelled', 'completed'] as any },
+    endAt: { gt: now },
+  };
+
   const [reservations, total] = await Promise.all([
     prisma.reservation.findMany({
-      where: { userId },
+      where,
       include: {
         doctorSchedule: {
           include: {
@@ -93,7 +100,7 @@ export async function listPatientReservations(userId: string, skip: number, take
       skip,
       take,
     }),
-    prisma.reservation.count({ where: { userId } }),
+    prisma.reservation.count({ where }),
   ]);
   return { reservations, total };
 }

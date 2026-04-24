@@ -24,30 +24,28 @@ export const Decimal = runtime.Decimal
 
 
 export const NullTypes = {
-  DbNull: runtime.NullTypes.DbNull as (new (secret: never) => typeof runtime.DbNull),
-  JsonNull: runtime.NullTypes.JsonNull as (new (secret: never) => typeof runtime.JsonNull),
-  AnyNull: runtime.NullTypes.AnyNull as (new (secret: never) => typeof runtime.AnyNull),
+  DbNull: runtime.objectEnumValues.classes.DbNull as (new (secret: never) => typeof runtime.objectEnumValues.instances.DbNull),
+  JsonNull: runtime.objectEnumValues.classes.JsonNull as (new (secret: never) => typeof runtime.objectEnumValues.instances.JsonNull),
+  AnyNull: runtime.objectEnumValues.classes.AnyNull as (new (secret: never) => typeof runtime.objectEnumValues.instances.AnyNull),
 }
 /**
  * Helper for filtering JSON entries that have `null` on the database (empty on the db)
  *
  * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
  */
-export const DbNull = runtime.DbNull
-
+export const DbNull = runtime.objectEnumValues.instances.DbNull
 /**
  * Helper for filtering JSON entries that have JSON `null` values (not empty on the db)
  *
  * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
  */
-export const JsonNull = runtime.JsonNull
-
+export const JsonNull = runtime.objectEnumValues.instances.JsonNull
 /**
  * Helper for filtering JSON entries that are `Prisma.DbNull` or `Prisma.JsonNull`
  *
  * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
  */
-export const AnyNull = runtime.AnyNull
+export const AnyNull = runtime.objectEnumValues.instances.AnyNull
 
 
 export const ModelName = {
@@ -58,7 +56,39 @@ export const ModelName = {
   Reservation: 'Reservation',
   DoctorProfile: 'DoctorProfile',
   DoctorSchedule: 'DoctorSchedule',
-  Notification: 'Notification'
+  Notification: 'Notification',
+  Medicine: 'Medicine',
+  DrugbankDrug: 'DrugbankDrug',
+  PatientCondition: 'PatientCondition',
+  audit_log_entries: 'audit_log_entries',
+  custom_oauth_providers: 'custom_oauth_providers',
+  flow_state: 'flow_state',
+  identities: 'identities',
+  instances: 'instances',
+  mfa_amr_claims: 'mfa_amr_claims',
+  mfa_challenges: 'mfa_challenges',
+  mfa_factors: 'mfa_factors',
+  oauth_authorizations: 'oauth_authorizations',
+  oauth_client_states: 'oauth_client_states',
+  oauth_clients: 'oauth_clients',
+  oauth_consents: 'oauth_consents',
+  one_time_tokens: 'one_time_tokens',
+  refresh_tokens: 'refresh_tokens',
+  saml_providers: 'saml_providers',
+  saml_relay_states: 'saml_relay_states',
+  schema_migrations: 'schema_migrations',
+  sessions: 'sessions',
+  sso_domains: 'sso_domains',
+  sso_providers: 'sso_providers',
+  users: 'users',
+  webauthn_challenges: 'webauthn_challenges',
+  webauthn_credentials: 'webauthn_credentials',
+  admin_audit_log: 'admin_audit_log',
+  profiles: 'profiles',
+  reservation_alert_subscriptions: 'reservation_alert_subscriptions',
+  staff_profiles: 'staff_profiles',
+  user_accounts: 'user_accounts',
+  Feedback: 'Feedback'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -82,9 +112,9 @@ export const UserScalarFieldEnum = {
   email: 'email',
   firstName: 'firstName',
   lastName: 'lastName',
-  accountType: 'accountType',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  accountType: 'accountType'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -154,18 +184,18 @@ export type ScanScalarFieldEnum = (typeof ScanScalarFieldEnum)[keyof typeof Scan
 export const ReservationScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  doctorScheduleId: 'doctorScheduleId',
-  slotIndex: 'slotIndex',
-  startAt: 'startAt',
-  endAt: 'endAt',
   reason: 'reason',
+  startAt: 'startAt',
   status: 'status',
   notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  doctorScheduleId: 'doctorScheduleId',
+  slotIndex: 'slotIndex',
+  endAt: 'endAt',
   shareHealthData: 'shareHealthData',
   notifyOnCancel: 'notifyOnCancel',
-  cancelDeadlineAt: 'cancelDeadlineAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  cancelDeadlineAt: 'cancelDeadlineAt'
 } as const
 
 export type ReservationScalarFieldEnum = (typeof ReservationScalarFieldEnum)[keyof typeof ReservationScalarFieldEnum]
@@ -222,6 +252,530 @@ export const NotificationScalarFieldEnum = {
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
 
 
+export const MedicineScalarFieldEnum = {
+  id: 'id',
+  brandNameAr: 'brandNameAr',
+  brandNameEn: 'brandNameEn',
+  activeIngredient: 'activeIngredient',
+  rxcui: 'rxcui',
+  drugbankId: 'drugbankId',
+  drugClasses: 'drugClasses',
+  category: 'category',
+  form: 'form',
+  manufacturer: 'manufacturer',
+  photoUrl: 'photoUrl',
+  isOtc: 'isOtc',
+  createdAt: 'createdAt'
+} as const
+
+export type MedicineScalarFieldEnum = (typeof MedicineScalarFieldEnum)[keyof typeof MedicineScalarFieldEnum]
+
+
+export const DrugbankDrugScalarFieldEnum = {
+  drugbankId: 'drugbankId',
+  name: 'name',
+  synonyms: 'synonyms',
+  categories: 'categories',
+  contraindications: 'contraindications',
+  interactions: 'interactions',
+  createdAt: 'createdAt'
+} as const
+
+export type DrugbankDrugScalarFieldEnum = (typeof DrugbankDrugScalarFieldEnum)[keyof typeof DrugbankDrugScalarFieldEnum]
+
+
+export const PatientConditionScalarFieldEnum = {
+  id: 'id',
+  patientId: 'patientId',
+  condition: 'condition',
+  source: 'source',
+  detectedAt: 'detectedAt'
+} as const
+
+export type PatientConditionScalarFieldEnum = (typeof PatientConditionScalarFieldEnum)[keyof typeof PatientConditionScalarFieldEnum]
+
+
+export const Audit_log_entriesScalarFieldEnum = {
+  instance_id: 'instance_id',
+  id: 'id',
+  payload: 'payload',
+  created_at: 'created_at',
+  ip_address: 'ip_address'
+} as const
+
+export type Audit_log_entriesScalarFieldEnum = (typeof Audit_log_entriesScalarFieldEnum)[keyof typeof Audit_log_entriesScalarFieldEnum]
+
+
+export const Custom_oauth_providersScalarFieldEnum = {
+  id: 'id',
+  provider_type: 'provider_type',
+  identifier: 'identifier',
+  name: 'name',
+  client_id: 'client_id',
+  client_secret: 'client_secret',
+  acceptable_client_ids: 'acceptable_client_ids',
+  scopes: 'scopes',
+  pkce_enabled: 'pkce_enabled',
+  attribute_mapping: 'attribute_mapping',
+  authorization_params: 'authorization_params',
+  enabled: 'enabled',
+  email_optional: 'email_optional',
+  issuer: 'issuer',
+  discovery_url: 'discovery_url',
+  skip_nonce_check: 'skip_nonce_check',
+  cached_discovery: 'cached_discovery',
+  discovery_cached_at: 'discovery_cached_at',
+  authorization_url: 'authorization_url',
+  token_url: 'token_url',
+  userinfo_url: 'userinfo_url',
+  jwks_uri: 'jwks_uri',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Custom_oauth_providersScalarFieldEnum = (typeof Custom_oauth_providersScalarFieldEnum)[keyof typeof Custom_oauth_providersScalarFieldEnum]
+
+
+export const Flow_stateScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  auth_code: 'auth_code',
+  code_challenge_method: 'code_challenge_method',
+  code_challenge: 'code_challenge',
+  provider_type: 'provider_type',
+  provider_access_token: 'provider_access_token',
+  provider_refresh_token: 'provider_refresh_token',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  authentication_method: 'authentication_method',
+  auth_code_issued_at: 'auth_code_issued_at',
+  invite_token: 'invite_token',
+  referrer: 'referrer',
+  oauth_client_state_id: 'oauth_client_state_id',
+  linking_target_id: 'linking_target_id',
+  email_optional: 'email_optional'
+} as const
+
+export type Flow_stateScalarFieldEnum = (typeof Flow_stateScalarFieldEnum)[keyof typeof Flow_stateScalarFieldEnum]
+
+
+export const IdentitiesScalarFieldEnum = {
+  provider_id: 'provider_id',
+  user_id: 'user_id',
+  identity_data: 'identity_data',
+  provider: 'provider',
+  last_sign_in_at: 'last_sign_in_at',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  email: 'email',
+  id: 'id'
+} as const
+
+export type IdentitiesScalarFieldEnum = (typeof IdentitiesScalarFieldEnum)[keyof typeof IdentitiesScalarFieldEnum]
+
+
+export const InstancesScalarFieldEnum = {
+  id: 'id',
+  uuid: 'uuid',
+  raw_base_config: 'raw_base_config',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type InstancesScalarFieldEnum = (typeof InstancesScalarFieldEnum)[keyof typeof InstancesScalarFieldEnum]
+
+
+export const Mfa_amr_claimsScalarFieldEnum = {
+  session_id: 'session_id',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  authentication_method: 'authentication_method',
+  id: 'id'
+} as const
+
+export type Mfa_amr_claimsScalarFieldEnum = (typeof Mfa_amr_claimsScalarFieldEnum)[keyof typeof Mfa_amr_claimsScalarFieldEnum]
+
+
+export const Mfa_challengesScalarFieldEnum = {
+  id: 'id',
+  factor_id: 'factor_id',
+  created_at: 'created_at',
+  verified_at: 'verified_at',
+  ip_address: 'ip_address',
+  otp_code: 'otp_code',
+  web_authn_session_data: 'web_authn_session_data'
+} as const
+
+export type Mfa_challengesScalarFieldEnum = (typeof Mfa_challengesScalarFieldEnum)[keyof typeof Mfa_challengesScalarFieldEnum]
+
+
+export const Mfa_factorsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  friendly_name: 'friendly_name',
+  factor_type: 'factor_type',
+  status: 'status',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  secret: 'secret',
+  phone: 'phone',
+  last_challenged_at: 'last_challenged_at',
+  web_authn_credential: 'web_authn_credential',
+  web_authn_aaguid: 'web_authn_aaguid',
+  last_webauthn_challenge_data: 'last_webauthn_challenge_data'
+} as const
+
+export type Mfa_factorsScalarFieldEnum = (typeof Mfa_factorsScalarFieldEnum)[keyof typeof Mfa_factorsScalarFieldEnum]
+
+
+export const Oauth_authorizationsScalarFieldEnum = {
+  id: 'id',
+  authorization_id: 'authorization_id',
+  client_id: 'client_id',
+  user_id: 'user_id',
+  redirect_uri: 'redirect_uri',
+  scope: 'scope',
+  state: 'state',
+  resource: 'resource',
+  code_challenge: 'code_challenge',
+  code_challenge_method: 'code_challenge_method',
+  response_type: 'response_type',
+  status: 'status',
+  authorization_code: 'authorization_code',
+  created_at: 'created_at',
+  expires_at: 'expires_at',
+  approved_at: 'approved_at',
+  nonce: 'nonce'
+} as const
+
+export type Oauth_authorizationsScalarFieldEnum = (typeof Oauth_authorizationsScalarFieldEnum)[keyof typeof Oauth_authorizationsScalarFieldEnum]
+
+
+export const Oauth_client_statesScalarFieldEnum = {
+  id: 'id',
+  provider_type: 'provider_type',
+  code_verifier: 'code_verifier',
+  created_at: 'created_at'
+} as const
+
+export type Oauth_client_statesScalarFieldEnum = (typeof Oauth_client_statesScalarFieldEnum)[keyof typeof Oauth_client_statesScalarFieldEnum]
+
+
+export const Oauth_clientsScalarFieldEnum = {
+  id: 'id',
+  client_secret_hash: 'client_secret_hash',
+  registration_type: 'registration_type',
+  redirect_uris: 'redirect_uris',
+  grant_types: 'grant_types',
+  client_name: 'client_name',
+  client_uri: 'client_uri',
+  logo_uri: 'logo_uri',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  deleted_at: 'deleted_at',
+  client_type: 'client_type',
+  token_endpoint_auth_method: 'token_endpoint_auth_method'
+} as const
+
+export type Oauth_clientsScalarFieldEnum = (typeof Oauth_clientsScalarFieldEnum)[keyof typeof Oauth_clientsScalarFieldEnum]
+
+
+export const Oauth_consentsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  client_id: 'client_id',
+  scopes: 'scopes',
+  granted_at: 'granted_at',
+  revoked_at: 'revoked_at'
+} as const
+
+export type Oauth_consentsScalarFieldEnum = (typeof Oauth_consentsScalarFieldEnum)[keyof typeof Oauth_consentsScalarFieldEnum]
+
+
+export const One_time_tokensScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  token_type: 'token_type',
+  token_hash: 'token_hash',
+  relates_to: 'relates_to',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type One_time_tokensScalarFieldEnum = (typeof One_time_tokensScalarFieldEnum)[keyof typeof One_time_tokensScalarFieldEnum]
+
+
+export const Refresh_tokensScalarFieldEnum = {
+  instance_id: 'instance_id',
+  id: 'id',
+  token: 'token',
+  user_id: 'user_id',
+  revoked: 'revoked',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  parent: 'parent',
+  session_id: 'session_id'
+} as const
+
+export type Refresh_tokensScalarFieldEnum = (typeof Refresh_tokensScalarFieldEnum)[keyof typeof Refresh_tokensScalarFieldEnum]
+
+
+export const Saml_providersScalarFieldEnum = {
+  id: 'id',
+  sso_provider_id: 'sso_provider_id',
+  entity_id: 'entity_id',
+  metadata_xml: 'metadata_xml',
+  metadata_url: 'metadata_url',
+  attribute_mapping: 'attribute_mapping',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  name_id_format: 'name_id_format'
+} as const
+
+export type Saml_providersScalarFieldEnum = (typeof Saml_providersScalarFieldEnum)[keyof typeof Saml_providersScalarFieldEnum]
+
+
+export const Saml_relay_statesScalarFieldEnum = {
+  id: 'id',
+  sso_provider_id: 'sso_provider_id',
+  request_id: 'request_id',
+  for_email: 'for_email',
+  redirect_to: 'redirect_to',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  flow_state_id: 'flow_state_id'
+} as const
+
+export type Saml_relay_statesScalarFieldEnum = (typeof Saml_relay_statesScalarFieldEnum)[keyof typeof Saml_relay_statesScalarFieldEnum]
+
+
+export const Schema_migrationsScalarFieldEnum = {
+  version: 'version'
+} as const
+
+export type Schema_migrationsScalarFieldEnum = (typeof Schema_migrationsScalarFieldEnum)[keyof typeof Schema_migrationsScalarFieldEnum]
+
+
+export const SessionsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  factor_id: 'factor_id',
+  aal: 'aal',
+  not_after: 'not_after',
+  refreshed_at: 'refreshed_at',
+  user_agent: 'user_agent',
+  ip: 'ip',
+  tag: 'tag',
+  oauth_client_id: 'oauth_client_id',
+  refresh_token_hmac_key: 'refresh_token_hmac_key',
+  refresh_token_counter: 'refresh_token_counter',
+  scopes: 'scopes'
+} as const
+
+export type SessionsScalarFieldEnum = (typeof SessionsScalarFieldEnum)[keyof typeof SessionsScalarFieldEnum]
+
+
+export const Sso_domainsScalarFieldEnum = {
+  id: 'id',
+  sso_provider_id: 'sso_provider_id',
+  domain: 'domain',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Sso_domainsScalarFieldEnum = (typeof Sso_domainsScalarFieldEnum)[keyof typeof Sso_domainsScalarFieldEnum]
+
+
+export const Sso_providersScalarFieldEnum = {
+  id: 'id',
+  resource_id: 'resource_id',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  disabled: 'disabled'
+} as const
+
+export type Sso_providersScalarFieldEnum = (typeof Sso_providersScalarFieldEnum)[keyof typeof Sso_providersScalarFieldEnum]
+
+
+export const UsersScalarFieldEnum = {
+  instance_id: 'instance_id',
+  id: 'id',
+  aud: 'aud',
+  role: 'role',
+  email: 'email',
+  encrypted_password: 'encrypted_password',
+  email_confirmed_at: 'email_confirmed_at',
+  invited_at: 'invited_at',
+  confirmation_token: 'confirmation_token',
+  confirmation_sent_at: 'confirmation_sent_at',
+  recovery_token: 'recovery_token',
+  recovery_sent_at: 'recovery_sent_at',
+  email_change_token_new: 'email_change_token_new',
+  email_change: 'email_change',
+  email_change_sent_at: 'email_change_sent_at',
+  last_sign_in_at: 'last_sign_in_at',
+  raw_app_meta_data: 'raw_app_meta_data',
+  raw_user_meta_data: 'raw_user_meta_data',
+  is_super_admin: 'is_super_admin',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  phone: 'phone',
+  phone_confirmed_at: 'phone_confirmed_at',
+  phone_change: 'phone_change',
+  phone_change_token: 'phone_change_token',
+  phone_change_sent_at: 'phone_change_sent_at',
+  confirmed_at: 'confirmed_at',
+  email_change_token_current: 'email_change_token_current',
+  email_change_confirm_status: 'email_change_confirm_status',
+  banned_until: 'banned_until',
+  reauthentication_token: 'reauthentication_token',
+  reauthentication_sent_at: 'reauthentication_sent_at',
+  is_sso_user: 'is_sso_user',
+  deleted_at: 'deleted_at',
+  is_anonymous: 'is_anonymous'
+} as const
+
+export type UsersScalarFieldEnum = (typeof UsersScalarFieldEnum)[keyof typeof UsersScalarFieldEnum]
+
+
+export const Webauthn_challengesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  challenge_type: 'challenge_type',
+  session_data: 'session_data',
+  created_at: 'created_at',
+  expires_at: 'expires_at'
+} as const
+
+export type Webauthn_challengesScalarFieldEnum = (typeof Webauthn_challengesScalarFieldEnum)[keyof typeof Webauthn_challengesScalarFieldEnum]
+
+
+export const Webauthn_credentialsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  credential_id: 'credential_id',
+  public_key: 'public_key',
+  attestation_type: 'attestation_type',
+  aaguid: 'aaguid',
+  sign_count: 'sign_count',
+  transports: 'transports',
+  backup_eligible: 'backup_eligible',
+  backed_up: 'backed_up',
+  friendly_name: 'friendly_name',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  last_used_at: 'last_used_at'
+} as const
+
+export type Webauthn_credentialsScalarFieldEnum = (typeof Webauthn_credentialsScalarFieldEnum)[keyof typeof Webauthn_credentialsScalarFieldEnum]
+
+
+export const Admin_audit_logScalarFieldEnum = {
+  id: 'id',
+  actor_id: 'actor_id',
+  action: 'action',
+  target_type: 'target_type',
+  target_id: 'target_id',
+  old_value: 'old_value',
+  new_value: 'new_value',
+  ip_address: 'ip_address',
+  user_agent: 'user_agent',
+  created_at: 'created_at'
+} as const
+
+export type Admin_audit_logScalarFieldEnum = (typeof Admin_audit_logScalarFieldEnum)[keyof typeof Admin_audit_logScalarFieldEnum]
+
+
+export const ProfilesScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  first_name: 'first_name',
+  last_name: 'last_name',
+  full_name: 'full_name',
+  gender: 'gender',
+  phone: 'phone',
+  date_of_birth: 'date_of_birth',
+  blood_type: 'blood_type',
+  allergies: 'allergies',
+  chronic_conditions: 'chronic_conditions',
+  height_cm: 'height_cm',
+  weight_kg: 'weight_kg',
+  emergency_contact_name: 'emergency_contact_name',
+  emergency_contact_phone: 'emergency_contact_phone',
+  avatar_url: 'avatar_url',
+  is_profile_complete: 'is_profile_complete',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type ProfilesScalarFieldEnum = (typeof ProfilesScalarFieldEnum)[keyof typeof ProfilesScalarFieldEnum]
+
+
+export const Reservation_alert_subscriptionsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  doctor_schedule_id: 'doctor_schedule_id',
+  email: 'email',
+  is_active: 'is_active',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Reservation_alert_subscriptionsScalarFieldEnum = (typeof Reservation_alert_subscriptionsScalarFieldEnum)[keyof typeof Reservation_alert_subscriptionsScalarFieldEnum]
+
+
+export const Staff_profilesScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  staff_type: 'staff_type',
+  government_id_path: 'government_id_path',
+  specialty: 'specialty',
+  affiliation_name: 'affiliation_name',
+  affiliation_type: 'affiliation_type',
+  certificate_file_path: 'certificate_file_path',
+  selfie_file_path: 'selfie_file_path',
+  verification_status: 'verification_status',
+  verification_notes: 'verification_notes',
+  submitted_at: 'submitted_at',
+  reviewed_at: 'reviewed_at',
+  reviewed_by: 'reviewed_by',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Staff_profilesScalarFieldEnum = (typeof Staff_profilesScalarFieldEnum)[keyof typeof Staff_profilesScalarFieldEnum]
+
+
+export const User_accountsScalarFieldEnum = {
+  id: 'id',
+  account_type: 'account_type',
+  account_status: 'account_status',
+  must_change_password: 'must_change_password',
+  approved_by: 'approved_by',
+  approved_at: 'approved_at',
+  rejected_reason: 'rejected_reason',
+  suspended_reason: 'suspended_reason',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type User_accountsScalarFieldEnum = (typeof User_accountsScalarFieldEnum)[keyof typeof User_accountsScalarFieldEnum]
+
+
+export const FeedbackScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  condition: 'condition',
+  riskLevel: 'riskLevel',
+  relatedMedicines: 'relatedMedicines',
+  createdAt: 'createdAt'
+} as const
+
+export type FeedbackScalarFieldEnum = (typeof FeedbackScalarFieldEnum)[keyof typeof FeedbackScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -236,6 +790,13 @@ export const NullableJsonNullValueInput = {
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {

@@ -149,7 +149,10 @@ export async function removeDoctorSchedule(userId: string, scheduleId: string, r
   });
 
   if (reservations.length > 0) {
-    const defaultDateStr = new Date(schedule.scheduleDate).toLocaleDateString('en-US', { dateStyle: 'full' });
+    const defaultDateStr = new Intl.DateTimeFormat('en-US', { 
+      dateStyle: 'full', 
+      timeZone: 'Africa/Cairo' 
+    }).format(new Date(schedule.scheduleDate));
 
     await prisma.notification.createMany({
       data: reservations.map(r => ({
@@ -187,7 +190,7 @@ export async function removeDoctorSchedule(userId: string, scheduleId: string, r
       userId,
       type: 'reservation_cancelled',
       title: 'Schedule Cancelled Successfully',
-      body: `You have successfully cancelled your schedule on ${new Date(schedule.scheduleDate).toLocaleDateString('en-US', { dateStyle: 'full' })}. All booked patients have been notified.`,
+      body: `You have successfully cancelled your schedule on ${new Intl.DateTimeFormat('en-US', { dateStyle: 'full', timeZone: 'Africa/Cairo' }).format(new Date(schedule.scheduleDate))}. All booked patients have been notified.`,
     }
   });
 }

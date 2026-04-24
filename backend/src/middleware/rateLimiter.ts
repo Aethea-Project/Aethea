@@ -44,13 +44,21 @@ if (process.env.REDIS_URL) {
 }
 
 /**
- * General API rate limiter — 100 requests per 15 minutes per IP
+ * General API rate limiter — 500 requests per 15 minutes per user/IP.
+ * Raised from 100 because React Strict Mode doubles effect invocations, and
+ * a normal page load triggers 8-12 parallel API calls simultaneously.
+ * We key by userId (when authenticated) so Cloudflare proxy IPs don't pool users together.
  */
 export const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,                  // limit each IP to 100 requests per window
-  standardHeaders: true,     // Return rate limit info in `RateLimit-*` headers
-  legacyHeaders: false,      // Disable `X-RateLimit-*` headers
+  windowMs: 15 * 60 * 1000,
+  max: 500,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const userId = (req as any).localUser?.id ?? (req as any).user?.sub;
+    return userId ? `user:${userId}` : (req.ip ?? 'unknown');
+  },
+  skip: (req) => req.path === '/health',
   ...(getRedisStore && { store: getRedisStore('rl:api:') }),
   message: {
     error: 'Too many requests',
@@ -84,7 +92,7 @@ export const authLimiter = rateLimit({
  */
 export const mapsProxyLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 60,
+  max: 120,
   standardHeaders: true,
   legacyHeaders: false,
   ...(getRedisStore && { store: getRedisStore('rl:maps:') }),

@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { FeatureHeader } from '../../components/FeatureHeader';
 import { Modal } from '../../components/Modal';
-import { imageAssets } from '../../constants/imageAssets';
 import { useMarketplaceSchedules } from '../../hooks/useDoctors';
 import { useReservations } from '../../hooks/useReservations';
 import { useAuth } from '@core/auth/useAuth';
@@ -10,17 +8,8 @@ import { useUiNotifications } from '../../contexts/UiNotificationsProvider';
 import { decodeJWT } from '@core/auth/token-manager';
 import type { AccountType } from '@core/auth/auth-types';
 import type { MarketplaceSchedulePost } from '../../services/medicalApi';
-import './styles.css';
-
+import { cn } from '../../lib/cn';
 const SPECIALTIES = [
-  'All Specialties',
-  'Cardiology',
-  'Dermatology',
-  'Pediatrics',
-  'Orthopedics',
-  'Neurology',
-  'Ophthalmology',
-  'Gynecology',
   'Psychiatry',
   'General Practice',
 ];
@@ -99,23 +88,23 @@ function ReserveModal({
   };
 
   return (
-    <div className="marketplace-modal">
-      <h3>Reserve with Dr. {post.doctor.firstName} {post.doctor.lastName}</h3>
-      <p className="marketplace-modal-subtitle">
-        {post.doctor.specialty} · {new Date(post.schedule.scheduleDate).toLocaleDateString()}
+    <div className="flex flex-col gap-3 min-h-0">
+      <h3 className="m-0 text-xl font-bold text-gray-900">Reserve with Dr. {post.doctor.firstName} {post.doctor.lastName}</h3>  
+      <p className="m-0 text-gray-500 text-[0.95rem]">
+        {post.doctor.specialty} • {new Date(post.schedule.scheduleDate).toLocaleDateString()}
       </p>
       {clinicAddress && (
-        <p className="marketplace-modal-subtitle">Clinic: {clinicAddress}</p>
+        <p className="m-0 text-gray-500 text-[0.95rem]">Clinic: {clinicAddress}</p>   
       )}
       {clinicMapLink && (
-        <a className="view-profile-btn" href={clinicMapLink} target="_blank" rel="noreferrer">
+        <a className="inline-flex items-center justify-center w-fit border border-gray-200 rounded-lg px-3 py-2 no-underline text-gray-900 bg-white text-sm font-medium hover:bg-gray-50 transition-colors" href={clinicMapLink} target="_blank" rel="noreferrer">
           Open Clinic Location
         </a>
       )}
 
-      <div className="marketplace-slot-list">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-2 max-h-[min(30dvh,240px)] sm:max-h-none overflow-y-auto pr-1 content-start mt-2">
         {availableSlots.length === 0 ? (
-          <p className="error">No slots available for this post.</p>
+          <p className="text-sm text-red-600">No slots available for this post.</p>
         ) : (
           availableSlots.map((slotIndex) => {
             const slotStart = new Date(new Date(post.schedule.startAt).getTime() + slotIndex * slotDurationMs);
@@ -124,7 +113,10 @@ function ReserveModal({
               <button
                 key={slotIndex}
                 type="button"
-                className={`time-slot-btn${selectedSlotIndex === slotIndex ? ' selected' : ''}`}
+                className={cn(
+                  "bg-white border p-2 rounded-lg cursor-pointer text-gray-900 text-sm font-inherit transition-colors hover:border-blue-400",
+                  selectedSlotIndex === slotIndex ? "bg-blue-50 border-blue-600 text-blue-700 font-semibold" : "border-gray-200"
+                )}
                 onClick={() => setSelectedSlotIndex(slotIndex)}
               >
                 {slotStart.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
@@ -137,8 +129,8 @@ function ReserveModal({
       </div>
 
       {availableSlots.length > 0 && (
-        <form onSubmit={handleSubmit} className="marketplace-form">
-          <label>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3 mt-1">
+          <label className="flex flex-col gap-2 text-sm font-medium text-gray-900">
             Reason for visit *
             <textarea
               rows={3}
@@ -148,21 +140,23 @@ function ReserveModal({
               required
               minLength={2}
               maxLength={500}
+              className="w-full border border-gray-200 rounded-lg p-2.5 font-inherit text-[0.95rem] resize-y min-h-[80px] bg-white text-gray-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-shadow"
             />
           </label>
 
-          <label className="checkbox-label">
+          <label className="flex flex-row items-center gap-2 font-normal text-gray-500 text-sm cursor-pointer">
             <input
               type="checkbox"
               checked={shareHealthData}
               onChange={(e) => setShareHealthData(e.target.checked)}
+              className="w-4 h-4 m-0 accent-teal-600 shrink-0"
             />
             Share my health records with this doctor
           </label>
 
-          <div className="modal-actions">
-            <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
-            <button type="submit" className="book-btn" disabled={submitting || selectedSlotIndex === null || !reason.trim()}>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2.5 mt-2 pt-2.5 border-t border-gray-200 sticky bottom-0 bg-white z-10 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-8px_14px_-12px_rgba(15,23,42,0.4)] sm:shadow-none sm:pb-0 sm:static">
+            <button type="button" className="w-full sm:w-auto bg-transparent border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 px-3.5 py-2 rounded-lg font-inherit text-[0.95rem] font-medium cursor-pointer transition-colors" onClick={onClose}>Cancel</button>
+            <button type="submit" className="w-full sm:w-auto bg-blue-600 border border-transparent text-white hover:bg-blue-700 px-3.5 py-2 rounded-lg font-inherit text-[0.95rem] font-medium cursor-pointer disabled:opacity-65 disabled:cursor-not-allowed transition-colors" disabled={submitting || selectedSlotIndex === null || !reason.trim()}>
               {submitting ? 'Booking...' : 'Confirm Booking'}
             </button>
           </div>
@@ -266,62 +260,56 @@ export default function AppointmentsMarketplacePage() {
   }, [debouncedSearch, specialty, city, date, searchPosts]);
 
   return (
-    <div className="appointments-marketplace-page">
-      <FeatureHeader
-        title="Appointments Marketplace"
-        subtitle="Browse doctor availability posts and reserve a timing"
-        variant="doc"
-        imageSrc={imageAssets.headers.doctor}
-        imageAlt="Appointments Marketplace"
-      />
+    <div className="max-w-[1200px] mx-auto p-4 sm:p-6 pb-20">
+      <h1 className="m-0 mb-5 text-[1.75rem] font-bold text-gray-900">Appointments Marketplace</h1>
 
       {!canBook && (
-        <p className="error">Admin accounts are read-only and cannot create bookings.</p>
+        <p className="text-red-600 m-0 mb-4 bg-red-50 p-3 rounded-lg text-sm border border-red-200">Admin accounts are read-only and cannot create bookings.</p>
       )}
 
-      <div className="finder-controls">
+      <div className="grid grid-[repeat(auto-fit,minmax(180px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3 mb-5">
         <input
-          className="search-input"
+          className="border border-gray-200 rounded-lg px-3 py-2.5 font-inherit bg-white text-gray-900 min-h-[40px] focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-shadow"
           type="text"
           placeholder="Search doctor name, specialty, clinic, city..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <select className="specialty-select" value={specialty} onChange={(e) => setSpecialty(e.target.value)}>
+        <select className="border border-gray-200 rounded-lg px-3 py-2.5 font-inherit bg-white text-gray-900 min-h-[40px] focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-shadow" value={specialty} onChange={(e) => setSpecialty(e.target.value)}>
           {SPECIALTIES.map((s) => (
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
         <input
-          className="search-input"
+          className="border border-gray-200 rounded-lg px-3 py-2.5 font-inherit bg-white text-gray-900 min-h-[40px] focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-shadow"
           type="text"
           placeholder="Filter by city"
           value={city}
           onChange={(e) => setCity(e.target.value)}
         />
         <input
-          className="search-input"
+          className="border border-gray-200 rounded-lg px-3 py-2.5 font-inherit bg-white text-gray-900 min-h-[40px] focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-shadow"
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
         />
       </div>
 
-      {error && <div className="error">{error}</div>}
+      {error && <div className="text-red-600 m-0 mb-4 bg-red-50 p-3 rounded-lg text-sm border border-red-200">{error}</div>}
       {loading ? (
-        <p className="loading">Loading availability posts...</p>
+        <p className="text-gray-500 italic mt-2">Loading availability posts...</p>
       ) : posts.length === 0 ? (
-        <div className="marketplace-empty-state">
-          <p className="loading">{emptyState.message}</p>
-          <p className="marketplace-empty-state-hint">{emptyState.hint}</p>
-          <div className="marketplace-empty-actions">
-            <button type="button" className="btn btn-ghost" onClick={clearFilters}>
+        <div className="mt-3 border border-gray-200 rounded-[10px] bg-white p-4">
+          <p className="text-gray-900 font-medium m-0">{emptyState.message}</p>
+          <p className="m-0 mt-2 text-gray-500 text-sm">{emptyState.hint}</p>     
+          <div className="mt-3 flex flex-wrap gap-2.5">
+            <button type="button" className="bg-transparent border border-gray-200 text-gray-700 hover:bg-gray-50 px-3.5 py-2 rounded-lg font-inherit text-[0.95rem] font-medium cursor-pointer transition-colors" onClick={clearFilters}>
               Clear Filters
             </button>
             {emptyState.showDoctorAction && (
               <button
                 type="button"
-                className="book-btn"
+                className="bg-blue-600 border border-transparent text-white hover:bg-blue-700 px-3.5 py-2 rounded-lg font-inherit text-[0.95rem] font-medium cursor-pointer transition-colors"
                 onClick={() => navigate('/availability-manager')}
               >
                 Open Availability Manager
@@ -330,89 +318,96 @@ export default function AppointmentsMarketplacePage() {
           </div>
         </div>
       ) : (
-        <div className="doctors-grid appointments-posts-grid">
-          {posts.map((post) => {
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-6 mt-3.5">
+          {posts.map((post, index) => {
             const availableSlots = post.schedule.maxPatients - post.schedule.bookedSlotIndexes.length;
             const name = `Dr. ${post.doctor.firstName} ${post.doctor.lastName}`;
             const locationValue = post.doctor.address || [post.doctor.clinicName, post.doctor.city].filter(Boolean).join(', ');
             const location = locationValue || 'Location unknown';
             const clinicMapLink = buildMapsSearchLink(locationValue);
 
+            const cardTones = ['apc-tone-1', 'apc-tone-2', 'apc-tone-3'];
+            const cardToneClass = cardTones[index % cardTones.length];
+
             return (
-              <div key={post.schedule.id} className="doctor-card appointments-post-card">
-                <div className="doctor-card-header">
-                  <div className="doctor-avatar">
-                   {post.doctor.photoUrl ? (
-                      <img src={post.doctor.photoUrl} alt={name} />
-                    ) : (
-                      <span>{post.doctor.firstName[0]}{post.doctor.lastName[0]}</span>
+              <div key={post.schedule.id} className="bg-white rounded-xl border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.12)] overflow-hidden flex flex-col min-h-[470px] sm:min-h-0 transition-transform duration-150 hover:-translate-y-[2px]"> 
+                {/* Top Image Area */}
+                <div className="relative h-[190px] bg-[#27272a] shrink-0">
+                  {post.doctor.photoUrl ? (
+                    <img src={post.doctor.photoUrl} alt={name} className="w-full h-full object-cover block" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-[#2c2c2e]">
+                      <span className="text-[#a1a1aa] text-[11px] tracking-[0.08em] font-semibold">IMAGE PLACEHOLDER</span>
+                    </div>
+                  )}
+                  <div className="absolute top-0 right-[14px] bg-[#f59e0b] text-white font-bold py-[5px] px-[12px] rounded-b-lg text-[13px]">
+                    {post.doctor.consultFee ? `${post.doctor.consultFee} EGP` : 'Free'}
+                  </div>
+                </div>
+
+                {/* Bottom Content Area */}
+                <div className={cn("text-white p-4 flex flex-col flex-1", cardToneClass === 'apc-tone-1' ? 'bg-[#151b3d]' : cardToneClass === 'apc-tone-2' ? 'bg-[#1e293b]' : 'bg-[#2c2c2e]')}>
+                  <div className="grid grid-cols-1 sm:grid-cols-[1fr_max-content_1fr] gap-3">
+                    {/* Left Col */}
+                    <div className="min-w-0">
+                      <h3 className="m-0 text-[18px] font-bold leading-tight">{name}</h3>
+                      <p className="m-0 mt-1 text-[12px] leading-[1.35] text-white/90">{post.doctor.specialty}</p>       
+                      <div className="mt-2.5 flex gap-[2px]">
+                        <span className="text-amber-400">★</span>
+                        <span className="text-amber-400">★</span>
+                        <span className="text-amber-400">★</span>
+                        <span className="text-amber-400">★</span>
+                        <span className="text-amber-400">★</span>
+                      </div>
+                    </div>
+                    <div className="hidden sm:block w-px bg-white/20"></div>
+                    {/* Right Col */}
+                    <div className="min-w-0">
+                      <h4 className="m-0 text-[10px] font-bold tracking-[0.06em] text-white/95">DETAILS</h4>
+                      <p className="m-0 mt-1 text-[12px] leading-[1.35] text-white/90">
+                        {new Date(post.schedule.scheduleDate).toLocaleDateString()}
+                        <br />
+                        {new Date(post.schedule.startAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })} - {new Date(post.schedule.endAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                      <h4 className="m-0 mt-2 text-[10px] font-bold tracking-[0.06em] text-white/95">LOCATION</h4>
+                      <p className="m-0 mt-1 text-[12px] leading-[1.35] text-white/90">{location}</p>
+                      {clinicMapLink && (
+                        <a className="inline-block mt-1.5 text-[12px] text-slate-200 underline" href={clinicMapLink} target="_blank" rel="noreferrer">
+                          Open Map
+                        </a>
+                      )}
+                      <h4 className="m-0 mt-2 text-[10px] font-bold tracking-[0.06em] text-white/95">AVAILABILITY</h4>       
+                      <p className="m-0 mt-1 text-[12px] leading-[1.35] text-white/90">
+                        {availableSlots}/{post.schedule.maxPatients} slots open 
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-auto flex flex-col gap-2 items-center pt-3.5">
+                    <button
+                      className="min-w-[150px] bg-white text-gray-900 border-none rounded-lg px-4 py-2 text-[12px] font-bold cursor-pointer hover:bg-slate-100 disabled:bg-white/60 disabled:text-gray-900/55 disabled:cursor-not-allowed transition-colors"
+                      type="button"
+                      disabled={!canBook || availableSlots <= 0}
+                      onClick={() => {
+                        setSelectedPost(post);
+                        setBookingSuccess(false);
+                      }}
+                    >
+                      {availableSlots <= 0 ? 'Fully Booked' : canBook ? 'Reserve Slot' : 'Read Only'}
+                    </button>
+                    {availableSlots <= 0 && canBook && (
+                      <button
+                        className="bg-transparent text-white border border-white/45 rounded-lg px-3.5 py-1.5 text-[12px] cursor-pointer hover:bg-white/10 transition-colors"
+                        type="button"
+                        disabled={alertLoading[post.schedule.id] === true}      
+                        onClick={() => void handleAlertSubscription(post.schedule.id)}
+                      >
+                        {alertLoading[post.schedule.id] ? 'Saving...' : 'Notify Me'}
+                      </button>
                     )}
                   </div>
-                  <div className="doctor-info">
-                    <div className="doctor-name-row">
-                      <h3>{name}</h3>
-                      {post.doctor.verified && (
-                        <span className="verified-badge" title="Verified">✓</span>
-                      )}
-                    </div>
-                    <p className="doctor-specialty">{post.doctor.specialty}</p>
-                  </div>
-                </div>
-
-                <div className="doctor-details">
-                  <div className="detail-row">
-                    <span className="detail-icon">📅</span>
-                    <span>{new Date(post.schedule.scheduleDate).toLocaleDateString()}</span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="detail-icon">⏰</span>
-                    <span>
-                      {new Date(post.schedule.startAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-                      {' - '}
-                      {new Date(post.schedule.endAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                  {location && (
-                    <div className="detail-row">
-                      <span className="detail-icon">📍</span>
-                      <span>{location}</span>
-                    </div>
-                  )}
-                  <div className="detail-row">
-                    <span className="detail-icon">👥</span>
-                    <span>{post.schedule.slotDurationMins} min slots · {availableSlots}/{post.schedule.maxPatients} available</span>
-                  </div>
-                </div>
-
-                <div className="doctor-actions layout-col">
-                  <button
-                    className="book-btn"
-                    type="button"
-                    disabled={!canBook || availableSlots <= 0}
-                    onClick={() => {
-                      setSelectedPost(post);
-                      setBookingSuccess(false);
-                    }}
-                  >
-                    {availableSlots <= 0 ? 'Fully Booked' : canBook ? 'Reserve Slot' : 'Read Only'}
-                  </button>
-                  {availableSlots <= 0 && canBook && (
-                    <button
-                      className="view-profile-btn"
-                      type="button"
-                      disabled={alertLoading[post.schedule.id] === true}
-                      onClick={() => void handleAlertSubscription(post.schedule.id)}
-                    >
-                      {alertLoading[post.schedule.id] ? 'Saving...' : 'Notify Me If Slot Opens'}
-                    </button>
-                  )}
-                  {clinicMapLink && (
-                    <a className="view-profile-btn" href={clinicMapLink} target="_blank" rel="noreferrer">
-                      View Clinic on Map
-                    </a>
-                  )}
                   {alertMessages[post.schedule.id] && (
-                    <p className="appointments-alert-message">{alertMessages[post.schedule.id]}</p>
+                    <p className="m-0 mt-2.5 text-[12px] text-slate-50 text-center">{alertMessages[post.schedule.id]}</p>
                   )}
                 </div>
               </div>
@@ -425,12 +420,12 @@ export default function AppointmentsMarketplacePage() {
         <Modal
           isOpen={Boolean(selectedPost)}
           onClose={() => setSelectedPost(null)}
-          contentClassName="appointments-marketplace-modal-content"
+          contentClassName="w-full max-w-[560px] max-h-[calc(100dvh-2rem)] overflow-y-auto"
           ariaLabel="Reserve appointment slot"
         >
           {bookingSuccess ? (
-            <div className="booking-success">
-              <p>✓ Booking confirmed. You can review it in your appointments list.</p>
+            <div className="m-0 p-3 rounded-lg border border-green-500 bg-green-50 text-green-800">
+              <p>Booking confirmed. You can review it in your appointments list.</p>
             </div>
           ) : (
             <ReserveModal

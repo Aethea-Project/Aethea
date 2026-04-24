@@ -14,6 +14,7 @@ import {
   MarketplaceSchedulePost,
   MarketplaceScheduleQuery,
 } from '../services/medicalApi';
+import { useAuth } from '@core/auth/useAuth';
 
 export interface UseDoctorsResult {
   doctors: DoctorProfile[];
@@ -24,6 +25,7 @@ export interface UseDoctorsResult {
 }
 
 export function useDoctors(initialParams?: DoctorListParams): UseDoctorsResult {
+  const { session, loading: authLoading } = useAuth();
   const [doctors, setDoctors] = useState<DoctorProfile[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -44,8 +46,17 @@ export function useDoctors(initialParams?: DoctorListParams): UseDoctorsResult {
   }, []);
 
   useEffect(() => {
-    void search(initialParams ?? {});
+    if (authLoading || !session) return; // wait for session to be ready
+    void search({
+      search: initialParams?.search,
+      specialty: initialParams?.specialty,
+      city: initialParams?.city,
+      page: initialParams?.page,
+      limit: initialParams?.limit,
+    });
   }, [
+    authLoading,
+    session,
     search,
     initialParams?.search,
     initialParams?.specialty,
@@ -68,6 +79,7 @@ export interface UseDoctorSchedulesResult {
 }
 
 export function useDoctorSchedules(doctorId: string): UseDoctorSchedulesResult {
+  const { session, loading: authLoading } = useAuth();
   const [schedules, setSchedules] = useState<DoctorSchedule[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -92,8 +104,9 @@ export function useDoctorSchedules(doctorId: string): UseDoctorSchedulesResult {
   }, [doctorId]);
 
   useEffect(() => {
+    if (authLoading || !session) return;
     load();
-  }, [load]);
+  }, [load, authLoading, session]);
 
   return { schedules, total, loading, error, refresh: load };
 }
@@ -108,6 +121,7 @@ export interface UseScheduleSlotsResult {
 }
 
 export function useScheduleSlots(scheduleId: string): UseScheduleSlotsResult {
+  const { session, loading: authLoading } = useAuth();
   const [slotView, setSlotView] = useState<ScheduleSlotView | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -126,8 +140,9 @@ export function useScheduleSlots(scheduleId: string): UseScheduleSlotsResult {
   }, [scheduleId]);
 
   useEffect(() => {
+    if (authLoading || !session) return;
     if (scheduleId) load();
-  }, [scheduleId, load]);
+  }, [scheduleId, load, authLoading, session]);
 
   return { slotView, loading, error, refresh: load };
 }
@@ -143,6 +158,7 @@ export interface UseMarketplaceSchedulesResult {
 }
 
 export function useMarketplaceSchedules(initialParams?: MarketplaceScheduleQuery, enabled = true): UseMarketplaceSchedulesResult {
+  const { session, loading: authLoading } = useAuth();
   const [posts, setPosts] = useState<MarketplaceSchedulePost[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -163,13 +179,13 @@ export function useMarketplaceSchedules(initialParams?: MarketplaceScheduleQuery
   }, []);
 
   useEffect(() => {
-    if (!enabled) {
-      setLoading(false);
+    if (authLoading || !session || !enabled) {
+      if (!enabled) setLoading(false);
       return;
     }
     void search(initialParams ?? {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled]);
+  }, [enabled, authLoading, session]);
 
   return { posts, total, loading, error, search };
 }

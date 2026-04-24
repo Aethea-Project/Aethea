@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { medicalApi, FastestRoute, NearbyPlace } from '../services/medicalApi';
+import { useAuth } from '@core/auth/useAuth';
 
 export interface LatLng {
   lat: number;
@@ -42,6 +43,7 @@ const getCurrentPositionAsync = () =>
   });
 
 export function useNearbyMedicalPlaces(options: NearbyMedicalPlacesOptions = {}): NearbyMedicalPlacesState {
+  const { session, loading: authLoading } = useAuth();
   const [userLocation, setUserLocation] = useState<LatLng>(DEFAULT_CENTER);
   const userLocationRef = useRef<LatLng>(DEFAULT_CENTER);
   const [doctors, setDoctors] = useState<NearbyPlace[]>([]);
@@ -125,8 +127,9 @@ export function useNearbyMedicalPlaces(options: NearbyMedicalPlacesOptions = {})
   );
 
   useEffect(() => {
+    if (authLoading || !session) return; // wait for session to be ready
     void refresh();
-  }, [refresh]);
+  }, [refresh, authLoading, session]);
 
   return {
     userLocation,

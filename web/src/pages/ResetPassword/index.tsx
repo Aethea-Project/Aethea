@@ -4,7 +4,6 @@ import { doPasswordsMatch, validatePassword } from '@core/auth/auth-utils';
 import { useAuth } from '@core/auth/useAuth';
 import { authService } from '../../services/auth';
 import { completePasswordChange } from '../../services/authApi';
-import './styles.css';
 
 interface PasswordRequirement {
   id: 'length' | 'uppercase' | 'lowercase' | 'number' | 'special';
@@ -240,85 +239,100 @@ const ResetPasswordPage: React.FC = () => {
   };
 
   return (
-    <div className="reset-password-page">
-      <div className="reset-password-card">
-        <h1>Set New Password</h1>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        <div className="mx-auto w-full max-w-md bg-white border border-gray-200 rounded-lg p-4 space-y-4">
+          <h1 className="text-2xl font-semibold text-gray-900">Set New Password</h1>
 
-        {!loading && !sessionPreparing && !sessionReady && !recoveryContext.hasRecoveryFlow && (
-          <div className="reset-password-error" role="alert">
-            This reset link is invalid or expired. Please request a new one.
+          {!loading && !sessionPreparing && !sessionReady && !recoveryContext.hasRecoveryFlow && (
+            <div className="rounded-lg border border-gray-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+              This reset link is invalid or expired. Please request a new one.
+            </div>
+          )}
+
+          {sessionPreparing && (
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-600" role="status">
+              Preparing secure reset session...
+            </div>
+          )}
+
+          {sessionError && (
+            <div className="rounded-lg border border-gray-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+              {sessionError}
+            </div>
+          )}
+
+          {error && (
+            <div className="rounded-lg border border-gray-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="rounded-lg border border-gray-200 bg-green-50 p-3 text-sm text-green-700" role="status">
+              {success}
+            </div>
+          )}
+
+          <form onSubmit={onSubmit} className="space-y-3">
+            <label htmlFor="new-password" className="text-sm font-medium text-gray-700">
+              New Password
+            </label>
+            <input
+              id="new-password"
+              type="password"
+              autoComplete="new-password"
+              value={newPassword}
+              onChange={(event) => setNewPassword(event.target.value)}
+              disabled={submitting || loading || sessionPreparing || !sessionReady}
+              required
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-300 focus:outline-none"
+            />
+            <ul className="space-y-1" aria-label="Password requirements">
+              {passwordRequirements.map((requirement) => (
+                <li
+                  key={requirement.id}
+                  className={`flex items-center gap-2 text-xs font-semibold ${requirement.met ? 'text-green-700' : 'text-red-700'}`}
+                >
+                  <span className="w-4 text-center" aria-hidden="true">
+                    {requirement.met ? '✓' : '✗'}
+                  </span>
+                  {requirement.label}
+                </li>
+              ))}
+            </ul>
+
+            <label htmlFor="confirm-password" className="text-sm font-medium text-gray-700">
+              Confirm New Password
+            </label>
+            <input
+              id="confirm-password"
+              type="password"
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              disabled={submitting || loading || sessionPreparing || !sessionReady}
+              required
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-300 focus:outline-none"
+            />
+
+            <button
+              type="submit"
+              className="bg-teal-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={submitting || loading || sessionPreparing || !sessionReady}
+            >
+              {submitting ? 'Updating...' : 'Update Password'}
+            </button>
+          </form>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+            <Link to="/forgot-password" className="text-gray-600 hover:text-gray-900 transition-colors">
+              Request another reset link
+            </Link>
+            <Link to="/login" className="text-gray-600 hover:text-gray-900 transition-colors">
+              Back to sign in
+            </Link>
           </div>
-        )}
-
-        {sessionPreparing && (
-          <div className="reset-password-info" role="status">
-            Preparing secure reset session...
-          </div>
-        )}
-
-        {sessionError && (
-          <div className="reset-password-error" role="alert">
-            {sessionError}
-          </div>
-        )}
-
-        {error && (
-          <div className="reset-password-error" role="alert">
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="reset-password-success" role="status">
-            {success}
-          </div>
-        )}
-
-        <form onSubmit={onSubmit} className="reset-password-form">
-          <label htmlFor="new-password">New Password</label>
-          <input
-            id="new-password"
-            type="password"
-            autoComplete="new-password"
-            value={newPassword}
-            onChange={(event) => setNewPassword(event.target.value)}
-            disabled={submitting || loading || sessionPreparing || !sessionReady}
-            required
-          />
-          <ul className="password-checklist" aria-label="Password requirements">
-            {passwordRequirements.map((requirement) => (
-              <li key={requirement.id} className={requirement.met ? 'met' : ''}>
-                <span className="check-icon" aria-hidden="true">
-                  {requirement.met ? '✓' : '✗'}
-                </span>
-                {requirement.label}
-              </li>
-            ))}
-          </ul>
-
-          <label htmlFor="confirm-password">Confirm New Password</label>
-          <input
-            id="confirm-password"
-            type="password"
-            autoComplete="new-password"
-            value={confirmPassword}
-            onChange={(event) => setConfirmPassword(event.target.value)}
-            disabled={submitting || loading || sessionPreparing || !sessionReady}
-            required
-          />
-
-          <button
-            type="submit"
-            className="reset-password-btn"
-            disabled={submitting || loading || sessionPreparing || !sessionReady}
-          >
-            {submitting ? 'Updating...' : 'Update Password'}
-          </button>
-        </form>
-
-        <div className="reset-password-links">
-          <Link to="/forgot-password">Request another reset link</Link>
-          <Link to="/login">Back to sign in</Link>
         </div>
       </div>
     </div>

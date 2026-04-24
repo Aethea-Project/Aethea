@@ -20,6 +20,8 @@ dotenv.config();
 
 const PORT = process.env.PORT || 3001;
 
+import { startCleanupJob } from './jobs/cleanup.job.js';
+
 // Create the Express application
 const app = createApp({
   supabaseUrl: process.env.SUPABASE_URL,
@@ -27,6 +29,9 @@ const app = createApp({
   corsOrigins: process.env.CORS_ORIGIN?.split(',') || undefined,
   isProduction: process.env.NODE_ENV === 'production',
 });
+
+// Start background jobs
+startCleanupJob();
 
 // Start server
 const server = app.listen(PORT, () => {

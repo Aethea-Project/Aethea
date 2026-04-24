@@ -28,7 +28,7 @@ import {
 export const createDoctorRoutes = (authMiddleware: RequestHandler): Router => {
   const router = Router();
 
-  const auth = [authMiddleware, requireTrustedClaims, requireActiveAccount, requirePasswordChanged, requireLocalUser];
+  const auth = [authMiddleware, requireLocalUser, requireTrustedClaims, requireActiveAccount, requirePasswordChanged];
 
   // Doctor-only: manage own profile and schedules (MUST be before /:id)
   router.get('/me/profile', auth, asyncHandler(getMyDoctorProfile));

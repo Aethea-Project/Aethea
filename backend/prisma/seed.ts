@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { PrismaClient } from '../src/generated/prisma/client';
+import { PrismaClient, Prisma } from '../src/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 const connectionString = process.env.DATABASE_URL;
@@ -14,10 +14,10 @@ const prisma = new PrismaClient({ adapter });
 
 // Test account UUIDs (must exist in Supabase Auth before seeding)
 const ACCOUNTS = {
-  admin:       { id: '980035ac-6e2b-46cd-adb6-1eb3dc170233', email: 'admin@aethea.com' },
-  patient:     { id: '60185e1c-88c3-4ef1-8d19-cb60dfd3d643', email: 'patient@aethea.com' },
-  doctor:      { id: '26df25b3-a9ca-47c6-8df5-f52841d55682', email: 'doctor@aethea.com' },
-  pharmacist:  { id: '25bdbbcd-abaa-4467-a386-1f7033cbb745', email: 'pharmacist@aethea.com' },
+  admin:       { id: '1c8e4f56-8af4-452a-ae6f-7b20a6d3d9b7', email: 'admin@aethea.com' },
+  patient:     { id: 'ae0b9899-7075-4b2d-bfaa-93e3aed947bc', email: 'patient@aethea.com' },
+  doctor:      { id: 'db2417ae-914d-468f-9db1-0503fb556b24', email: 'doctor@aethea.com' },
+  pharmacist:  { id: 'c58b6c74-f6d3-4fe8-90fd-ed1ad15840c9', email: 'pharmacist@aethea.com' },
 };
 
 async function main() {
@@ -52,6 +52,116 @@ async function main() {
     update: { email: ACCOUNTS.pharmacist.email, accountType: 'pharmacist' },
     create: { id: ACCOUNTS.pharmacist.id, email: ACCOUNTS.pharmacist.email, accountType: 'pharmacist' },
   });
+
+  // ── 1b. Upsert Supabase authorization state (user_accounts) ───────────────
+  // IMPORTANT: Web + backend role guards rely on JWT claims injected from
+  // public.user_accounts via Supabase custom_access_token_hook.
+  console.log('Upserting user_accounts (authorization claims)…');
+
+  const userAccountsTable = await prisma.$queryRaw<Array<{ exists: boolean }>>(
+    Prisma.sql`
+      SELECT EXISTS (
+        SELECT 1
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+          AND table_name = 'user_accounts'
+      ) AS exists
+    `,
+  );
+
+  if (!userAccountsTable[0]?.exists) {
+    console.warn(
+      '⚠️  public.user_accounts table not found — skipping auth claim seeding. ' +
+      'Run scripts/supabase/2026-03-11_authorization_schema.sql and enable the auth hooks to get account_type JWT claims.',
+    );
+  } else {
+    const authUserExists = async (userId: string) => {
+      const rows = await prisma.$queryRaw<Array<{ exists: boolean }>>(
+        Prisma.sql`SELECT EXISTS (SELECT 1 FROM auth.users WHERE id = ${userId}::uuid) AS exists`,
+      );
+      return Boolean(rows[0]?.exists);
+    };
+
+    const safeApprovedBy = async (approvedBy: string | null | undefined) => {
+      if (!approvedBy) return null;
+      return (await authUserExists(approvedBy)) ? approvedBy : null;
+    };
+
+    const upsertUserAccount = async (input: {
+      userId: string;
+      accountType: 'patient' | 'doctor' | 'pharmacist' | 'admin';
+      accountStatus: 'pending' | 'active' | 'suspended' | 'rejected';
+      mustChangePassword: boolean;
+      approvedBy?: string | null;
+    }) => {
+      if (!(await authUserExists(input.userId))) {
+        console.warn(
+          `⚠️  auth.users row not found for ${input.userId}; skipping public.user_accounts upsert (create the Supabase Auth user first).`,
+        );
+        return;
+      }
+
+      await prisma.$executeRaw`
+        INSERT INTO public.user_accounts (
+          id,
+          account_type,
+          account_status,
+          must_change_password,
+          approved_by,
+          approved_at
+        )
+        VALUES (
+          ${input.userId}::uuid,
+          ${input.accountType}::public.account_type,
+          ${input.accountStatus}::public.account_status,
+          ${input.mustChangePassword},
+          ${await safeApprovedBy(input.approvedBy)}::uuid,
+          CASE WHEN ${input.accountStatus} = 'active' THEN now() ELSE NULL END
+        )
+        ON CONFLICT (id) DO UPDATE SET
+          account_type = EXCLUDED.account_type,
+          account_status = EXCLUDED.account_status,
+          must_change_password = EXCLUDED.must_change_password,
+          approved_by = EXCLUDED.approved_by,
+          approved_at = EXCLUDED.approved_at,
+          updated_at = now()
+      `;
+    };
+
+    // Seed test accounts as ready-to-use (active + no forced password change)
+    // so doctor/pharmacist routes are accessible in local dev.
+    await upsertUserAccount({
+      userId: ACCOUNTS.admin.id,
+      accountType: 'admin',
+      accountStatus: 'active',
+      mustChangePassword: false,
+      approvedBy: null,
+    });
+
+    await upsertUserAccount({
+      userId: ACCOUNTS.patient.id,
+      accountType: 'patient',
+      accountStatus: 'active',
+      mustChangePassword: false,
+      approvedBy: null,
+    });
+
+    await upsertUserAccount({
+      userId: ACCOUNTS.doctor.id,
+      accountType: 'doctor',
+      accountStatus: 'active',
+      mustChangePassword: false,
+      approvedBy: ACCOUNTS.admin.id,
+    });
+
+    await upsertUserAccount({
+      userId: ACCOUNTS.pharmacist.id,
+      accountType: 'pharmacist',
+      accountStatus: 'active',
+      mustChangePassword: false,
+      approvedBy: ACCOUNTS.admin.id,
+    });
+  }
 
   // ── 2. Patient lab tests ───────────────────────────────────────────────────
   console.log('Seeding lab tests…');

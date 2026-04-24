@@ -1,9 +1,16 @@
-﻿import { useMemo, useState } from 'react';
-import { FeatureHeader } from '../../components/FeatureHeader';
-import { imageAssets } from '../../constants/imageAssets';
-import './styles.css';
+import { useMemo, useState } from 'react';
 import { useReservations } from '../../hooks/useReservations';
 import { useUiNotifications } from '../../contexts/UiNotificationsProvider';
+import { cn } from '../../lib/utils';
+
+const STATUS_CLASSES: Record<string, string> = {
+  scheduled: 'bg-sky-100 text-sky-700',
+  confirmed: 'bg-teal-100 text-teal-700',
+  in_progress: 'bg-amber-100 text-amber-800',
+  completed: 'bg-emerald-100 text-emerald-700',
+  cancelled: 'bg-red-100 text-red-700',
+  no_show: 'bg-slate-100 text-slate-600',
+};
 
 function buildMapsSearchLink(address: string | null | undefined): string | null {
   if (!address || !address.trim()) {
@@ -72,27 +79,30 @@ export default function ReservationsPage() {
     const mapLink = buildMapsSearchLink(clinicAddress ?? clinic);
 
     return (
-      <div key={res.id} className="res-card">
-        <div className="res-row"><span className="res-label">Doctor</span><span>{doctorName}</span></div>
-        {specialty && <div className="res-row"><span className="res-label">Specialty</span><span>{specialty}</span></div>}
-        {clinic && <div className="res-row"><span className="res-label">Clinic</span><span>{clinic}</span></div>}
-        {clinicAddress && <div className="res-row"><span className="res-label">Address</span><span>{clinicAddress}</span></div>}
-        <div className="res-row"><span className="res-label">Reason</span><span>{res.reason}</span></div>
-        <div className="res-row"><span className="res-label">Start</span><span>{new Date(res.startAt).toLocaleString()}</span></div>
-        <div className="res-row"><span className="res-label">End</span><span>{new Date(res.endAt).toLocaleString()}</span></div>
-        <div className="res-row">
-          <span className="res-label">Status</span>
-          <span className={`res-status ${res.status}`}>{res.status.replace(/_/g, ' ')}</span>
+      <div key={res.id} className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="flex gap-2 text-sm text-slate-700"><span className="text-slate-500 font-semibold min-w-24">Doctor</span><span>{doctorName}</span></div>
+        {specialty && <div className="flex gap-2 text-sm text-slate-700"><span className="text-slate-500 font-semibold min-w-24">Specialty</span><span>{specialty}</span></div>}
+        {clinic && <div className="flex gap-2 text-sm text-slate-700"><span className="text-slate-500 font-semibold min-w-24">Clinic</span><span>{clinic}</span></div>}
+        {res.doctor?.consultFee && <div className="flex gap-2 text-sm text-slate-700"><span className="text-slate-500 font-semibold min-w-24">Fee</span><span>{res.doctor.consultFee} EGP</span></div>}
+        {clinicAddress && <div className="flex gap-2 text-sm text-slate-700"><span className="text-slate-500 font-semibold min-w-24">Address</span><span>{clinicAddress}</span></div>}
+        <div className="flex gap-2 text-sm text-slate-700"><span className="text-slate-500 font-semibold min-w-24">Reason</span><span>{res.reason}</span></div>
+        <div className="flex gap-2 text-sm text-slate-700"><span className="text-slate-500 font-semibold min-w-24">Start</span><span>{new Date(res.startAt).toLocaleString()}</span></div>
+        <div className="flex gap-2 text-sm text-slate-700"><span className="text-slate-500 font-semibold min-w-24">End</span><span>{new Date(res.endAt).toLocaleString()}</span></div>
+        <div className="flex gap-2 text-sm text-slate-700">
+          <span className="text-slate-500 font-semibold min-w-24">Status</span>
+          <span className={cn('inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold capitalize', STATUS_CLASSES[res.status] || 'bg-slate-100 text-slate-600')}>
+            {res.status.replace(/_/g, ' ')}
+          </span>
         </div>
-        {res.notes && <div className="res-row"><span className="res-label">Notes</span><span>{res.notes}</span></div>}
-        <div className="res-row">
-          <span className="res-label">Cancel by</span>
+        {res.notes && <div className="flex gap-2 text-sm text-slate-700"><span className="text-slate-500 font-semibold min-w-24">Notes</span><span>{res.notes}</span></div>}
+        <div className="flex gap-2 text-sm text-slate-700">
+          <span className="text-slate-500 font-semibold min-w-24">Cancel by</span>
           <span>{new Date(res.cancelDeadlineAt).toLocaleString()}</span>
         </div>
-        <div className="res-buttons">
+        <div className="flex flex-wrap gap-2 pt-2 sm:col-span-2">
           {canCancel(res.status, res.cancelDeadlineAt) && (
             <button
-              className="btn btn-ghost"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={cancelling === res.id}
               onClick={() => handleCancel(res.id, res.cancelDeadlineAt)}
             >
@@ -100,7 +110,7 @@ export default function ReservationsPage() {
             </button>
           )}
           {mapLink && (
-            <a className="btn btn-ghost" href={mapLink} target="_blank" rel="noreferrer">
+            <a className="no-underline inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50" href={mapLink} target="_blank" rel="noreferrer">
               Open Clinic Location
             </a>
           )}
@@ -110,54 +120,56 @@ export default function ReservationsPage() {
   };
 
   return (
-    <div className="reservations-page">
-      <FeatureHeader
-        title="My Appointments"
-        subtitle="View and manage your upcoming reservations"
-        variant="doc"
-        imageSrc={imageAssets.headers.doctor}
-        imageAlt="Medical appointments"
-      />
+    <div className="mx-auto max-w-[900px] px-6 py-8">
+      <h1 className="text-2xl font-bold text-slate-900 mb-5">My Appointments</h1>
 
       {(error || cancelError) && (
-        <div className="error">{error ?? cancelError}</div>
+        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+          {error ?? cancelError}
+        </div>
       )}
 
       {loading ? (
-        <p className="loading">Loading appointments...</p>
+        <p className="text-slate-700 py-4">Loading appointments...</p>
       ) : sorted.length === 0 ? (
-        <p className="loading">No appointments yet. Use Appointments Marketplace to book one.</p>
+        <p className="text-slate-700 py-4">No appointments yet. Use Appointments Marketplace to book one.</p>
       ) : (
-        <div className="res-sections">
-          <section className="res-section" aria-labelledby="current-reservations-title">
-            <div className="res-section-head">
-              <h2 id="current-reservations-title" className="res-section-title">Current Reservations</h2>
-              <span className="res-count">{currentReservations.length}</span>
+        <div className="flex flex-col gap-6">
+          <section className="rounded-xl border border-slate-200 bg-slate-50 p-4" aria-labelledby="current-reservations-title">
+            <div className="flex items-center justify-between mb-3">
+              <h2 id="current-reservations-title" className="text-base font-bold text-slate-900">Current Reservations</h2>
+              <span className="inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full bg-slate-200 text-slate-700 text-xs font-bold">
+                {currentReservations.length}
+              </span>
             </div>
             {currentReservations.length === 0 ? (
-              <p className="loading">No current reservations.</p>
+              <p className="text-slate-700 py-2">No current reservations.</p>
             ) : (
               currentReservations.map((res) => renderReservationCard(res))
             )}
           </section>
 
-          <section className="res-section" aria-labelledby="past-reservations-title">
-            <div className="res-section-head">
-              <h2 id="past-reservations-title" className="res-section-title">Past Reservations</h2>
-              <span className="res-count">{pastReservations.length}</span>
+          <section className="rounded-xl border border-slate-200 bg-slate-50 p-4" aria-labelledby="past-reservations-title">
+            <div className="flex items-center justify-between mb-3">
+              <h2 id="past-reservations-title" className="text-base font-bold text-slate-900">Past Reservations</h2>
+              <span className="inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full bg-slate-200 text-slate-700 text-xs font-bold">
+                {pastReservations.length}
+              </span>
             </div>
             {pastReservations.length === 0 ? (
-              <p className="loading">No past reservations.</p>
+              <p className="text-slate-700 py-2">No past reservations.</p>
             ) : (
               pastReservations.map((res) => renderReservationCard(res))
             )}
           </section>
 
           {cancelledReservations.length > 0 && (
-            <section className="res-section" aria-labelledby="cancelled-reservations-title">
-              <div className="res-section-head">
-                <h2 id="cancelled-reservations-title" className="res-section-title">Cancelled Reservations</h2>
-                <span className="res-count">{cancelledReservations.length}</span>
+            <section className="rounded-xl border border-slate-200 bg-slate-50 p-4" aria-labelledby="cancelled-reservations-title">
+              <div className="flex items-center justify-between mb-3">
+                <h2 id="cancelled-reservations-title" className="text-base font-bold text-slate-900">Cancelled Reservations</h2>
+                <span className="inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full bg-slate-200 text-slate-700 text-xs font-bold">
+                  {cancelledReservations.length}
+                </span>
               </div>
               {cancelledReservations.map((res) => renderReservationCard(res))}
             </section>

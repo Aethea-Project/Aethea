@@ -10,6 +10,7 @@ import {
   subscribeToAvailabilityAlerts,
   getScheduleSlots,
   patchReservationStatus,
+  getPatientDataForReservation,
 } from '../controllers/reservations.controller.js';
 import { validateBody, validateQuery } from '../middleware/validate.js';
 import { asyncHandler } from '../middleware/asyncHandler.js';
@@ -25,7 +26,7 @@ import {
 export const createReservationRoutes = (authMiddleware: RequestHandler): Router => {
   const router = Router();
 
-  const auth = [authMiddleware, requireTrustedClaims, requireActiveAccount, requirePasswordChanged, requireLocalUser];
+  const auth = [authMiddleware, requireLocalUser, requireTrustedClaims, requireActiveAccount, requirePasswordChanged];
 
   // Patient: list their reservations
   router.get('/', auth, validateQuery(paginationSchema), asyncHandler(listReservations));
@@ -39,6 +40,8 @@ export const createReservationRoutes = (authMiddleware: RequestHandler): Router 
   router.get('/schedule/:scheduleId/slots', auth, asyncHandler(getScheduleSlots));
   // Doctor: update a slot's status (e.g., confirmed → in_progress → completed)
   router.patch('/:id/status', auth, validateBody(updateReservationStatusSchema), asyncHandler(patchReservationStatus));
+  // Doctor: view patient health data during the reservation window
+  router.get('/:id/patient-data', auth, asyncHandler(getPatientDataForReservation));
 
   return router;
 };

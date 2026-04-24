@@ -15,6 +15,7 @@ import {
   subscribeAvailabilityAlert,
   getDoctorScheduleSlots,
   updateSlotStatus,
+  getPatientHealthData,
 } from '../services/reservationService.js';
 
 /** GET /reservations — patient's own reservations */
@@ -87,4 +88,13 @@ export const patchReservationStatus = async (req: Request, res: Response): Promi
   if (!id) throw AppError.badRequest('Missing reservation id');
   const reservation = await updateSlotStatus(id, user.id, req.body.status, req.body.notes);
   res.json({ reservation });
+};
+
+/** GET /reservations/:id/patient-data — doctor views patient health data */
+export const getPatientDataForReservation = async (req: Request, res: Response): Promise<void> => {
+  const user = req.localUser!;
+  const id = req.params.id as string;
+  if (!id) throw AppError.badRequest('Missing reservation id');
+  const data = await getPatientHealthData(id, user.id);
+  res.json(data);
 };

@@ -5,10 +5,15 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Request, Response, NextFunction } from 'express';
+import { createHash } from 'node:crypto';
 import { AppError } from '../../lib/AppError.js';
 
 /** Maximum time (ms) to wait for Supabase to verify a token */
 const VERIFY_TIMEOUT_MS = 8_000;
+
+/** Cache Supabase getUser() lookups to reduce network latency. */
+const USER_LOOKUP_CACHE_TTL_MS = 60_000;
+const USER_LOOKUP_CACHE_MAX_ENTRIES = 5_000;
 
 export interface JWTPayload {
   sub: string;
@@ -26,6 +31,50 @@ interface VerifiedAuthUser {
   id: string;
   email?: string | null;
 }
+
+type CachedUserLookup = {
+  expiresAt: number;
+  user: VerifiedAuthUser;
+};
+
+const userLookupCache = new Map<string, CachedUserLookup>();
+const inFlightUserLookups = new Map<string, Promise<VerifiedAuthUser>>();
+
+const hashToken = (token: string): string => {
+  return createHash('sha256').update(token).digest('base64url');
+};
+
+const computeLookupTtlMs = (payload: JWTPayload | null, nowMs: number): number => {
+  const defaultTtl = USER_LOOKUP_CACHE_TTL_MS;
+  if (!payload?.exp) {
+    return defaultTtl;
+  }
+
+  const remainingMs = payload.exp * 1000 - nowMs;
+  if (remainingMs <= 0) {
+    return 0;
+  }
+
+  return Math.min(defaultTtl, remainingMs);
+};
+
+const cacheUserLookup = (cacheKey: string, user: VerifiedAuthUser, ttlMs: number): void => {
+  if (ttlMs <= 0) {
+    return;
+  }
+
+  const now = Date.now();
+  userLookupCache.set(cacheKey, { user, expiresAt: now + ttlMs });
+
+  // Best-effort bounded cache: evict oldest entries.
+  while (userLookupCache.size > USER_LOOKUP_CACHE_MAX_ENTRIES) {
+    const oldestKey = userLookupCache.keys().next().value as string | undefined;
+    if (!oldestKey) {
+      break;
+    }
+    userLookupCache.delete(oldestKey);
+  }
+};
 
 type TokenVerificationResult =
   | {
@@ -63,28 +112,67 @@ export class JWTVerifier {
    * Verify JWT token and get user (with timeout)
    */
   async verifyToken(token: string): Promise<TokenVerificationResult> {
-    try {
-      const result = await Promise.race([
-        this.supabase.auth.getUser(token),
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Supabase auth verification timed out')), VERIFY_TIMEOUT_MS)
-        ),
-      ]);
+    const payload = decodePayload(token);
+    const nowMs = Date.now();
 
-      const { data, error } = result;
+    // Safe fast-fail: if the token *claims* it's expired, it's definitely not usable.
+    if (payload?.exp && payload.exp * 1000 <= nowMs) {
+      return {
+        valid: false,
+        error: 'Token expired',
+      };
+    }
 
-      if (error || !data.user) {
+    const cacheKey = hashToken(token);
+    const cached = userLookupCache.get(cacheKey);
+    if (cached) {
+      if (cached.expiresAt > nowMs) {
         return {
-          valid: false,
-          error: error?.message || 'Invalid token',
+          valid: true,
+          user: cached.user,
+          payload,
         };
       }
+      userLookupCache.delete(cacheKey);
+    }
 
-      return {
-        valid: true,
-        user: data.user,
-        payload: decodePayload(token),
-      };
+    try {
+      const ttlMs = computeLookupTtlMs(payload, nowMs);
+
+      const existing = inFlightUserLookups.get(cacheKey);
+      if (existing) {
+        const user = await existing;
+        return { valid: true, user, payload };
+      }
+
+      const lookupPromise = (async (): Promise<VerifiedAuthUser> => {
+        const result = await Promise.race([
+          this.supabase.auth.getUser(token),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('Supabase auth verification timed out')), VERIFY_TIMEOUT_MS)
+          ),
+        ]);
+
+        const { data, error } = result;
+        if (error || !data.user) {
+          throw new Error(error?.message || 'Invalid token');
+        }
+
+        return {
+          id: data.user.id,
+          email: data.user.email ?? null,
+        };
+      })();
+
+      inFlightUserLookups.set(cacheKey, lookupPromise);
+
+      try {
+        const user = await lookupPromise;
+        cacheUserLookup(cacheKey, user, ttlMs);
+        return { valid: true, user, payload };
+      } finally {
+        inFlightUserLookups.delete(cacheKey);
+      }
     } catch (error: unknown) {
       return {
         valid: false,
@@ -115,7 +203,12 @@ export class JWTVerifier {
   authMiddleware() {
     return async (req: Request, _res: Response, next: NextFunction) => {
       try {
-        const token = this.extractTokenFromHeader(req.headers.authorization);
+        let token = this.extractTokenFromHeader(req.headers.authorization);
+
+        // Fallback to query parameter for EventSource (SSE) which cannot send headers
+        if (!token && req.query.token && typeof req.query.token === 'string') {
+          token = req.query.token;
+        }
 
         if (!token) {
           throw AppError.unauthorized('No authorization token provided');
@@ -124,6 +217,9 @@ export class JWTVerifier {
         const verification = await this.verifyToken(token);
 
         if (!verification.valid) {
+          if (verification.error?.includes('timed out') || verification.error?.includes('fetch')) {
+            throw new AppError(verification.error, 503);
+          }
           throw AppError.unauthorized(verification.error || 'Invalid token');
         }
 

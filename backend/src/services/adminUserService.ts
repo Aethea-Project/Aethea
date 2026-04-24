@@ -219,6 +219,20 @@ export async function changeUserStatus(
     throw AppError.notFound('User account not found');
   }
 
+  // Security: ensure status changes take effect immediately for existing JWTs.
+  // If a user is suspended/rejected/pending, revoke all backend-registered sessions.
+  // (This blocks requests even if the access token claim is stale.)
+  if (accountStatus !== 'active') {
+    try {
+      await revokeAllUserSessions({ userId });
+    } catch (sessionError) {
+      logger.warn(
+        { err: sessionError, userId, accountStatus },
+        'Failed to revoke user sessions after account status change',
+      );
+    }
+  }
+
   const actionMap: Record<AccountStatus, AuditAction> = {
     active: 'user.approve',
     suspended: 'user.suspend',
@@ -555,6 +569,17 @@ export async function changeUserAccountType(
     throw AppError.notFound('User account not found');
   }
 
+  // Security: account type changes can grant/revoke privileges; revoke sessions so
+  // old tokens with stale claims cannot continue to access privileged endpoints.
+  try {
+    await revokeAllUserSessions({ userId: input.userId });
+  } catch (sessionError) {
+    logger.warn(
+      { err: sessionError, userId: input.userId, accountType: input.accountType },
+      'Failed to revoke user sessions after account type change',
+    );
+  }
+
   const { ipAddress, userAgent } = extractRequestMeta(meta.headers, meta.socketAddress);
   await writeAuditLog({
     actorId: input.actorId,
@@ -602,6 +627,17 @@ export async function deleteUserAccount(input: DeleteUserInput, meta: RequestMet
         'ADMIN_LOCKOUT_PREVENTED',
       );
     }
+  }
+
+  // Best-effort: revoke backend sessions before deleting the Supabase identity.
+  // This prevents short-lived auth cache windows from allowing access post-delete.
+  try {
+    await revokeAllUserSessions({ userId: input.userId });
+  } catch (sessionError) {
+    logger.warn(
+      { err: sessionError, userId: input.userId },
+      'Failed to revoke user sessions before account deletion',
+    );
   }
 
   const supabaseAdmin = getSupabaseAdminClient();

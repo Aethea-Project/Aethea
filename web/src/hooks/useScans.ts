@@ -10,6 +10,7 @@
 import { useEffect, useState } from 'react';
 import { MedicalScan } from '@core/types/medical';
 import { medicalApi } from '../services/medicalApi';
+import { useAuth } from '@core/auth/useAuth';
 
 export interface UseScansResult {
   scans: MedicalScan[];
@@ -18,11 +19,13 @@ export interface UseScansResult {
 }
 
 export function useScans(): UseScansResult {
+  const { session, loading: authLoading } = useAuth();
   const [scans, setScans] = useState<MedicalScan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (authLoading || !session) return;
     let active = true;
 
     (async () => {
@@ -43,7 +46,7 @@ export function useScans(): UseScansResult {
     return () => {
       active = false;
     };
-  }, []);
+  }, [authLoading, session]);
 
   return { scans, loading, error };
 }

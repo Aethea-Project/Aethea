@@ -8,7 +8,6 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@core/auth/useAuth';
 import { isValidEmail } from '@core/auth/auth-utils';
 import { useTurnstile } from '../hooks/useTurnstile';
-import './LoginForm.css'; // Reuses login form styles
 
 export const ForgotPasswordForm: React.FC = () => {
   const { resetPassword, loading } = useAuth();
@@ -54,43 +53,49 @@ export const ForgotPasswordForm: React.FC = () => {
   };
 
   return (
-    <div className="login-container">
-      <form className="login-form" onSubmit={handleSubmit} noValidate>
-        <div className="form-header">
-          <Link to="/" className="form-brand" aria-label="Back to home">
-            <div className="form-brand-icon">A</div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        <form
+          className="mx-auto w-full max-w-md bg-white border border-gray-200 rounded-lg p-4 space-y-4"
+          onSubmit={handleSubmit}
+          noValidate
+        >
+        {/* ── Header ────────────────── */}
+        <div className="flex flex-col items-center gap-2 text-center">
+          <Link to="/" className="no-underline" aria-label="Back to home">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-600 text-lg font-bold text-white">A</div>
           </Link>
-          <h1 className="form-title">Reset Password</h1>
-          <p className="form-subtitle">
+          <h1 className="m-0 text-xl font-semibold text-gray-900">Reset Password</h1>
+          <p className="m-0 text-sm text-gray-500">
             Enter your email and we'll send you a link to reset your password
           </p>
         </div>
 
         {localError && (
-          <div className="error-banner" role="alert">
+          <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
             {localError}
           </div>
         )}
 
         {success ? (
-          <div className="success-banner" role="status">
-            <p>If an account exists with that email, you'll receive a password reset link shortly.</p>
-            <p style={{ marginTop: '1rem' }}>
-              <Link to="/login" className="link">Back to Sign In</Link>
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm text-emerald-700" role="status">
+            <p className="m-0">If an account exists with that email, you'll receive a password reset link shortly.</p>
+            <p className="m-0 mt-4">
+              <Link to="/login" className="font-medium text-teal-700 hover:text-teal-800 underline">Back to Sign In</Link>
             </p>
           </div>
         ) : (
           <>
             {/* Email Input */}
-            <div className="form-group">
-              <label htmlFor="email" className="form-label">
+            <div className="space-y-1">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email
               </label>
               <input
                 id="email"
                 name="email"
                 type="email"
-                className="form-input"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-100"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
@@ -107,27 +112,28 @@ export const ForgotPasswordForm: React.FC = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="submit-button"
+              className="w-full rounded-lg bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading}
               aria-busy={loading}
             >
               {loading ? 'Sending...' : 'Send Reset Link'}
             </button>
 
-            <div className="captcha-container" style={{ marginTop: '0.75rem' }}>
+            <div className="min-h-[65px] flex justify-center mt-3">
               <div ref={turnstileRef} />
             </div>
           </>
         )}
 
         {/* Back to Login Link */}
-        <div className="signup-link">
+        <div className="text-center text-sm text-gray-600">
           Remember your password?{' '}
-          <Link to="/login" className="link">
+          <Link to="/login" className="font-medium text-teal-700 hover:text-teal-800 underline">
             Sign in
           </Link>
         </div>
       </form>
+      </div>
     </div>
   );
 };

@@ -29,8 +29,8 @@ import {
  */
 export const createUserRoutes = (authMiddleware: RequestHandler): Router => {
   const router = Router();
-  const protectedAuth = [authMiddleware, requireTrustedClaims, requireActiveAccount, requirePasswordChanged, requireLocalUser];
-  const passwordChangeAuth = [authMiddleware, requireTrustedClaims, requireActiveAccount, requireLocalUser];
+  const protectedAuth = [authMiddleware, requireLocalUser, requireTrustedClaims, requireActiveAccount, requirePasswordChanged];
+  const passwordChangeAuth = [authMiddleware, requireLocalUser, requireTrustedClaims, requireActiveAccount];
 
   // GET /api/users/profile
   router.get('/profile', protectedAuth, getProfile);
