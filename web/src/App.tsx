@@ -5,8 +5,10 @@
  */
 
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Link, useLocation, Outlet } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthProvider';
+import { Toaster } from 'react-hot-toast';
+import { AiUploadProvider, useAiUpload } from './contexts/AiUploadContext';
 import { useAuth } from '@core/auth/useAuth';
 import { decodeJWT } from '@core/auth/token-manager';
 import type { AccountType, AccountStatus } from '@core/auth/auth-types';
@@ -17,7 +19,7 @@ import { imageAssets } from './constants/imageAssets';
 import { UiNotificationsProvider, useUiNotifications } from './contexts/UiNotificationsProvider';
 import { NotificationCenter } from './components/NotificationCenter';
 import { useNotifications } from './hooks/useNotifications';
-
+import { UploadLabModal } from './pages/LabResults/UploadLabModal';
 import {
   DashboardIcon, LabIcon, ScanIcon, MedicineIcon, DoctorIcon,
   NutritionIcon, RecoveryIcon, ProfileIcon, MenuIcon, CalendarIcon, ChatIcon
@@ -743,6 +745,7 @@ const CapsuleToggle = ({ isCollapsed, onClick }: { isCollapsed: boolean; onClick
 
 const Sidebar = ({ isOpen, onClose, isCollapsed }: { isOpen: boolean; onClose: () => void; isCollapsed: boolean }) => {
   const { signOut, session, profile } = useAuth();
+  const { isUploading, currentFileName, elapsedSeconds } = useAiUpload();
   const { notifyInfo, notifyError } = useUiNotifications();
   const accountType = resolveAccountType(session, profile?.accountType);
   const isAdmin = accountType === 'admin';
@@ -813,6 +816,34 @@ const Sidebar = ({ isOpen, onClose, isCollapsed }: { isOpen: boolean; onClose: (
                 <SidebarItem to="/admin/users" icon={DoctorIcon} label="User Management" />
               </div>
             )}
+
+            {/* Global AI Processing Indicator */}
+            {isUploading && (
+              <div className="mt-6 mx-1 p-4 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-2xl border border-teal-100 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="relative">
+                    <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">AI</div>
+                    <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-teal-500"></span>
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] font-bold text-teal-800 uppercase tracking-wider">Analyzing Lab Result</p>
+                      <span className="text-[10px] font-mono font-bold text-teal-600">
+                        {Math.floor(elapsedSeconds / 60)}:{(elapsedSeconds % 60).toString().padStart(2, '0')}
+                      </span>
+                    </div>
+                    <p className="text-xs text-teal-600 truncate font-medium">{currentFileName || 'Processing...'}</p>
+                  </div>
+                </div>
+                <div className="w-full bg-teal-200/30 rounded-full h-1.5 overflow-hidden">
+                  <div className="bg-teal-600 h-full w-1/3 animate-loading-shimmer"></div>
+                </div>
+                <p className="mt-2 text-[10px] text-teal-500 font-medium italic">Streaming tokens in real-time...</p>
+              </div>
+            )}
           </nav>
           <div className="mt-auto border-t border-slate-200 pt-4">
             <SidebarItem to="/profile" icon={ProfileIcon} label="My Profile" />
@@ -843,14 +874,74 @@ const Sidebar = ({ isOpen, onClose, isCollapsed }: { isOpen: boolean; onClose: (
   );
 };
 
+const FloatingUploadBar = () => {
+  const { isUploading, currentFileName, elapsedSeconds, isMinimized, setIsMinimized, setIsModalOpen } = useAiUpload();
+  
+  if (!isUploading || !isMinimized) return null;
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div className="fixed bottom-6 right-6 z-[60] animate-in slide-in-from-right-10 duration-500">
+      <button 
+        onClick={() => {
+          setIsMinimized(false);
+          setIsModalOpen(true);
+        }}
+        className="flex items-center gap-4 bg-white border border-teal-100 rounded-2xl p-4 shadow-2xl hover:shadow-teal-100/50 transition-all group"
+      >
+        <div className="relative">
+          <div className="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-teal-600/30">
+            <svg className="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+          </div>
+          <span className="absolute -top-1 -right-1 flex h-4 w-4">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-4 w-4 bg-teal-500"></span>
+          </span>
+        </div>
+        <div className="text-left pr-2">
+          <div className="flex items-center justify-between gap-8 mb-0.5">
+            <p className="text-[10px] font-bold text-teal-800 uppercase tracking-widest">AI Analyzing Result</p>
+            <span className="text-[10px] font-mono font-bold bg-teal-50 text-teal-700 px-1.5 py-0.5 rounded border border-teal-100">
+              {formatTime(elapsedSeconds)}
+            </span>
+          </div>
+          <p className="text-sm font-bold text-slate-900 truncate max-w-[150px]">{currentFileName}</p>
+        </div>
+        <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-teal-600 group-hover:text-white transition-colors">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+        </div>
+      </button>
+    </div>
+  );
+};
+
 /* ───────── App Layout ───────── */
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const [isMobileOpen, setMobileOpen] = useState(false);
-  const [isDesktopCollapsed, setDesktopCollapsed] = useState(true); // Default to closed for max dashboard space!
+  const [isDesktopCollapsed, setDesktopCollapsed] = useState(true);
+  const { isModalOpen, setIsModalOpen } = useAiUpload();
+  const { notifySuccess } = useUiNotifications();
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 relative">
+      <FloatingUploadBar />
+      
+      <UploadLabModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onUploadSuccess={() => {
+          notifySuccess('Analysis Complete', 'Your lab results have been processed and saved.');
+          // Dispatch a global event to refresh any data-heavy pages
+          window.dispatchEvent(new CustomEvent('lab-data-refresh'));
+        }} 
+      />
+
       {/* Invisible Document Flow Spacer (Pushes Main UI organically) */}
       <div className={`hidden lg:block transition-all duration-500 ease-bounce flex-shrink-0 ${isDesktopCollapsed ? 'w-0' : 'w-72'}`} aria-hidden="true" />
       
@@ -904,8 +995,28 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const PageLayout = ({ children }: { children: React.ReactNode }) => (
-  <AppLayout>{children}</AppLayout>
+const DashboardLayout = () => (
+  <ProtectedRoute>
+    <AppLayout>
+      <Outlet />
+    </AppLayout>
+  </ProtectedRoute>
+);
+
+const AdminLayout = () => (
+  <RoleRoute allowed={['admin']}>
+    <AppLayout>
+      <Outlet />
+    </AppLayout>
+  </RoleRoute>
+);
+
+const StaffLayout = () => (
+  <RoleRoute allowed={['doctor', 'pharmacist']}>
+    <AppLayout>
+      <Outlet />
+    </AppLayout>
+  </RoleRoute>
 );
 
 /* ───────── Dashboard ───────── */
@@ -927,6 +1038,8 @@ function AppRoutes() {
         <Route path="/forgot-password" element={<ForgotPasswordForm />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/auth/confirm" element={<AuthConfirmPage />} />
+        
+        {/* ── Private route (no layout) ── */}
         <Route
           path="/complete-profile"
           element={
@@ -935,34 +1048,34 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-        {/* ── Protected routes ── */}
-        <Route path="/dashboard" element={<ProtectedRoute><PageLayout><DashboardPage /></PageLayout></ProtectedRoute>} />
-        <Route path="/lab-results" element={<ProtectedRoute><PageLayout><LabResultsPage /></PageLayout></ProtectedRoute>} />
-        <Route path="/scans" element={<ProtectedRoute><PageLayout><ScansPage /></PageLayout></ProtectedRoute>} />
-        <Route path="/medicines" element={<ProtectedRoute><PageLayout><MedicineGuidePage /></PageLayout></ProtectedRoute>} />
-        <Route path="/care-locator" element={<ProtectedRoute><PageLayout><DoctorFinderPage /></PageLayout></ProtectedRoute>} />
-        <Route path="/appointments-marketplace" element={<ProtectedRoute><PageLayout><AppointmentsMarketplacePage /></PageLayout></ProtectedRoute>} />
-        <Route path="/my-appointments" element={<ProtectedRoute><PageLayout><ReservationsPage /></PageLayout></ProtectedRoute>} />
-        <Route path="/notifications" element={<ProtectedRoute><PageLayout><NotificationsPage /></PageLayout></ProtectedRoute>} />
-        <Route path="/nutrition" element={<ProtectedRoute><PageLayout><NutritionPlannerPage /></PageLayout></ProtectedRoute>} />
-        <Route path="/recovery" element={<ProtectedRoute><PageLayout><RecoveryAssistantPage /></PageLayout></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><PageLayout><ProfilePage /></PageLayout></ProtectedRoute>} />
-        <Route
-          path="/admin/users"
-          element={<RoleRoute allowed={['admin']}><PageLayout><AdminUsersPage /></PageLayout></RoleRoute>}
-        />
-        <Route
-          path="/admin/users/:id"
-          element={<RoleRoute allowed={['admin']}><PageLayout><AdminUserDetailsPage /></PageLayout></RoleRoute>}
-        />
-        <Route
-          path="/staff-verification"
-          element={<RoleRoute allowed={['doctor', 'pharmacist']}><PageLayout><StaffVerificationPage /></PageLayout></RoleRoute>}
-        />
-        <Route
-          path="/availability-manager"
-          element={<RoleRoute allowed={['doctor', 'admin']}><PageLayout><DoctorReservationsPage /></PageLayout></RoleRoute>}
-        />
+
+        {/* ── Dashboard Layout Routes (Persistent Sidebar) ── */}
+        <Route element={<DashboardLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/lab-results" element={<LabResultsPage />} />
+          <Route path="/scans" element={<ScansPage />} />
+          <Route path="/medicines" element={<MedicineGuidePage />} />
+          <Route path="/care-locator" element={<DoctorFinderPage />} />
+          <Route path="/appointments-marketplace" element={<AppointmentsMarketplacePage />} />
+          <Route path="/my-appointments" element={<ReservationsPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/nutrition" element={<NutritionPlannerPage />} />
+          <Route path="/recovery" element={<RecoveryAssistantPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+        </Route>
+
+        {/* ── Admin Routes ── */}
+        <Route element={<AdminLayout />}>
+          <Route path="/admin/users" element={<AdminUsersPage />} />
+          <Route path="/admin/users/:id" element={<AdminUserDetailsPage />} />
+          <Route path="/availability-manager" element={<DoctorReservationsPage />} />
+        </Route>
+
+        {/* ── Staff Routes ── */}
+        <Route element={<StaffLayout />}>
+          <Route path="/staff-verification" element={<StaffVerificationPage />} />
+          {/* Doctors can also access availability manager, handled by AdminLayout logic or separate route */}
+        </Route>
 
         {/* ── Fallback ── */}
         <Route path="*" element={<Navigate to="/" replace />} />
@@ -975,9 +1088,12 @@ function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
-        <UiNotificationsProvider>
-          <AppRoutes />
-        </UiNotificationsProvider>
+        <AiUploadProvider>
+          <UiNotificationsProvider>
+            <Toaster position="top-right" />
+            <AppRoutes />
+          </UiNotificationsProvider>
+        </AiUploadProvider>
       </AuthProvider>
     </BrowserRouter>
   );

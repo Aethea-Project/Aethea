@@ -4,7 +4,7 @@
 
 import { Router, RequestHandler } from 'express';
 import { createLabTest, listLabTests, updateLabTest } from '../controllers/labTests.controller.js';
-import { uploadLabResult, getLabFeedbacks } from '../controllers/labResults.controller.js';
+import { uploadLabResult, getLabFeedbacks, updateLabFeedback, deleteLabFeedback } from '../controllers/labResults.controller.js';
 import { validateBody, validateQuery } from '../middleware/validate.js';
 import { asyncHandler } from '../middleware/asyncHandler.js';
 import { requireLocalUser } from '../lib/authMiddleware.js';
@@ -40,6 +40,8 @@ export const createLabTestRoutes = (authMiddleware: RequestHandler): Router => {
   router.put('/:id', auth, validateBody(updateLabTestSchema), asyncHandler(updateLabTest));
   router.post('/upload', auth, upload.single('file'), asyncHandler(uploadLabResult));
   router.get('/feedbacks', auth, asyncHandler(getLabFeedbacks));
+  router.put('/feedbacks/:id', auth, asyncHandler(updateLabFeedback));
+  router.delete('/feedbacks/:id', auth, asyncHandler(deleteLabFeedback));
 
   return router;
 };

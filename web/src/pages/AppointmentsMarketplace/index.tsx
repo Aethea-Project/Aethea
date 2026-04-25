@@ -57,7 +57,6 @@ function ReserveModal({
 
   const clinicAddress = post.doctor.address || [post.doctor.clinicName, post.doctor.city].filter(Boolean).join(', ');
   const clinicMapLink = buildMapsSearchLink(clinicAddress);
-
   const slotDurationMs = post.schedule.slotDurationMins * 60_000;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,80 +87,142 @@ function ReserveModal({
   };
 
   return (
-    <div className="flex flex-col gap-3 min-h-0">
-      <h3 className="m-0 text-xl font-bold text-gray-900">Reserve with Dr. {post.doctor.firstName} {post.doctor.lastName}</h3>  
-      <p className="m-0 text-gray-500 text-[0.95rem]">
-        {post.doctor.specialty} • {new Date(post.schedule.scheduleDate).toLocaleDateString()}
-      </p>
-      {clinicAddress && (
-        <p className="m-0 text-gray-500 text-[0.95rem]">Clinic: {clinicAddress}</p>   
-      )}
-      {clinicMapLink && (
-        <a className="inline-flex items-center justify-center w-fit border border-gray-200 rounded-lg px-3 py-2 no-underline text-gray-900 bg-white text-sm font-medium hover:bg-gray-50 transition-colors" href={clinicMapLink} target="_blank" rel="noreferrer">
-          Open Clinic Location
-        </a>
-      )}
+    <div className="flex flex-col h-full bg-white">
+      {/* Premium Header Section */}
+      <div className="relative p-8 pb-6 border-b border-gray-100">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center border border-teal-100 shadow-sm">
+            {post.doctor.photoUrl ? (
+              <img src={post.doctor.photoUrl} alt={post.doctor.firstName} className="w-full h-full object-cover rounded-2xl" />
+            ) : (
+              <span className="text-xl font-black text-teal-600 uppercase">{post.doctor.firstName[0]}{post.doctor.lastName[0]}</span>
+            )}
+          </div>
+          <div>
+            <span className="text-[10px] font-black text-teal-600 uppercase tracking-[0.2em] block mb-1">Appointment Booking</span>
+            <h3 className="text-2xl font-black text-gray-900 tracking-tight m-0">Dr. {post.doctor.firstName} {post.doctor.lastName}</h3>  
+            <p className="text-sm font-bold text-gray-400 mt-1 uppercase tracking-wider">{post.doctor.specialty}</p>
+          </div>
+        </div>
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-2 max-h-[min(30dvh,240px)] sm:max-h-none overflow-y-auto pr-1 content-start mt-2">
-        {availableSlots.length === 0 ? (
-          <p className="text-sm text-red-600">No slots available for this post.</p>
-        ) : (
-          availableSlots.map((slotIndex) => {
-            const slotStart = new Date(new Date(post.schedule.startAt).getTime() + slotIndex * slotDurationMs);
-            const slotEnd = new Date(slotStart.getTime() + slotDurationMs);
-            return (
-              <button
-                key={slotIndex}
-                type="button"
-                className={cn(
-                  "bg-white border p-2 rounded-lg cursor-pointer text-gray-900 text-sm font-inherit transition-colors hover:border-blue-400",
-                  selectedSlotIndex === slotIndex ? "bg-blue-50 border-blue-600 text-blue-700 font-semibold" : "border-gray-200"
-                )}
-                onClick={() => setSelectedSlotIndex(slotIndex)}
-              >
-                {slotStart.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-                {' - '}
-                {slotEnd.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-              </button>
-            );
-          })
-        )}
+        <div className="flex flex-wrap gap-4 items-center">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-100">
+            <svg className="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            <span className="text-[11px] font-black text-gray-600">{new Date(post.schedule.scheduleDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+          </div>
+          {clinicAddress && (
+             <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-100 max-w-[200px]">
+                <svg className="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                <span className="text-[11px] font-black text-gray-600 truncate">{clinicAddress}</span>
+             </div>
+          )}
+        </div>
       </div>
 
-      {availableSlots.length > 0 && (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3 mt-1">
-          <label className="flex flex-col gap-2 text-sm font-medium text-gray-900">
-            Reason for visit *
-            <textarea
-              rows={3}
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="Describe your visit reason (e.g. Back pain, Checkup)"
-              required
-              minLength={2}
-              maxLength={500}
-              className="w-full border border-gray-200 rounded-lg p-2.5 font-inherit text-[0.95rem] resize-y min-h-[80px] bg-white text-gray-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-shadow"
-            />
-          </label>
-
-          <label className="flex flex-row items-center gap-2 font-normal text-gray-500 text-sm cursor-pointer">
-            <input
-              type="checkbox"
-              checked={shareHealthData}
-              onChange={(e) => setShareHealthData(e.target.checked)}
-              className="w-4 h-4 m-0 accent-teal-600 shrink-0"
-            />
-            Share my health records with this doctor
-          </label>
-
-          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2.5 mt-2 pt-2.5 border-t border-gray-200 sticky bottom-0 bg-white z-10 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-8px_14px_-12px_rgba(15,23,42,0.4)] sm:shadow-none sm:pb-0 sm:static">
-            <button type="button" className="w-full sm:w-auto bg-transparent border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700 px-3.5 py-2 rounded-lg font-inherit text-[0.95rem] font-medium cursor-pointer transition-colors" onClick={onClose}>Cancel</button>
-            <button type="submit" className="w-full sm:w-auto bg-blue-600 border border-transparent text-white hover:bg-blue-700 px-3.5 py-2 rounded-lg font-inherit text-[0.95rem] font-medium cursor-pointer disabled:opacity-65 disabled:cursor-not-allowed transition-colors" disabled={submitting || selectedSlotIndex === null || !reason.trim()}>
-              {submitting ? 'Booking...' : 'Confirm Booking'}
-            </button>
+      <div className="p-8 space-y-8 overflow-y-auto max-h-[60vh] scrollbar-hide">
+        {/* Slot Selection */}
+        <section>
+          <div className="flex justify-between items-center mb-4">
+            <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Select Available Time</h4>
+            <span className="text-[10px] font-bold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-lg">{availableSlots.length} slots open</span>
           </div>
-        </form>
-      )}
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {availableSlots.length === 0 ? (
+              <div className="col-span-full p-4 bg-red-50 rounded-2xl border border-red-100 text-center">
+                <p className="text-[11px] font-black text-red-600 uppercase tracking-widest">No slots remaining for this date</p>
+              </div>
+            ) : (
+              availableSlots.map((slotIndex) => {
+                const slotStart = new Date(new Date(post.schedule.startAt).getTime() + slotIndex * slotDurationMs);
+                const slotEnd = new Date(slotStart.getTime() + slotDurationMs);
+                const isSelected = selectedSlotIndex === slotIndex;
+                return (
+                  <button
+                    key={slotIndex}
+                    type="button"
+                    onClick={() => setSelectedSlotIndex(slotIndex)}
+                    className={cn(
+                      "p-3 rounded-2xl border transition-all text-center group",
+                      isSelected 
+                        ? "bg-teal-600 border-teal-600 text-white shadow-lg shadow-teal-600/30 scale-[1.02]" 
+                        : "bg-white border-slate-100 hover:border-teal-500 hover:shadow-md"
+                    )}
+                  >
+                    <p className={cn("text-xs font-black", isSelected ? "text-white" : "text-gray-900 group-hover:text-teal-600")}>
+                      {slotStart.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: true })}
+                    </p>
+                    <p className={cn("text-[9px] font-bold mt-1", isSelected ? "text-teal-100" : "text-gray-400")}>
+                      {post.schedule.slotDurationMins} min session
+                    </p>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </section>
+
+        {availableSlots.length > 0 && (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Reason for Visit */}
+            <div>
+              <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Consultation Details</h4>
+              <textarea
+                rows={3}
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Briefly describe your symptoms or reason for the visit..."
+                required
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl p-4 text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:bg-white focus:ring-2 focus:ring-teal-100 focus:border-teal-600 transition-all outline-none min-h-[100px]"
+              />
+            </div>
+
+            {/* Health Data Sharing */}
+            <div 
+              onClick={() => setShareHealthData(!shareHealthData)}
+              className={cn(
+                "p-4 rounded-2xl border transition-all cursor-pointer flex items-center gap-4",
+                shareHealthData ? "bg-teal-50/50 border-teal-100 shadow-sm" : "bg-white border-slate-100 hover:bg-slate-50"
+              )}
+            >
+              <div className={cn(
+                "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
+                shareHealthData ? "bg-teal-600 text-white shadow-md shadow-teal-600/20" : "bg-slate-100 text-slate-400"
+              )}>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-[11px] font-black text-gray-900 uppercase tracking-wider">Share Health Records</p>
+                <p className="text-[10px] font-bold text-gray-400 mt-0.5">Let Dr. {post.doctor.lastName} review your past results</p>
+              </div>
+              <div className={cn(
+                "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all",
+                shareHealthData ? "border-teal-600 bg-teal-600" : "border-slate-200"
+              )}>
+                {shareHealthData && <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg>}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
+              <button 
+                type="button" 
+                onClick={onClose}
+                className="flex-1 px-6 py-3.5 text-xs font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-colors"
+              >
+                Go Back
+              </button>
+              <button 
+                type="submit" 
+                disabled={submitting || selectedSlotIndex === null || !reason.trim()}
+                className="flex-[1.5] px-8 py-3.5 bg-teal-600 text-white text-xs font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-teal-600/30 hover:bg-teal-700 hover:-translate-y-0.5 transition-all active:translate-y-0 disabled:opacity-50 disabled:grayscale disabled:hover:translate-y-0"
+              >
+                {submitting ? 'Processing...' : 'Confirm Appointment'}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
     </div>
   );
 }

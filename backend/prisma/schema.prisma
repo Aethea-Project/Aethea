@@ -74,8 +74,11 @@ model LabTest {
   createdAt  DateTime      @default(now()) @db.Timestamptz(6)
   updatedAt  DateTime      @updatedAt @db.Timestamptz(6)
   user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feedbackId String?       @db.Uuid
+  feedback   Feedback?     @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
 
   @@index([userId, measuredAt])
+  @@index([feedbackId])
   @@map("lab_tests")
   @@schema("public")
 }
@@ -985,8 +988,10 @@ model Feedback {
   relatedMedicines String[]
   doctorAnalysis   String?
   patientSummary   String?
-  createdAt        DateTime @default(now()) @db.Timestamptz(6)
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt        DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  labTests         LabTest[]
 
   @@map("feedbacks")
   @@schema("public")

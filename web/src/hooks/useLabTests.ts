@@ -27,13 +27,18 @@ export function useLabTests(): UseLabTestsResult & { refresh: () => void } {
 
   const refresh = () => setRefreshTrigger(prev => prev + 1);
 
+  const userId = session?.user?.id;
+
   useEffect(() => {
-    if (authLoading || !session) return;
+    if (authLoading || !userId) return;
     let active = true;
 
     (async () => {
       try {
-        setLoading(true);
+        // Only show loading spinner if we don't have data yet (prevents flicker on focus)
+        if (labTests.length === 0) {
+          setLoading(true);
+        }
         const data = await medicalApi.fetchLabTests();
         if (!active) return;
         setLabTests(data);
@@ -49,7 +54,7 @@ export function useLabTests(): UseLabTestsResult & { refresh: () => void } {
     return () => {
       active = false;
     };
-  }, [authLoading, session, refreshTrigger]);
+  }, [authLoading, userId, refreshTrigger]);
 
   return { labTests, loading, error, refresh };
 }
@@ -63,12 +68,16 @@ export function useLabFeedbacks() {
 
   const refresh = () => setRefreshTrigger(prev => prev + 1);
 
+  const userId = session?.user?.id;
+
   useEffect(() => {
-    if (authLoading || !session) return;
+    if (authLoading || !userId) return;
     let active = true;
     (async () => {
       try {
-        setLoading(true);
+        if (feedbacks.length === 0) {
+          setLoading(true);
+        }
         const data = await medicalApi.fetchLabFeedbacks();
         if (!active) return;
         setFeedbacks(data);
@@ -81,7 +90,7 @@ export function useLabFeedbacks() {
       }
     })();
     return () => { active = false; };
-  }, [authLoading, session, refreshTrigger]);
+  }, [authLoading, userId, refreshTrigger]);
 
   return { feedbacks, loading, error, refresh };
 }

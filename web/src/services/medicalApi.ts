@@ -309,6 +309,26 @@ export const medicalApi = {
     return data.data ?? [];
   },
 
+  async updateLabFeedback(id: string, condition: string): Promise<any> {
+    return await authFetch(`/lab-tests/feedbacks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ condition }),
+    });
+  },
+
+  async deleteLabFeedback(id: string): Promise<any> {
+    return await authFetch(`/lab-tests/feedbacks/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  async updateLabTest(id: string, data: Partial<LabTest>): Promise<any> {
+    return await authFetch(`/lab-tests/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
   /* ── Scans ── */
   async fetchScans(): Promise<(MedicalScan & { scanDate?: Date })[]> {
     const data = await authFetch<{ data?: RawMedicalScan[]; scans?: RawMedicalScan[] }>('/scans');

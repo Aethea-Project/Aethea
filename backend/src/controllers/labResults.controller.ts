@@ -51,9 +51,7 @@ export const uploadLabResult = async (req: Request, res: Response) => {
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-        res.write(chunk);
-
-        // Accumulate for database storage
+        // Accumulate for database storage and clean streaming
         buffer += chunk;
         const lines = buffer.split('\n');
         buffer = lines.pop() || '';
@@ -61,12 +59,15 @@ export const uploadLabResult = async (req: Request, res: Response) => {
         for (const line of lines) {
           const trimmed = line.trim();
           if (!trimmed) continue;
+
+          // Stream valid JSON lines to the client with explicit newlines
+          res.write(trimmed + '\n');
+
           try {
             const data = JSON.parse(trimmed);
-            if (data.done === true) {
-              finalAiResult = data.final || data;
-            } else if (data.final) {
-              finalAiResult = data.final;
+            // Check for explicit done flag or if the object looks like a final result
+            if (data.done === true || data.final || data.lab_results || data.tests || data.summary || data.findings) {
+              finalAiResult = data.final || data.data || data;
             }
           } catch (e) {
             // Ignore partial JSON parse errors
@@ -75,6 +76,18 @@ export const uploadLabResult = async (req: Request, res: Response) => {
       }
 
       clearInterval(heartbeat);
+
+      // Process any remaining data in the buffer after the stream ends
+      if (buffer.trim()) {
+        try {
+          const data = JSON.parse(buffer.trim());
+          if (data.done === true || data.final || data.lab_results || data.tests || data.summary || data.findings) {
+            finalAiResult = data.final || data.data || data;
+          }
+        } catch (e) {
+          // Ignore
+        }
+      }
 
       // 3. Post-stream processing: Store feedback and tests in Database
       if (finalAiResult) {
@@ -85,7 +98,7 @@ export const uploadLabResult = async (req: Request, res: Response) => {
         const patientSummary = finalAiResult.patient_summary || finalAiResult.summary || null;
 
         // Create Feedback entry
-        await prisma.feedback.create({
+        const feedback = await prisma.feedback.create({
           data: {
             userId,
             condition: condition,
@@ -97,7 +110,7 @@ export const uploadLabResult = async (req: Request, res: Response) => {
         });
 
         // 4. Store Numerical Tests if extracted by AI
-        const extractedTests = finalAiResult.extracted_tests || finalAiResult.tests || [];
+        const extractedTests = finalAiResult.extracted_tests || finalAiResult.lab_results || finalAiResult.tests || finalAiResult.data || [];
         if (Array.isArray(extractedTests) && extractedTests.length > 0) {
           logger.info(`Storing ${extractedTests.length} extracted tests for user ${userId}`);
           for (const test of extractedTests) {
@@ -105,14 +118,20 @@ export const uploadLabResult = async (req: Request, res: Response) => {
               await prisma.labTest.create({
                 data: {
                   userId,
-                  testName: test.name || test.test_name || 'Unknown Test',
-                  category: test.category || 'General',
-                  value: String(test.value || '0'),
-                  unit: test.unit || '',
-                  refMin: test.ref_min !== undefined ? test.ref_min : (test.min !== undefined ? test.min : null),
-                  refMax: test.ref_max !== undefined ? test.ref_max : (test.max !== undefined ? test.max : null),
-                  refText: test.ref_text || null,
-                  status: (['normal', 'borderline', 'abnormal', 'critical'].includes(test.status) ? test.status : 'normal') as any,
+                  feedbackId: feedback.id,
+                  testName: test.test_name || test.name || test.parameter || test.test || 'Unknown Test',
+                  category: test.category || test.section || 'General',
+                  value: String(test.value !== undefined ? test.value : (test.result || '0')),
+                  unit: test.unit || test.units || '',
+                  refMin: test.ref_min !== undefined ? test.ref_min : (test.min !== undefined ? test.min : (test.reference_min !== undefined ? test.reference_min : null)),
+                  refMax: test.ref_max !== undefined ? test.ref_max : (test.max !== undefined ? test.max : (test.reference_max !== undefined ? test.reference_max : null)),
+                  refText: test.ref_text || test.reference_range || test.reference || test.ref || null,
+                  status: (() => {
+                    const s = String(test.status || test.result_status || '').toLowerCase();
+                    if (['normal', 'borderline', 'abnormal', 'critical'].includes(s)) return s as any;
+                    if (['low', 'high', 'high!', 'low!', 'decreased', 'increased', 'flagged'].some(f => s.includes(f))) return 'abnormal';
+                    return 'normal';
+                  })(),
                   orderedBy: 'AI Analysis',
                   measuredAt: new Date(),
                 }
@@ -122,6 +141,8 @@ export const uploadLabResult = async (req: Request, res: Response) => {
             }
           }
         }
+        // Notify client that data is officially in the DB
+        res.write(JSON.stringify({ status: 'db_saved', count: extractedTests.length }) + '\n');
       }
 
       res.end();
@@ -155,12 +176,68 @@ export const getLabFeedbacks = async (req: Request, res: Response) => {
 
     const feedbacks = await prisma.feedback.findMany({
       where: { userId },
+      include: { labTests: true },
       orderBy: { createdAt: 'desc' }
     });
 
     return res.status(200).json({ data: feedbacks });
   } catch (error: any) {
     logger.error({ error }, 'Error fetching feedbacks');
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const updateLabFeedback = async (req: Request, res: Response) => {
+  try {
+    const userId = req.localUser?.id;
+    const { id } = req.params;
+    const { condition } = req.body;
+
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const feedback = await prisma.feedback.findFirst({
+      where: { id, userId }
+    });
+
+    if (!feedback) return res.status(404).json({ error: 'Feedback not found' });
+
+    const updated = await prisma.feedback.update({
+      where: { id },
+      data: { condition }
+    });
+
+    return res.status(200).json({ data: updated });
+  } catch (error: any) {
+    logger.error({ error }, 'Error updating feedback');
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const deleteLabFeedback = async (req: Request, res: Response) => {
+  try {
+    const userId = req.localUser?.id;
+    const { id } = req.params;
+
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const feedback = await prisma.feedback.findFirst({
+      where: { id, userId }
+    });
+
+    if (!feedback) return res.status(404).json({ error: 'Feedback not found' });
+
+    // Manually delete associated lab tests first to ensure no orphans
+    await prisma.labTest.deleteMany({
+      where: { feedbackId: id }
+    });
+
+    await prisma.feedback.delete({
+      where: { id }
+    });
+
+    return res.status(200).json({ message: 'Feedback deleted successfully' });
+  } catch (error: any) {
+    logger.error({ error }, 'Error deleting feedback');
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
