@@ -310,7 +310,7 @@ function LabResultsPage() {
                              </span>
                              <div className="flex -space-x-2">
                                 {fb.labTests?.slice(0, 3).map((t: any) => (
-                                   <div key={t.id} className={`w-6 h-6 rounded-full border-2 border-white shadow-sm ${STATUS_DOT_CLASSES[t.status]}`} />
+                                   <div key={t.id} className={`w-6 h-6 rounded-full border-2 border-white shadow-sm ${STATUS_DOT_CLASSES[t.status as LabStatus]}`} />
                                 ))}
                              </div>
                           </div>

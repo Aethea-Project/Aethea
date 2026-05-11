@@ -41,6 +41,8 @@ export const ConditionsBanner: React.FC = () => {
 
             {loading ? (
               <p className="m-0 text-sm text-gray-600">Loading profile...</p>
+            ) : error ? (
+              <p className="m-0 text-sm text-red-600">{error}</p>
             ) : conditions.length === 0 ? (
               <span className="inline-flex items-center rounded-lg border border-gray-200 bg-gray-50 text-gray-500 px-3 py-1 text-xs font-semibold w-fit">
                 No conditions set
@@ -59,14 +61,12 @@ export const ConditionsBanner: React.FC = () => {
                 })}
               </div>
             )}
-
-            {error && <p className="m-0 text-xs text-red-700">{error}</p>}
           </div>
 
           <button
             type="button"
             onClick={handleEditClick}
-            disabled={loading || saving}
+            disabled={loading || saving || !!error}
             className="w-full sm:w-auto border border-gray-300 bg-white text-gray-700 rounded-lg px-4 py-2 text-sm hover:bg-gray-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
           >
             Edit profile

@@ -122,6 +122,14 @@ async function handleFetchError(res: Response, path: string) {
     throw new Error(message);
   }
 
+  if (res.status === 401) {
+    // Global unauthorized handler - trigger user sign out
+    if (typeof window !== 'undefined') {
+      authService.signOut().catch(() => {});
+    }
+    throw new Error('Unauthorized - No valid session found');
+  }
+
   if (res.status >= 500) {
     // Mask 5xx errors to avoid leaking technical details to the user
     const maskedMessage = "An unexpected issue occurred. Our team has been notified.";

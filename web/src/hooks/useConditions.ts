@@ -7,6 +7,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { medicineApi } from '../services/medicineApi';
 import { useAuth } from '@core/auth/useAuth';
+import { authService } from '../services/auth';
 
 type ConditionLabel = { en: string; ar: string; emoji: string };
 
@@ -53,7 +54,15 @@ export function useConditions(enabled = true): UseConditionsResult {
       .catch((err) => {
         // Not logged in — silently set empty conditions
         setConditionsState([]);
-        setError(err instanceof Error ? err.message : 'Failed to load conditions');
+        const msg = err instanceof Error ? err.message : 'Failed to load conditions';
+        if (msg.includes('Unauthorized')) {
+          // If the backend rejects our session, it's likely expired or invalid.
+          // Trigger a silent sign-out to clear the invalid state.
+          void authService.signOut();
+          setError('Session expired. Please log in again.');
+        } else {
+          setError(msg);
+        }
       })
       .finally(() => setLoading(false));
   }, [enabled]);

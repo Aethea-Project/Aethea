@@ -42,6 +42,7 @@ import { createDoctorRoutes } from './routes/doctors.routes.js';
 import { createNotificationRoutes } from './routes/notifications.routes.js';
 import { createMapsRoutes } from './routes/maps.routes.js';
 import { createMedicineRoutes } from './routes/medicine.routes.js';
+import { createNutritionRoutes } from './routes/nutrition.routes.js';
 import prisma from './lib/prisma.js';
 import { requireLocalUser } from './lib/authMiddleware.js';
 import logger from './lib/logger.js';
@@ -199,7 +200,8 @@ export function createApp(config: AppConfig = {}) {
   const doctorRoutes = createDoctorRoutes(authMiddleware);
   const notificationRoutes = createNotificationRoutes(authMiddleware);
   const mapsRoutes = createMapsRoutes(authMiddleware);
-  const medicineRoutes = createMedicineRoutes(prisma, requireLocalUser);
+  const medicineRoutes = createMedicineRoutes(prisma, authMiddleware);
+  const nutritionRoutes = createNutritionRoutes(authMiddleware);
 
   // API v1 — explicit versioning (REST best practice)
   app.use('/api/v1/auth', authRoutes);
@@ -214,6 +216,7 @@ export function createApp(config: AppConfig = {}) {
   app.use('/api/v1/notifications', notificationRoutes);
   app.use('/api/v1/maps', mapsRoutes);
   app.use('/api/v1/medicines', medicineRoutes);
+  app.use('/api/v1/nutrition', nutritionRoutes);
 
   // Backward-compatible aliases (non-versioned paths → v1)
   app.use('/api/auth', authRoutes);
@@ -228,6 +231,7 @@ export function createApp(config: AppConfig = {}) {
   app.use('/api/notifications', notificationRoutes);
   app.use('/api/maps', mapsRoutes);
   app.use('/api/medicines', medicineRoutes);
+  app.use('/api/nutrition', nutritionRoutes);
 
   // ─── Error handling (must be LAST) ───
   app.use(notFoundHandler);

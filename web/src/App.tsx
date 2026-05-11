@@ -33,6 +33,7 @@ const DoctorFinderPage = lazy(() => import('./pages/DoctorFinder'));
 const ReservationsPage = lazy(() => import('./pages/Reservations'));
 const AppointmentsMarketplacePage = lazy(() => import('./pages/AppointmentsMarketplace'));
 const NutritionPlannerPage = lazy(() => import('./pages/NutritionPlanner'));
+const NutritionSafetyPage = lazy(() => import('./pages/NutritionSafety'));
 const RecoveryAssistantPage = lazy(() => import('./pages/RecoveryAssistant'));
 const NotificationsPage = lazy(() => import('./pages/Notifications'));
 const ProfilePage = lazy(() => import('./pages/Profile'));
@@ -1059,7 +1060,8 @@ function AppRoutes() {
           <Route path="/appointments-marketplace" element={<AppointmentsMarketplacePage />} />
           <Route path="/my-appointments" element={<ReservationsPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/nutrition" element={<NutritionPlannerPage />} />
+          <Route path="/nutrition-planner" element={<NutritionPlannerPage />} />
+          <Route path="/nutrition" element={<NutritionSafetyPage />} />
           <Route path="/recovery" element={<RecoveryAssistantPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
