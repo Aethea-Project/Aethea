@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ATEHEA – AI Fracture Detection Report</title>
+<style>
+  :root {
+    --cream:             #f5f2ec;
+    --warm-white:        #faf8f4;
+    --sage:              #6b7c5e;
+    --sage-light:        #8d9e7f;
+    --sage-dark:         #4a5940;
+    --terracotta:        #b5763a;
+    --terracotta-light:  #d4924d;
+    --ink:               #2c2c28;
+    --muted:             #7a7a6e;
+    --border:            #d8d3c8;
+    --highlight:         #e8f0e2;
+    --amber:             #d4892a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #e0ddd8;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+  }
+
+  /* ── A4 Page ─────────────────────────────────────────── */
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 20px auto;
+    background: var(--warm-white);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0,0,0,.18);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .page + .page { margin-top: 0; }
+
+  .page::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 6px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--terracotta) 0%, var(--sage) 50%, var(--terracotta-light) 100%);
+  }
+
+  /* ── Botanical ornament ──────────────────────────────── */
+  .botanical {
+    position: absolute;
+    top: 0; right: 0;
+    width: 90px;
+    opacity: .07;
+    pointer-events: none;
+  }
+
+  /* ── Header ──────────────────────────────────────────── */
+  .header {
+    background: var(--cream);
+    padding: 20px 32px 16px 44px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 44px; right: 32px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--terracotta), transparent);
+  }
+  .logo-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    color: var(--terracotta);
+  }
+  .logo-text .alt { color: var(--sage-dark); }
+  .report-meta {
+    text-align: right;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.75;
+    font-weight: 400;
+  }
+  .report-meta strong {
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 13px;
+  }
+
+  /* ── Title band ───────────────────────────────────────── */
+  .title-band {
+    background: var(--sage-dark);
+    padding: 13px 32px 13px 44px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .title-band h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 1px;
+  }
+  .title-band .subtitle {
+    font-size: 13px;
+    color: rgba(255,255,255,.6);
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+  }
+  .ai-badge {
+    margin-left: auto;
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.25);
+    color: rgba(255,255,255,.8);
+    font-size: 9px;
+    padding: 3px 9px;
+    border-radius: 2px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  /* ── Content ─────────────────────────────────────────── */
+  .content { padding: 22px 32px 22px 44px; flex: 1; }
+
+  /* ── Summary cards ───────────────────────────────────── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .summary-card {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+  }
+  .summary-card.card-accent::before  { background: var(--terracotta); }
+  .summary-card.card-warn::before    { background: var(--amber); }
+  .summary-card.card-neutral::before { background: var(--sage); }
+
+  .summary-card .s-label {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--muted);
+    margin-bottom: 5px;
+    font-weight: 700;
+  }
+  .summary-card .s-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1;
+    text-transform: capitalize;
+  }
+  .summary-card .s-value.text-val {
+    font-size: 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+  }
+  .conf-bar-wrap {
+    margin-top: 7px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .conf-bar { height: 100%; border-radius: 2px; }
+  .s-sub {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 5px;
+  }
+
+  /* ── Section headers ─────────────────────────────────── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 11px;
+  }
+  .section-header h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--sage-dark);
+    letter-spacing: .5px;
+    white-space: nowrap;
+  }
+  .section-header .line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* ── Findings ─────────────────────────────────────────── */
+  .findings {
+    background: var(--highlight);
+    border-left: 3px solid var(--sage);
+    border-radius: 0 3px 3px 0;
+    padding: 13px 17px;
+    font-size: 12.5px;
+    line-height: 1.85;
+    color: var(--ink);
+    margin-bottom: 22px;
+  }
+  .findings strong { color: var(--sage-dark); font-weight: 700; }
+  .disclaimer {
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 9px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .disclaimer::before { content: '⚕'; font-style: normal; font-size: 13px; color: var(--terracotta); }
+
+  /* ── Candidates table ────────────────────────────────── */
+  .fracture-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 22px;
+  }
+  .fracture-table thead tr { background: var(--sage-dark); color: #fff; }
+  .fracture-table thead th {
+    padding: 9px 11px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 10.5px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .fracture-table thead th:first-child { padding-left: 15px; }
+  .fracture-table tbody tr { border-bottom: 1px solid var(--border); }
+  .fracture-table tbody tr:nth-child(even) { background: var(--cream); }
+  .fracture-table td {
+    padding: 10px 11px;
+    vertical-align: middle;
+    font-size: 11.5px;
+    color: var(--ink);
+  }
+  .fracture-table td:first-child { padding-left: 15px; }
+
+  .candidate-num {
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .conf-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-size: 10.5px;
+    font-weight: 600;
+  }
+  .conf-pill.high   { background: #d4ecd9; color: #2f6e40; }
+  .conf-pill.medium { background: #fef0d6; color: #8a5c10; }
+  .conf-pill.low    { background: #f4e3e3; color: #8a2020; }
+
+  /* ── Two-col ─────────────────────────────────────────── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 22px; }
+
+  /* ── Type distribution ───────────────────────────────── */
+  .type-bars { display: flex; flex-direction: column; gap: 6px; }
+  .type-row  { display: grid; grid-template-columns: 130px 1fr 44px; align-items: center; gap: 8px; }
+  .type-name { font-size: 11px; color: var(--ink); text-transform: capitalize; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .type-name.top-type { font-weight: 700; color: var(--terracotta); }
+  .type-bar-bg { height: 7px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .type-bar-fill { height: 100%; border-radius: 4px; background: var(--sage); }
+  .type-bar-fill.rank-1 { background: var(--terracotta); }
+  .type-bar-fill.rank-2 { background: var(--sage-light); }
+  .type-pct { font-size: 10.5px; color: var(--muted); text-align: right; font-weight: 600; }
+  .type-pct.rank-1 { color: var(--terracotta); font-weight: 700; }
+
+  /* ── Prediction cards ────────────────────────────────── */
+  .pred-card {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .pred-card:last-child { margin-bottom: 0; }
+  .pred-section-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 7px;
+    font-weight: 400;
+  }
+  .pred-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .pred-row:last-child { border-bottom: none; }
+  .pred-label-text { font-size: 12px; color: var(--sage-dark); font-weight: 700; text-transform: capitalize; }
+  .pred-conf-val   { font-size: 12px; font-weight: 700; }
+
+  /* ── Footer ──────────────────────────────────────────── */
+  .footer {
+    background: var(--cream);
+    border-top: 1px solid var(--border);
+    padding: 10px 32px 10px 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+  }
+  .footer-disclaimer {
+    font-size: 10px;
+    color: var(--muted);
+    font-style: italic;
+    max-width: 380px;
+    line-height: 1.5;
+  }
+  .footer-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    color: var(--terracotta);
+    letter-spacing: 2px;
+    font-weight: 700;
+  }
+  .footer-page { font-size: 10.5px; color: var(--muted); font-weight: 500; }
+
+  /* ── Page 2 – Images ─────────────────────────────────── */
+  .page2-content { padding: 24px 32px 24px 44px; flex: 1; }
+  .img-section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--sage-dark);
+    margin-bottom: 18px;
+  }
+
+  .overlay-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .img-block { display: flex; flex-direction: column; gap: 7px; }
+  .img-block-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .img-frame {
+    border: 1.5px solid var(--border);
+    border-radius: 3px;
+    background: var(--cream);
+    min-height: 190px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+  }
+  .img-frame img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 2px;
+    object-fit: contain;
+  }
+  .img-placeholder {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 6px; color: var(--muted); font-size: 10px; font-style: italic; text-align: center;
+    padding: 16px; min-height: 190px; width: 100%;
+  }
+  .img-placeholder .ph-icon { font-size: 30px; opacity: .3; }
+
+  .roi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .roi-item { display: flex; flex-direction: column; gap: 5px; }
+  .roi-label {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .roi-frame {
+    border: 1.5px solid var(--border);
+    border-radius: 3px;
+    background: var(--cream);
+    min-height: 110px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 6px;
+  }
+  .roi-frame img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 2px;
+    object-fit: contain;
+  }
+  .roi-placeholder {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; color: var(--muted); font-size: 9px; font-style: italic; text-align: center;
+    padding: 10px; min-height: 110px; width: 100%;
+  }
+  .roi-conf-tag {
+    font-size: 9px;
+    color: var(--muted);
+    font-weight: 500;
+    text-align: center;
+  }
+
+  @media print {
+    body { background: none; }
+    .page { margin: 0; box-shadow: none; width: 210mm; min-height: 297mm; page-break-after: always; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 1
+═══════════════════════════════════════════════════════ -->
+<div class="page" id="page1">
+  <svg class="botanical" viewBox="0 0 200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M100 10 Q130 60 100 110 Q70 60 100 10Z" fill="#4a5940"/>
+    <path d="M100 90 Q145 130 115 175 Q85 130 100 90Z" fill="#4a5940"/>
+    <path d="M100 160 Q140 200 110 250 Q80 200 100 160Z" fill="#4a5940"/>
+    <path d="M100 50 Q60 80 70 120 Q90 90 100 50Z" fill="#b5763a"/>
+    <path d="M100 130 Q55 165 68 205 Q90 170 100 130Z" fill="#b5763a"/>
+    <line x1="100" y1="10" x2="100" y2="280" stroke="#4a5940" stroke-width="1.5"/>
+  </svg>
+
+  <header class="header">
+    <img src="{{ logo_src }}" alt="ATEHEA" style="height: 38px; width: auto;" />
+    <div class="report-meta" id="header-meta"></div>
+  </header>
+
+  <div class="title-band">
+    <h1>Fracture Detection Report</h1>
+    <span class="subtitle">Radiographic AI Analysis</span>
+    <span class="ai-badge">AI Generated</span>
+  </div>
+
+  <div class="content">
+    <div class="summary-grid" id="summary-grid"></div>
+
+    <div class="section-header"><h2>Clinical Findings</h2><div class="line"></div></div>
+    <div class="findings" id="findings-text"></div>
+
+    <div class="section-header"><h2>Fracture Candidate Details</h2><div class="line"></div></div>
+    <table class="fracture-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Detector Confidence</th>
+          <th>Analysis Confidence</th>
+          <th>Pattern Hint</th>
+          <th>Comminuted</th>
+          <th>Angle</th>
+        </tr>
+      </thead>
+      <tbody id="candidates-tbody"></tbody>
+    </table>
+
+    <div class="two-col">
+      <div>
+        <div class="section-header"><h2>Type Distribution</h2><div class="line"></div></div>
+        <div class="type-bars" id="type-bars"></div>
+      </div>
+      <div>
+        <div class="section-header"><h2>AI Model Predictions</h2><div class="line"></div></div>
+        <div id="model-predictions"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-disclaimer">AI-generated fracture analysis report. Clinical correlation is strongly recommended. This report does not constitute a medical diagnosis.</div>
+    <div class="footer-brand">ATEHEA</div>
+    <div class="footer-page">Page 1 of 2</div>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 2
+═══════════════════════════════════════════════════════ -->
+<div class="page" id="page2">
+  <svg class="botanical" viewBox="0 0 200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M100 10 Q130 60 100 110 Q70 60 100 10Z" fill="#4a5940"/>
+    <path d="M100 90 Q145 130 115 175 Q85 130 100 90Z" fill="#4a5940"/>
+    <path d="M100 160 Q140 200 110 250 Q80 200 100 160Z" fill="#4a5940"/>
+    <path d="M100 50 Q60 80 70 120 Q90 90 100 50Z" fill="#b5763a"/>
+    <path d="M100 130 Q55 165 68 205 Q90 170 100 130Z" fill="#b5763a"/>
+    <line x1="100" y1="10" x2="100" y2="280" stroke="#4a5940" stroke-width="1.5"/>
+  </svg>
+
+  <header class="header">
+    <img src="C:\Users\bo3ly\Desktop\AI Fracture Detection & Reporting Pipeline Project - Bundle C\AI FDRPP\utils\logo.png" alt="ATEHEA" style="height: 38px; width: auto;" />
+    <div class="report-meta" id="header-meta-p2"></div>
+  </header>
+
+  <div class="title-band">
+    <h1>Detection Imagery</h1>
+    <span class="subtitle">Annotated Radiographic Outputs</span>
+    <span class="ai-badge">AI Generated</span>
+  </div>
+
+  <div class="page2-content">
+    <div class="section-header"><h2>Annotated Overlay &amp; GradCAM Heatmap</h2><div class="line"></div></div>
+    <div class="overlay-grid" id="overlay-grid"></div>
+
+    <div class="section-header"><h2>Region of Interest Crops</h2><div class="line"></div></div>
+    <div class="roi-grid" id="roi-grid"></div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-disclaimer">AI-generated fracture analysis report. Clinical correlation is strongly recommended. This report does not constitute a medical diagnosis.</div>
+    <div class="footer-brand">ATEHEA</div>
+    <div class="footer-page">Page 2 of 2</div>
+  </footer>
+</div>
+
+<script>
+window.REPORT_DATA = {{ report_data_json | safe }};
+
+/* ─────────────────────────────────────────────────────────
+   HELPERS
+───────────────────────────────────────────────────────── */
+const fmt  = (n, d=2) => (n * 100).toFixed(d) + '%';
+const fmtR = (n, d=2) => n.toFixed(d);
+const cap  = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+function confColor(c) {
+  if (c >= 0.7)  return 'var(--terracotta)';
+  if (c >= 0.45) return 'var(--amber)';
+  return 'var(--muted)';
+}
+function confClass(c) {
+  if (c >= 0.7)  return 'high';
+  if (c >= 0.45) return 'medium';
+  return 'low';
+}
+function confLabel(c) {
+  if (c >= 0.7)  return 'High';
+  if (c >= 0.45) return 'Medium';
+  return 'Low';
+}
+function candidateColor(c) {
+  if (c >= 0.7)  return 'var(--terracotta)';
+  if (c >= 0.45) return 'var(--amber)';
+  return 'var(--muted)';
+}
+
+function bestModelPrediction(models) {
+  if (!models || models.length === 0) return null;
+  return models.reduce((a, b) => a.confidence >= b.confidence ? a : b);
+}
+
+function generateFindings(data) {
+  const s     = data.structured;
+  const bp    = s.body_part;
+  const ft    = s.fracture_type;
+  const count = s.count || 0;
+  const group = (data.groups && data.groups[0])
+    ? data.groups[0].group.replace('_', '/')
+    : (bp.detector_group || '').replace('_', '/');
+
+  const disclaimer = '<div class="disclaimer">These findings are AI-generated and must be reviewed and confirmed by a qualified medical professional prior to clinical use.</div>';
+
+  // ── If the API already provides a report string, use it as-is ──────────
+  // It is shown verbatim followed by the standard disclaimer.
+  if (data.report && data.report.trim().length > 0) {
+    return data.report + ' ' + disclaimer;
+  }
+
+  // ── No detections fallback (no report string, no fractures) ───────────
+  if (count === 0 || !s.fractures || s.fractures.length === 0) {
+    return 'The submitted radiographic image was classified as involving the <strong>' + cap(bp.label) + '</strong> region with a body-part confidence of <strong>' + fmt(bp.confidence,1) + '</strong>. The automated detection pipeline did <strong>not identify any fracture candidates</strong> in this image. This does not exclude the possibility of a fracture; clinical examination and radiologist review are strongly advised if there is clinical suspicion. ' + disclaimer;
+  }
+
+  // ── Has detections fallback (no report string) ─────────────────────────
+  const scores    = (ft && ft.scores) ? Object.entries(ft.scores).sort(function(a,b){ return b[1]-a[1]; }) : [];
+  const secondary = scores.length >= 2 ? scores[1] : null;
+
+  const highConf = s.fractures.filter(function(f){ return f.detector_confidence >= 0.7; }).length;
+  const lowConf  = s.fractures.filter(function(f){ return f.detector_confidence < 0.45; }).length;
+
+  var confNote = '';
+  if (lowConf > 0 && highConf > 0)
+    confNote = 'Candidates 1–' + highConf + ' carry moderate-to-high detector confidence; the remaining ' + (lowConf > 1 ? 'candidates' : 'candidate') + ' ' + (lowConf > 1 ? 'are' : 'is') + ' flagged at low confidence and may represent an artefact or edge region.';
+  else if (lowConf === 0)
+    confNote = 'All ' + count + ' candidate' + (count !== 1 ? 's' : '') + ' carry moderate-to-high detector confidence.';
+  else
+    confNote = 'All ' + count + ' candidate' + (count !== 1 ? 's' : '') + ' carry low detector confidence; clinical review is especially advised.';
+
+  var typeText = '';
+  if (ft && ft.label && ft.confidence != null) {
+    typeText = 'Automated fracture-type ensemble analysis suggests a possible <strong>' + cap(ft.label) + '</strong> fracture pattern (confidence ' + fmt(ft.confidence,1) + ').';
+    if (secondary) typeText += ' A secondary classification of <strong>' + cap(secondary[0]) + '</strong> was also noted (' + fmt(secondary[1]) + ').';
+    typeText += ' ';
+  }
+
+  return 'The submitted radiographic image was classified as involving the <strong>' + cap(bp.label) + '</strong> region with a body-part confidence of <strong>' + fmt(bp.confidence,1) + '</strong>. ' + typeText + 'A total of <strong>' + count + ' fracture candidate region' + (count !== 1 ? 's' : '') + '</strong> were identified by the detection pipeline within the ' + group + ' detector group. ' + confNote + ' ' + disclaimer;
+}
+
+/* ─────────────────────────────────────────────────────────
+   RENDER
+───────────────────────────────────────────────────────── */
+(function render() {
+  const D  = window.REPORT_DATA;
+  const s  = D.structured;
+  const bp = s.body_part;
+  const ft = s.fracture_type;
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0,19).replace('T',' ');
+
+  /* ── Meta header (both pages) ── */
+  const metaHTML = `
+    <strong>AI Fracture Detection Report</strong><br/>
+    Request ID: ${D.request_id}<br/>
+    Generated: ${dateStr}<br/>
+    Patient Ref: — / Referring Physician: —
+  `;
+  document.getElementById('header-meta').innerHTML    = metaHTML;
+  document.getElementById('header-meta-p2').innerHTML = metaHTML;
+
+  /* ── Summary cards ── */
+  const bpConf  = bp.confidence;
+  const ftConf  = ft.confidence;
+  const bpColor = confColor(bpConf);
+  const ftColor = confColor(ftConf);
+
+  document.getElementById('summary-grid').innerHTML = `
+    <div class="summary-card card-accent">
+      <div class="s-label">Body Part</div>
+      <div class="s-value text-val">${cap(bp.label)}</div>
+      <div class="conf-bar-wrap"><div class="conf-bar" style="width:${(bpConf*100).toFixed(1)}%;background:${bpColor}"></div></div>
+      <div class="s-sub"><strong>Confidence:</strong> ${fmt(bpConf,1)}</div>
+    </div>
+    <div class="summary-card card-warn">
+      <div class="s-label">Fracture Type</div>
+      <div class="s-value text-val">${(ft && ft.label) ? cap(ft.label) : 'N/A'}</div>
+      ${(ft && ft.confidence != null) ? `<div class="conf-bar-wrap"><div class="conf-bar" style="width:${(ftConf*100).toFixed(1)}%;background:${ftColor}"></div></div><div class="s-sub"><strong>Confidence:</strong> ${fmt(ftConf,1)}</div>` : '<div class="s-sub" style="font-style:italic">Not determined</div>'}
+    </div>
+    <div class="summary-card card-neutral">
+      <div class="s-label">Candidates Detected</div>
+      <div class="s-value">${s.count}</div>
+      <div class="s-sub"><strong>Detector group:</strong> ${bp.detector_group.replace('_',' ')}</div>
+    </div>
+  `;
+
+  /* ── Findings ── */
+  document.getElementById('findings-text').innerHTML = generateFindings(D);
+
+  /* ── Candidates table ── */
+  const fractures = s.fractures || [];
+  const noDetection = fractures.length === 0;
+
+  if (noDetection) {
+    document.getElementById('candidates-tbody').innerHTML =
+      `<tr><td colspan="6" style="text-align:center;padding:18px;font-style:italic;color:var(--muted);font-size:11.5px">No fracture candidates detected in this image.</td></tr>`;
+  } else {
+    const rows = fractures.map((f, i) => {
+      const cc    = candidateColor(f.detector_confidence);
+      const cpill = confClass(f.detector_confidence);
+      const clbl  = confLabel(f.detector_confidence);
+      const hint  = f.rule_based_type_hint ? cap(f.rule_based_type_hint) : '—';
+      const comm  = f.comminuted ? '<strong>Yes</strong>' : 'No';
+      return `<tr>
+        <td><span class="candidate-num" style="background:${cc}">${i+1}</span></td>
+        <td><span class="conf-pill ${cpill}">${fmt(f.detector_confidence,1)} — ${clbl}</span></td>
+        <td>${cap(f.analysis_confidence)}</td>
+        <td>${hint}</td>
+        <td>${comm}</td>
+        <td>${f.angle.toFixed(1)}°</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('candidates-tbody').innerHTML = rows;
+  }
+
+  /* ── Type distribution bars ── */
+  const hasScores    = ft && ft.scores && Object.keys(ft.scores).length > 0;
+  const sortedScores = hasScores ? Object.entries(ft.scores).sort((a,b) => b[1]-a[1]) : [];
+  const maxScore     = sortedScores.length > 0 ? sortedScores[0][1] : 1;
+  const topN         = sortedScores.slice(0, 8);
+
+  if (topN.length === 0 || noDetection) {
+    document.getElementById('type-bars').innerHTML =
+      `<p style="font-size:11px;color:var(--muted);font-style:italic">No fracture type data available.</p>`;
+  } else {
+    const barsHTML = topN.map(([type, score], idx) => {
+      const isTop    = idx === 0;
+      const isSecond = idx === 1;
+      const barClass  = isTop ? 'rank-1' : isSecond ? 'rank-2' : '';
+      const nameClass = isTop ? 'type-name top-type' : 'type-name';
+      const pctClass  = isTop ? 'type-pct rank-1' : 'type-pct';
+      const star      = isTop ? ' ★' : '';
+      const pctWidth  = ((score / maxScore) * 100).toFixed(1);
+      const displayName = type.replace('_', ' ');
+      return `<div class="type-row">
+        <span class="${nameClass}">${cap(displayName)}${star}</span>
+        <div class="type-bar-bg"><div class="type-bar-fill ${barClass}" style="width:${pctWidth}%"></div></div>
+        <span class="${pctClass}">${fmt(score, 1)}</span>
+      </div>`;
+    }).join('');
+    document.getElementById('type-bars').innerHTML = barsHTML;
+  }
+
+  /* ── Model predictions ── */
+  // Body part: pick highest confidence model prediction
+  const bpGroup    = D.groups && D.groups[0];
+  const bpBest     = bpGroup ? bestModelPrediction(bpGroup.model_predictions) : null;
+  // Fracture type: pick highest confidence model prediction
+  const ftBest     = bestModelPrediction((ft && ft.models) ? ft.models : []);
+
+  let predHTML = '';
+  if (bpBest) {
+    predHTML += `
+      <div class="pred-section-label">Body-part classification</div>
+      <div class="pred-card">
+        <div class="pred-row">
+          <span class="pred-label-text">${cap(bpBest.label)}</span>
+          <span class="pred-conf-val" style="color:${confColor(bpBest.confidence)}">${fmt(bpBest.confidence,1)}</span>
+        </div>
+      </div>`;
+  }
+  if (ftBest) {
+    predHTML += `
+      <div class="pred-section-label" style="margin-top:10px">Fracture-type classifier</div>
+      <div class="pred-card">
+        <div class="pred-row">
+          <span class="pred-label-text">${cap(ftBest.label)}</span>
+          <span class="pred-conf-val" style="color:${confColor(ftBest.confidence)}">${fmt(ftBest.confidence,1)}</span>
+        </div>
+      </div>`;
+  }
+  document.getElementById('model-predictions').innerHTML = predHTML;
+
+  /* ── Page 2: overlay images ── */
+  const imgs = D.images || {};
+
+  // Large overlay frames (bbox overlay, gradcam)
+  function overlayFrame(url, iconChar, altText) {
+    if (url) {
+      return `<div class="img-frame"><img src="${url}" alt="${altText}" onerror="this.parentElement.innerHTML='<div class=img-placeholder><div class=ph-icon>${iconChar}</div><span>Image unavailable</span></div>'"/></div>`;
+    }
+    return `<div class="img-frame"><div class="img-placeholder"><div class="ph-icon">${iconChar}</div><span>${altText}</span></div></div>`;
+  }
+
+  // Small ROI crop frames
+  function roiFrame(url, iconChar, altText) {
+    if (url) {
+      return `<div class="roi-frame"><img src="${url}" alt="${altText}" onerror="this.parentElement.innerHTML='<div class=roi-placeholder><span>Image unavailable</span></div>'"/></div>`;
+    }
+    return `<div class="roi-frame"><div class="roi-placeholder"><div class="ph-icon">${iconChar}</div><span>${altText}</span></div></div>`;
+  }
+
+  document.getElementById('overlay-grid').innerHTML = `
+    <div class="img-block">
+      <div class="img-block-label">Annotated Detection Overlay</div>
+      ${overlayFrame(imgs.bbox_overlay?.url, '🦴', 'Detection overlay image')}
+    </div>
+    <div class="img-block">
+      <div class="img-block-label">GradCAM Heatmap</div>
+      ${overlayFrame(imgs.gradcam_overlay?.url, '🌡', 'GradCAM heatmap image')}
+    </div>
+  `;
+
+  const crops    = imgs.roi_crops || [];
+  const roiGrid  = document.getElementById('roi-grid');
+
+  if (crops.length === 0) {
+    roiGrid.innerHTML = '<p style="font-size:11px;color:var(--muted);font-style:italic">No ROI crops available.</p>';
+  } else {
+    // Clamp columns: 1–3 based on actual count so no empty slots appear
+    const cols = Math.min(crops.length, 3);
+    roiGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+    roiGrid.innerHTML = crops.map((crop, i) => {
+      const conf = crop.confidence != null ? `<div class="roi-conf-tag"><strong>Conf:</strong> ${fmt(crop.confidence,1)}</div>` : '';
+      return `<div class="roi-item">
+        <div class="roi-label">ROI Crop ${i + 1}</div>
+        ${roiFrame(crop.url, '🔍', 'Region of interest crop ' + (i + 1))}
+        ${conf}
+      </div>`;
+    }).join('');
+  }
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,5438 @@
+==========================================================================================
+{
+  "started_at": "2026-06-05T17:55:39",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "http://127.0.0.1:8000/analyze",
+    "client": "127.0.0.1:56315",
+    "filename": "9ad1527d0b5993e1e553f0f33d73821faa56595aaf4ca215bc36f6538ac4a5dc_big_gallery.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 72205,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 18048,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 8.7121,
+    "total_wall": 8.732,
+    "total_process_cpu": 12.4375
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 35,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 133.33,
+      "max_cpu_percent": 852.35,
+      "start_rss_mb": 1507.31,
+      "end_rss_mb": 2133.44,
+      "max_sampled_rss_mb": 2133.44,
+      "peak_rss_mb": 2136.59
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605145539_4b735c98",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.5989888310432434,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.07325746864080429,
+          "Forearm": 0.5989888310432434,
+          "Hand": 0.0019151633605360985,
+          "Hips and pelvis": 0.0010115152690559626,
+          "Leg": 0.004884772002696991,
+          "Shoulders": 0.00025186294806189835,
+          "Upper arm": 0.3161478042602539,
+          "Wrist": 0.003542632330209017
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9954178333282471
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6312636137008667
+          }
+        ]
+      }
+    ],
+    "detections_count": 3,
+    "rois_count": 3,
+    "fractures_count": 3,
+    "pdf_url": "/download/pdfs/fracture_20260605145539_4b735c98_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605145539_4b735c98_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605145539_4b735c98_ar"
+  },
+  "finished_at": "2026-06-05T17:55:48"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-05T18:00:33",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "http://127.0.0.1:8000/analyze",
+    "client": "127.0.0.1:50463",
+    "filename": "9ad1527d0b5993e1e553f0f33d73821faa56595aaf4ca215bc36f6538ac4a5dc_big_gallery.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 72205,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 31456,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 7.9108,
+    "total_wall": 7.9318,
+    "total_process_cpu": 12.0938
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 32,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 142.08,
+      "max_cpu_percent": 788.31,
+      "start_rss_mb": 1506.53,
+      "end_rss_mb": 1825.25,
+      "max_sampled_rss_mb": 1829.62,
+      "peak_rss_mb": 1830.08
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605150033_bc50274a",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.5989888310432434,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.07325746864080429,
+          "Forearm": 0.5989888310432434,
+          "Hand": 0.0019151633605360985,
+          "Hips and pelvis": 0.0010115152690559626,
+          "Leg": 0.004884772002696991,
+          "Shoulders": 0.00025186294806189835,
+          "Upper arm": 0.3161478042602539,
+          "Wrist": 0.003542632330209017
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9954178333282471
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6312636137008667
+          }
+        ]
+      }
+    ],
+    "detections_count": 3,
+    "rois_count": 3,
+    "fractures_count": 3,
+    "pdf_url": "/download/pdfs/fracture_20260605150033_bc50274a_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605150033_bc50274a_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605150033_bc50274a_ar"
+  },
+  "finished_at": "2026-06-05T18:00:41"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-05T18:16:02",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://felt-garmin-helicopter-fixes.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "9ad1527d0b5993e1e553f0f33d73821faa56595aaf4ca215bc36f6538ac4a5dc_big_gallery.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 72205,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 30004,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 10.5596,
+    "total_wall": 10.5832,
+    "total_process_cpu": 11.6719
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 42,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 105.34,
+      "max_cpu_percent": 796.51,
+      "start_rss_mb": 1506.02,
+      "end_rss_mb": 1829.41,
+      "max_sampled_rss_mb": 1831.12,
+      "peak_rss_mb": 1833.89
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605151602_8b06daf5",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.5989888310432434,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.07325746864080429,
+          "Forearm": 0.5989888310432434,
+          "Hand": 0.0019151633605360985,
+          "Hips and pelvis": 0.0010115152690559626,
+          "Leg": 0.004884772002696991,
+          "Shoulders": 0.00025186294806189835,
+          "Upper arm": 0.3161478042602539,
+          "Wrist": 0.003542632330209017
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9954178333282471
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6312636137008667
+          }
+        ]
+      }
+    ],
+    "detections_count": 3,
+    "rois_count": 3,
+    "fractures_count": 3,
+    "pdf_url": "/download/pdfs/fracture_20260605151602_8b06daf5_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605151602_8b06daf5_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605151602_8b06daf5_ar"
+  },
+  "finished_at": "2026-06-05T18:16:13"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-05T18:23:33",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://felt-garmin-helicopter-fixes.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "images-11.jpeg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 18634,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 30004,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 7.5105,
+    "total_wall": 7.5121,
+    "total_process_cpu": 8.5938
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 30,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 111.58,
+      "max_cpu_percent": 834.78,
+      "start_rss_mb": 1829.62,
+      "end_rss_mb": 1842.2,
+      "max_sampled_rss_mb": 1842.2,
+      "peak_rss_mb": 1850.61
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605152333_cc3dcd13",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.99604332447052,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.0005943264113739133,
+          "Forearm": 0.0017653481336310506,
+          "Hand": 0.00018481699225958437,
+          "Hips and pelvis": 0.000749787490349263,
+          "Leg": 0.99604332447052,
+          "Shoulders": 0.00024293127353303134,
+          "Upper arm": 1.019635601551272e-05,
+          "Wrist": 0.0004093042225576937
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9997299313545227
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Leg",
+            "confidence": 0.9923566579818726
+          }
+        ]
+      }
+    ],
+    "detections_count": 3,
+    "rois_count": 3,
+    "fractures_count": 3,
+    "pdf_url": "/download/pdfs/fracture_20260605152333_cc3dcd13_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605152333_cc3dcd13_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605152333_cc3dcd13_ar"
+  },
+  "finished_at": "2026-06-05T18:23:41"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-05T19:14:56",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "http://127.0.0.1:8000/analyze",
+    "client": "127.0.0.1:50277",
+    "filename": "9ad1527d0b5993e1e553f0f33d73821faa56595aaf4ca215bc36f6538ac4a5dc_big_gallery.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 72205,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 27104,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 17.6418,
+    "total_wall": 17.6886,
+    "total_process_cpu": 13.7344
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 69,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 75.48,
+      "max_cpu_percent": 779.99,
+      "start_rss_mb": 1510.62,
+      "end_rss_mb": 1828.8,
+      "max_sampled_rss_mb": 1830.26,
+      "peak_rss_mb": 1832.7
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605161457_e8b3fa64",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.5989888310432434,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.07325746864080429,
+          "Forearm": 0.5989888310432434,
+          "Hand": 0.0019151633605360985,
+          "Hips and pelvis": 0.0010115152690559626,
+          "Leg": 0.004884772002696991,
+          "Shoulders": 0.00025186294806189835,
+          "Upper arm": 0.3161478042602539,
+          "Wrist": 0.003542632330209017
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9954178333282471
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6312636137008667
+          }
+        ]
+      }
+    ],
+    "detections_count": 3,
+    "rois_count": 3,
+    "fractures_count": 3,
+    "pdf_url": "/download/pdfs/fracture_20260605161457_e8b3fa64_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605161457_e8b3fa64_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605161457_e8b3fa64_ar"
+  },
+  "finished_at": "2026-06-05T19:15:14"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-05T19:24:55",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "images-11.jpeg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 18634,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 3012,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 8.8402,
+    "total_wall": 8.8576,
+    "total_process_cpu": 11.0
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 35,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 121.29,
+      "max_cpu_percent": 852.76,
+      "start_rss_mb": 1510.44,
+      "end_rss_mb": 1831.04,
+      "max_sampled_rss_mb": 1831.04,
+      "peak_rss_mb": 1839.42
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605162455_a49b63c9",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.99604332447052,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.0005943264113739133,
+          "Forearm": 0.0017653481336310506,
+          "Hand": 0.00018481699225958437,
+          "Hips and pelvis": 0.000749787490349263,
+          "Leg": 0.99604332447052,
+          "Shoulders": 0.00024293115711770952,
+          "Upper arm": 1.019635601551272e-05,
+          "Wrist": 0.0004093042225576937
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9997299313545227
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Leg",
+            "confidence": 0.9923566579818726
+          }
+        ]
+      }
+    ],
+    "detections_count": 3,
+    "rois_count": 3,
+    "fractures_count": 3,
+    "pdf_url": "/download/pdfs/fracture_20260605162455_a49b63c9_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605162455_a49b63c9_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605162455_a49b63c9_ar"
+  },
+  "finished_at": "2026-06-05T19:25:04"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-05T19:31:20",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "http://127.0.0.1:8000/analyze",
+    "client": "127.0.0.1:58943",
+    "filename": "9ad1527d0b5993e1e553f0f33d73821faa56595aaf4ca215bc36f6538ac4a5dc_big_gallery.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 72205,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 3012,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 16.025,
+    "total_wall": 16.0257,
+    "total_process_cpu": 8.7656
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 63,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 53.75,
+      "max_cpu_percent": 769.82,
+      "start_rss_mb": 1830.28,
+      "end_rss_mb": 1819.79,
+      "max_sampled_rss_mb": 1830.28,
+      "peak_rss_mb": 1843.79
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605163120_109337a4",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.5989888310432434,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.07325747609138489,
+          "Forearm": 0.5989888310432434,
+          "Hand": 0.0019151633605360985,
+          "Hips and pelvis": 0.0010115152690559626,
+          "Leg": 0.004884772002696991,
+          "Shoulders": 0.00025186294806189835,
+          "Upper arm": 0.3161478042602539,
+          "Wrist": 0.003542632330209017
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9954178333282471
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6312636137008667
+          }
+        ]
+      }
+    ],
+    "detections_count": 3,
+    "rois_count": 3,
+    "fractures_count": 3,
+    "pdf_url": "/download/pdfs/fracture_20260605163120_109337a4_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605163120_109337a4_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605163120_109337a4_ar"
+  },
+  "finished_at": "2026-06-05T19:31:36"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-05T19:32:36",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "9ad1527d0b5993e1e553f0f33d73821faa56595aaf4ca215bc36f6538ac4a5dc_big_gallery.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 72205,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 3012,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 7.4197,
+    "total_wall": 7.42,
+    "total_process_cpu": 8.0625
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 30,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 103.46,
+      "max_cpu_percent": 776.43,
+      "start_rss_mb": 1820.55,
+      "end_rss_mb": 1842.71,
+      "max_sampled_rss_mb": 1842.71,
+      "peak_rss_mb": 1845.89
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605163236_6189555b",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.5989888310432434,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.07325747609138489,
+          "Forearm": 0.5989888310432434,
+          "Hand": 0.0019151633605360985,
+          "Hips and pelvis": 0.0010115152690559626,
+          "Leg": 0.004884772002696991,
+          "Shoulders": 0.00025186294806189835,
+          "Upper arm": 0.3161478042602539,
+          "Wrist": 0.003542632330209017
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9954178333282471
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6312636137008667
+          }
+        ]
+      }
+    ],
+    "detections_count": 3,
+    "rois_count": 3,
+    "fractures_count": 3,
+    "pdf_url": "/download/pdfs/fracture_20260605163236_6189555b_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605163236_6189555b_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605163236_6189555b_ar"
+  },
+  "finished_at": "2026-06-05T19:32:44"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-05T19:39:43",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "images-11.jpeg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 18634,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 35368,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 10.7403,
+    "total_wall": 10.7579,
+    "total_process_cpu": 10.3281
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 43,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 92.72,
+      "max_cpu_percent": 787.29,
+      "start_rss_mb": 1510.0,
+      "end_rss_mb": 1831.3,
+      "max_sampled_rss_mb": 1832.41,
+      "peak_rss_mb": 1840.74
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605163943_b49e9b18",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.99604332447052,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.0005943264113739133,
+          "Forearm": 0.0017653481336310506,
+          "Hand": 0.00018481699225958437,
+          "Hips and pelvis": 0.000749787490349263,
+          "Leg": 0.99604332447052,
+          "Shoulders": 0.00024293115711770952,
+          "Upper arm": 1.019635601551272e-05,
+          "Wrist": 0.0004093042225576937
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9997299313545227
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Leg",
+            "confidence": 0.9923566579818726
+          }
+        ]
+      }
+    ],
+    "detections_count": 3,
+    "rois_count": 3,
+    "fractures_count": 3,
+    "pdf_url": "/download/pdfs/fracture_20260605163943_b49e9b18_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605163943_b49e9b18_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605163943_b49e9b18_ar"
+  },
+  "finished_at": "2026-06-05T19:39:54"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-05T19:43:09",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "images-11.jpeg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 18634,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 23256,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 6.8139,
+    "total_wall": 6.8309,
+    "total_process_cpu": 10.4531
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 28,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 144.63,
+      "max_cpu_percent": 811.28,
+      "start_rss_mb": 1510.14,
+      "end_rss_mb": 1829.82,
+      "max_sampled_rss_mb": 1829.82,
+      "peak_rss_mb": 1839.36
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605164309_1cfaa4ce",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.99604332447052,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.0005943264113739133,
+          "Forearm": 0.0017653481336310506,
+          "Hand": 0.00018481699225958437,
+          "Hips and pelvis": 0.000749787490349263,
+          "Leg": 0.99604332447052,
+          "Shoulders": 0.00024293115711770952,
+          "Upper arm": 1.019635601551272e-05,
+          "Wrist": 0.0004093042225576937
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9997299313545227
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Leg",
+            "confidence": 0.9923566579818726
+          }
+        ]
+      }
+    ],
+    "detections_count": 3,
+    "rois_count": 3,
+    "fractures_count": 3,
+    "pdf_url": "/download/pdfs/fracture_20260605164309_1cfaa4ce_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605164309_1cfaa4ce_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605164309_1cfaa4ce_ar"
+  },
+  "finished_at": "2026-06-05T19:43:16"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-05T19:48:11",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "178.61.144.30:0",
+    "filename": "5502.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 98694,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 16192,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 8.7121,
+    "total_wall": 8.7297,
+    "total_process_cpu": 10.1406
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 35,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 111.45,
+      "max_cpu_percent": 762.26,
+      "start_rss_mb": 1510.91,
+      "end_rss_mb": 1812.49,
+      "max_sampled_rss_mb": 1812.49,
+      "peak_rss_mb": 1816.22
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605164811_06db04a7",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.2263891100883484,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.1737203598022461,
+          "Forearm": 0.09327621757984161,
+          "Hand": 0.21385754644870758,
+          "Hips and pelvis": 0.004018958657979965,
+          "Leg": 0.2263891100883484,
+          "Shoulders": 0.016172591596841812,
+          "Upper arm": 0.05884339287877083,
+          "Wrist": 0.21372179687023163
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.44874107837677
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Hand",
+            "confidence": 0.42700251936912537
+          }
+        ]
+      }
+    ],
+    "detections_count": 2,
+    "rois_count": 2,
+    "fractures_count": 2,
+    "pdf_url": "/download/pdfs/fracture_20260605164811_06db04a7_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605164811_06db04a7_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605164811_06db04a7_ar"
+  },
+  "finished_at": "2026-06-05T19:48:20"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-05T19:51:13",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "178.61.144.30:0",
+    "filename": "5597.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 29114,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 16192,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 8.9908,
+    "total_wall": 8.9917,
+    "total_process_cpu": 8.8906
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 37,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 93.97,
+      "max_cpu_percent": 778.16,
+      "start_rss_mb": 1812.84,
+      "end_rss_mb": 1793.21,
+      "max_sampled_rss_mb": 1812.84,
+      "peak_rss_mb": 1830.3
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605165113_6631f82d",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.45304036140441895,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.41275930404663086,
+          "Forearm": 0.04375968873500824,
+          "Hand": 0.07126818597316742,
+          "Hips and pelvis": 0.0015123409684747458,
+          "Leg": 0.45304036140441895,
+          "Shoulders": 0.0008363174856640399,
+          "Upper arm": 0.012228457257151604,
+          "Wrist": 0.004595441278070211
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9014530181884766
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Elbow",
+            "confidence": 0.8235804438591003
+          }
+        ]
+      }
+    ],
+    "detections_count": 0,
+    "rois_count": 0,
+    "fractures_count": 0,
+    "pdf_url": "/download/pdfs/fracture_20260605165113_6631f82d_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605165113_6631f82d_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605165113_6631f82d_ar"
+  },
+  "finished_at": "2026-06-05T19:51:22"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-05T19:54:53",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "178.61.144.30:0",
+    "filename": "5606.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 17235,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 16192,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 4.9593,
+    "total_wall": 4.9598,
+    "total_process_cpu": 7.6094
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 20,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 147.54,
+      "max_cpu_percent": 801.24,
+      "start_rss_mb": 1793.61,
+      "end_rss_mb": 1814.84,
+      "max_sampled_rss_mb": 1824.16,
+      "peak_rss_mb": 1836.66
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605165453_c7ad2690",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.628685712814331,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.026207685470581055,
+          "Forearm": 0.31004881858825684,
+          "Hand": 0.012090337462723255,
+          "Hips and pelvis": 0.001121807494200766,
+          "Leg": 0.628685712814331,
+          "Shoulders": 0.000173678039573133,
+          "Upper arm": 0.001209415029734373,
+          "Wrist": 0.02046254649758339
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9369287490844727
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Forearm",
+            "confidence": 0.5758441090583801
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260605165453_c7ad2690_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605165453_c7ad2690_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605165453_c7ad2690_ar"
+  },
+  "finished_at": "2026-06-05T19:54:58"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-05T23:56:40",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "112393.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 17235,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 16192,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 10.8693,
+    "total_wall": 10.8747,
+    "total_process_cpu": 9.7656
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 43,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 87.06,
+      "max_cpu_percent": 782.36,
+      "start_rss_mb": 157.04,
+      "end_rss_mb": 788.9,
+      "max_sampled_rss_mb": 788.9,
+      "peak_rss_mb": 1836.66
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605205640_78fda6e4",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.628685712814331,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.026207685470581055,
+          "Forearm": 0.31004881858825684,
+          "Hand": 0.012090337462723255,
+          "Hips and pelvis": 0.001121807494200766,
+          "Leg": 0.628685712814331,
+          "Shoulders": 0.000173678039573133,
+          "Upper arm": 0.001209415029734373,
+          "Wrist": 0.02046254649758339
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9369287490844727
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Forearm",
+            "confidence": 0.5758441090583801
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260605205640_78fda6e4_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605205640_78fda6e4_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605205640_78fda6e4_ar"
+  },
+  "finished_at": "2026-06-05T23:56:51"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-05T23:58:35",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "112393.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 17235,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 29984,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 31.5612,
+    "total_wall": 31.6025,
+    "total_process_cpu": 11.9375
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 114,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 39.28,
+      "max_cpu_percent": 813.49,
+      "start_rss_mb": 1508.68,
+      "end_rss_mb": 1817.53,
+      "max_sampled_rss_mb": 1821.48,
+      "peak_rss_mb": 1821.54
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605205835_9602a064",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.628685712814331,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.026207678020000458,
+          "Forearm": 0.31004881858825684,
+          "Hand": 0.012090337462723255,
+          "Hips and pelvis": 0.0011218073777854443,
+          "Leg": 0.628685712814331,
+          "Shoulders": 0.0001736779959173873,
+          "Upper arm": 0.001209415029734373,
+          "Wrist": 0.020462552085518837
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9369287490844727
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Forearm",
+            "confidence": 0.5758441090583801
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260605205835_9602a064_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605205835_9602a064_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605205835_9602a064_ar"
+  },
+  "finished_at": "2026-06-05T23:59:06"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-06T00:02:48",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "9ad1527d0b5993e1e553f0f33d73821faa56595aaf4ca215bc36f6538ac4a5dc_big_gallery.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 72205,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 29984,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 6.357,
+    "total_wall": 6.3576,
+    "total_process_cpu": 8.7969
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 26,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 130.82,
+      "max_cpu_percent": 764.59,
+      "start_rss_mb": 1817.75,
+      "end_rss_mb": 1797.98,
+      "max_sampled_rss_mb": 1817.75,
+      "peak_rss_mb": 1831.71
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605210248_2c520796",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.5989888310432434,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.07325747609138489,
+          "Forearm": 0.5989888310432434,
+          "Hand": 0.0019151633605360985,
+          "Hips and pelvis": 0.0010115152690559626,
+          "Leg": 0.004884772002696991,
+          "Shoulders": 0.00025186294806189835,
+          "Upper arm": 0.3161478042602539,
+          "Wrist": 0.003542632330209017
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9954178333282471
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6312636137008667
+          }
+        ]
+      }
+    ],
+    "detections_count": 3,
+    "rois_count": 3,
+    "fractures_count": 3,
+    "pdf_url": "/download/pdfs/fracture_20260605210248_2c520796_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605210248_2c520796_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605210248_2c520796_ar"
+  },
+  "finished_at": "2026-06-06T00:02:54"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-06T00:25:53",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "112393.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 17235,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 9796,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 9.5165,
+    "total_wall": 9.5346,
+    "total_process_cpu": 9.9688
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 38,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 99.78,
+      "max_cpu_percent": 768.85,
+      "start_rss_mb": 1510.6,
+      "end_rss_mb": 1819.24,
+      "max_sampled_rss_mb": 1821.19,
+      "peak_rss_mb": 1823.42
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605212553_ec4f3a00",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.628685712814331,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.026207678020000458,
+          "Forearm": 0.31004881858825684,
+          "Hand": 0.012090337462723255,
+          "Hips and pelvis": 0.0011218073777854443,
+          "Leg": 0.628685712814331,
+          "Shoulders": 0.0001736779959173873,
+          "Upper arm": 0.001209415029734373,
+          "Wrist": 0.020462552085518837
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9369287490844727
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Forearm",
+            "confidence": 0.5758441090583801
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260605212553_ec4f3a00_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605212553_ec4f3a00_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605212553_ec4f3a00_ar"
+  },
+  "finished_at": "2026-06-06T00:26:03"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-06T00:36:53",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "112393.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 17235,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 1200,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 8.7369,
+    "total_wall": 8.7553,
+    "total_process_cpu": 10.0312
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 35,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 110.31,
+      "max_cpu_percent": 799.93,
+      "start_rss_mb": 1510.08,
+      "end_rss_mb": 1818.99,
+      "max_sampled_rss_mb": 1822.83,
+      "peak_rss_mb": 1823.23
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605213653_2b2f7036",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.628685712814331,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.026207678020000458,
+          "Forearm": 0.31004881858825684,
+          "Hand": 0.012090337462723255,
+          "Hips and pelvis": 0.0011218073777854443,
+          "Leg": 0.628685712814331,
+          "Shoulders": 0.0001736779959173873,
+          "Upper arm": 0.001209415029734373,
+          "Wrist": 0.020462552085518837
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9369287490844727
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Forearm",
+            "confidence": 0.5758441090583801
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260605213653_2b2f7036_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605213653_2b2f7036_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605213653_2b2f7036_ar"
+  },
+  "finished_at": "2026-06-06T00:37:02"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-06T00:39:30",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "112393.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 17235,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 1200,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 5.5721,
+    "total_wall": 5.5743,
+    "total_process_cpu": 8.125
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 23,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 134.22,
+      "max_cpu_percent": 762.52,
+      "start_rss_mb": 1819.12,
+      "end_rss_mb": 1815.58,
+      "max_sampled_rss_mb": 1826.97,
+      "peak_rss_mb": 1831.9
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605213930_7697e360",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.628685712814331,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.026207685470581055,
+          "Forearm": 0.31004881858825684,
+          "Hand": 0.012090337462723255,
+          "Hips and pelvis": 0.001121807494200766,
+          "Leg": 0.628685712814331,
+          "Shoulders": 0.000173678039573133,
+          "Upper arm": 0.001209415029734373,
+          "Wrist": 0.02046254649758339
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9369287490844727
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Forearm",
+            "confidence": 0.5758441090583801
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260605213930_7697e360_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605213930_7697e360_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605213930_7697e360_ar"
+  },
+  "finished_at": "2026-06-06T00:39:35"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-06T00:43:24",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "9ad1527d0b5993e1e553f0f33d73821faa56595aaf4ca215bc36f6538ac4a5dc_big_gallery.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 72205,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 1200,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 6.3444,
+    "total_wall": 6.3451,
+    "total_process_cpu": 9.0156
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 26,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 133.11,
+      "max_cpu_percent": 712.36,
+      "start_rss_mb": 1814.91,
+      "end_rss_mb": 1854.85,
+      "max_sampled_rss_mb": 1854.85,
+      "peak_rss_mb": 1856.63
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605214324_92c2436e",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.5989888310432434,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.07325747609138489,
+          "Forearm": 0.5989888310432434,
+          "Hand": 0.0019151633605360985,
+          "Hips and pelvis": 0.0010115152690559626,
+          "Leg": 0.004884772002696991,
+          "Shoulders": 0.00025186294806189835,
+          "Upper arm": 0.3161478042602539,
+          "Wrist": 0.003542632330209017
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9954178333282471
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6312636137008667
+          }
+        ]
+      }
+    ],
+    "detections_count": 3,
+    "rois_count": 3,
+    "fractures_count": 3,
+    "pdf_url": "/download/pdfs/fracture_20260605214324_92c2436e_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605214324_92c2436e_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605214324_92c2436e_ar"
+  },
+  "finished_at": "2026-06-06T00:43:30"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-06T00:44:41",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "112393.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 17235,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 7960,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 7.3107,
+    "total_wall": 7.3316,
+    "total_process_cpu": 10.3906
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 30,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 130.72,
+      "max_cpu_percent": 802.35,
+      "start_rss_mb": 1510.54,
+      "end_rss_mb": 1815.98,
+      "max_sampled_rss_mb": 1818.53,
+      "peak_rss_mb": 1820.72
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605214441_ac72eada",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.628685712814331,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.026207678020000458,
+          "Forearm": 0.31004881858825684,
+          "Hand": 0.012090337462723255,
+          "Hips and pelvis": 0.0011218073777854443,
+          "Leg": 0.628685712814331,
+          "Shoulders": 0.0001736779959173873,
+          "Upper arm": 0.001209415029734373,
+          "Wrist": 0.020462552085518837
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9369287490844727
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Forearm",
+            "confidence": 0.5758441090583801
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260605214441_ac72eada_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605214441_ac72eada_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605214441_ac72eada_ar"
+  },
+  "finished_at": "2026-06-06T00:44:48"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-06T00:46:55",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "9ad1527d0b5993e1e553f0f33d73821faa56595aaf4ca215bc36f6538ac4a5dc_big_gallery.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 72205,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 7960,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 6.853,
+    "total_wall": 6.8539,
+    "total_process_cpu": 9.6719
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 28,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 131.3,
+      "max_cpu_percent": 779.82,
+      "start_rss_mb": 1816.99,
+      "end_rss_mb": 1796.07,
+      "max_sampled_rss_mb": 1816.99,
+      "peak_rss_mb": 1828.42
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605214655_f223cd87",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.5989888310432434,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.07325747609138489,
+          "Forearm": 0.5989888310432434,
+          "Hand": 0.0019151633605360985,
+          "Hips and pelvis": 0.0010115152690559626,
+          "Leg": 0.004884772002696991,
+          "Shoulders": 0.00025186294806189835,
+          "Upper arm": 0.3161478042602539,
+          "Wrist": 0.003542632330209017
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9954178333282471
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6312636137008667
+          }
+        ]
+      }
+    ],
+    "detections_count": 3,
+    "rois_count": 3,
+    "fractures_count": 3,
+    "pdf_url": "/download/pdfs/fracture_20260605214655_f223cd87_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605214655_f223cd87_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605214655_f223cd87_ar"
+  },
+  "finished_at": "2026-06-06T00:47:02"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-06T01:02:01",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "9ad1527d0b5993e1e553f0f33d73821faa56595aaf4ca215bc36f6538ac4a5dc_big_gallery.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 72205,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 7960,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 10.1334,
+    "total_wall": 10.1342,
+    "total_process_cpu": 8.375
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 40,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 79.66,
+      "max_cpu_percent": 763.8,
+      "start_rss_mb": 1796.35,
+      "end_rss_mb": 1818.61,
+      "max_sampled_rss_mb": 1818.61,
+      "peak_rss_mb": 1828.42
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605220201_7fa40f49",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.5989888310432434,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.07325747609138489,
+          "Forearm": 0.5989888310432434,
+          "Hand": 0.0019151633605360985,
+          "Hips and pelvis": 0.0010115152690559626,
+          "Leg": 0.004884772002696991,
+          "Shoulders": 0.00025186294806189835,
+          "Upper arm": 0.3161478042602539,
+          "Wrist": 0.003542632330209017
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9954178333282471
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6312636137008667
+          }
+        ]
+      }
+    ],
+    "detections_count": 3,
+    "rois_count": 3,
+    "fractures_count": 3,
+    "pdf_url": "/download/pdfs/fracture_20260605220201_7fa40f49_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605220201_7fa40f49_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605220201_7fa40f49_ar"
+  },
+  "finished_at": "2026-06-06T01:02:12"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-06T02:25:46",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "9ad1527d0b5993e1e553f0f33d73821faa56595aaf4ca215bc36f6538ac4a5dc_big_gallery.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 72205,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 36684,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 14.3397,
+    "total_wall": 14.3657,
+    "total_process_cpu": 14.1562
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 56,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 97.13,
+      "max_cpu_percent": 786.63,
+      "start_rss_mb": 1509.28,
+      "end_rss_mb": 1827.71,
+      "max_sampled_rss_mb": 1827.71,
+      "peak_rss_mb": 1831.06
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605232546_6550e374",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.5989888310432434,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.07325746864080429,
+          "Forearm": 0.5989888310432434,
+          "Hand": 0.0019151633605360985,
+          "Hips and pelvis": 0.0010115152690559626,
+          "Leg": 0.004884772002696991,
+          "Shoulders": 0.00025186294806189835,
+          "Upper arm": 0.3161478042602539,
+          "Wrist": 0.003542632330209017
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9954178333282471
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6312636137008667
+          }
+        ]
+      }
+    ],
+    "detections_count": 3,
+    "rois_count": 3,
+    "fractures_count": 3,
+    "pdf_url": "/download/pdfs/fracture_20260605232546_6550e374_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605232546_6550e374_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605232546_6550e374_ar"
+  },
+  "finished_at": "2026-06-06T02:26:00"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-06T02:29:17",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "9ad1527d0b5993e1e553f0f33d73821faa56595aaf4ca215bc36f6538ac4a5dc_big_gallery.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 72205,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 36684,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 6.6214,
+    "total_wall": 6.622,
+    "total_process_cpu": 9.7031
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 27,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 136.68,
+      "max_cpu_percent": 793.77,
+      "start_rss_mb": 1828.14,
+      "end_rss_mb": 1827.52,
+      "max_sampled_rss_mb": 1840.12,
+      "peak_rss_mb": 1842.9
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605232917_ae44525a",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.5989888310432434,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.07325747609138489,
+          "Forearm": 0.5989888310432434,
+          "Hand": 0.0019151633605360985,
+          "Hips and pelvis": 0.0010115152690559626,
+          "Leg": 0.004884772002696991,
+          "Shoulders": 0.00025186294806189835,
+          "Upper arm": 0.3161478042602539,
+          "Wrist": 0.003542632330209017
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9954178333282471
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6312636137008667
+          }
+        ]
+      }
+    ],
+    "detections_count": 3,
+    "rois_count": 3,
+    "fractures_count": 3,
+    "pdf_url": "/download/pdfs/fracture_20260605232917_ae44525a_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605232917_ae44525a_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605232917_ae44525a_ar"
+  },
+  "finished_at": "2026-06-06T02:29:23"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-06T02:43:25",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "9ad1527d0b5993e1e553f0f33d73821faa56595aaf4ca215bc36f6538ac4a5dc_big_gallery.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 72205,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 41784,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 9.8216,
+    "total_wall": 9.8476,
+    "total_process_cpu": 11.5156
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 39,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 112.37,
+      "max_cpu_percent": 770.74,
+      "start_rss_mb": 1510.32,
+      "end_rss_mb": 1831.92,
+      "max_sampled_rss_mb": 1831.92,
+      "peak_rss_mb": 1835.53
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605234325_1e46b8d3",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.5989888310432434,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.07325746864080429,
+          "Forearm": 0.5989888310432434,
+          "Hand": 0.0019151633605360985,
+          "Hips and pelvis": 0.0010115152690559626,
+          "Leg": 0.004884772002696991,
+          "Shoulders": 0.00025186294806189835,
+          "Upper arm": 0.3161478042602539,
+          "Wrist": 0.003542632330209017
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9954178333282471
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6312636137008667
+          }
+        ]
+      }
+    ],
+    "detections_count": 3,
+    "rois_count": 3,
+    "fractures_count": 3,
+    "pdf_url": "/download/pdfs/fracture_20260605234325_1e46b8d3_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605234325_1e46b8d3_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605234325_1e46b8d3_ar"
+  },
+  "finished_at": "2026-06-06T02:43:35"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-06T02:55:02",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "9ad1527d0b5993e1e553f0f33d73821faa56595aaf4ca215bc36f6538ac4a5dc_big_gallery.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 72205,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 5644,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 11.259,
+    "total_wall": 11.2826,
+    "total_process_cpu": 11.4844
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 45,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 97.23,
+      "max_cpu_percent": 748.86,
+      "start_rss_mb": 1511.33,
+      "end_rss_mb": 1830.86,
+      "max_sampled_rss_mb": 1833.37,
+      "peak_rss_mb": 1836.3
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260605235502_7a84c395",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.5989888310432434,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.07325746864080429,
+          "Forearm": 0.5989888310432434,
+          "Hand": 0.0019151633605360985,
+          "Hips and pelvis": 0.0010115152690559626,
+          "Leg": 0.004884772002696991,
+          "Shoulders": 0.00025186294806189835,
+          "Upper arm": 0.3161478042602539,
+          "Wrist": 0.003542632330209017
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9954178333282471
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6312636137008667
+          }
+        ]
+      }
+    ],
+    "detections_count": 3,
+    "rois_count": 3,
+    "fractures_count": 3,
+    "pdf_url": "/download/pdfs/fracture_20260605235502_7a84c395_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260605235502_7a84c395_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260605235502_7a84c395_ar"
+  },
+  "finished_at": "2026-06-06T02:55:13"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-06T03:27:38",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "IMG-20260605-WA0058.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 17235,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 34276,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 8.7567,
+    "total_wall": 8.7741,
+    "total_process_cpu": 10.5469
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 35,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 117.33,
+      "max_cpu_percent": 811.55,
+      "start_rss_mb": 1510.65,
+      "end_rss_mb": 1819.7,
+      "max_sampled_rss_mb": 1820.58,
+      "peak_rss_mb": 1823.81
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260606002738_f3b51bb4",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.628685712814331,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.026207678020000458,
+          "Forearm": 0.31004881858825684,
+          "Hand": 0.012090337462723255,
+          "Hips and pelvis": 0.0011218073777854443,
+          "Leg": 0.628685712814331,
+          "Shoulders": 0.0001736779959173873,
+          "Upper arm": 0.001209415029734373,
+          "Wrist": 0.020462552085518837
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9369287490844727
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Forearm",
+            "confidence": 0.5758441090583801
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260606002738_f3b51bb4_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260606002738_f3b51bb4_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260606002738_f3b51bb4_ar"
+  },
+  "finished_at": "2026-06-06T03:27:47"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-06T03:31:04",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "9ad1527d0b5993e1e553f0f33d73821faa56595aaf4ca215bc36f6538ac4a5dc_big_gallery.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 72205,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 34276,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 6.1313,
+    "total_wall": 6.1321,
+    "total_process_cpu": 9.6875
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 25,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 148.41,
+      "max_cpu_percent": 738.05,
+      "start_rss_mb": 1820.34,
+      "end_rss_mb": 1803.16,
+      "max_sampled_rss_mb": 1820.34,
+      "peak_rss_mb": 1831.9
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260606003104_c5e22708",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.5989888310432434,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.07325747609138489,
+          "Forearm": 0.5989888310432434,
+          "Hand": 0.0019151633605360985,
+          "Hips and pelvis": 0.0010115152690559626,
+          "Leg": 0.004884772002696991,
+          "Shoulders": 0.00025186294806189835,
+          "Upper arm": 0.3161478042602539,
+          "Wrist": 0.003542632330209017
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9954178333282471
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6312636137008667
+          }
+        ]
+      }
+    ],
+    "detections_count": 2,
+    "rois_count": 2,
+    "fractures_count": 2,
+    "pdf_url": "/download/pdfs/fracture_20260606003104_c5e22708_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260606003104_c5e22708_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260606003104_c5e22708_ar"
+  },
+  "finished_at": "2026-06-06T03:31:10"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-06T04:32:56",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://frederick-ton-balloon-equation.trycloudflare.com/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "9ad1527d0b5993e1e553f0f33d73821faa56595aaf4ca215bc36f6538ac4a5dc_big_gallery.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 72205,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 43736,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 11.4926,
+    "total_wall": 11.5182,
+    "total_process_cpu": 13.6562
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 46,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 113.98,
+      "max_cpu_percent": 752.51,
+      "start_rss_mb": 1515.41,
+      "end_rss_mb": 1837.16,
+      "max_sampled_rss_mb": 1838.45,
+      "peak_rss_mb": 1840.89
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260606013256_347b018c",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.5989888310432434,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.07325746864080429,
+          "Forearm": 0.5989888310432434,
+          "Hand": 0.0019151633605360985,
+          "Hips and pelvis": 0.0010115152690559626,
+          "Leg": 0.004884772002696991,
+          "Shoulders": 0.00025186294806189835,
+          "Upper arm": 0.3161478042602539,
+          "Wrist": 0.003542632330209017
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9954178333282471
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6312636137008667
+          }
+        ]
+      }
+    ],
+    "detections_count": 2,
+    "rois_count": 2,
+    "fractures_count": 2,
+    "pdf_url": "/download/pdfs/fracture_20260606013256_347b018c_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260606013256_347b018c_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260606013256_347b018c_ar"
+  },
+  "finished_at": "2026-06-06T04:33:08"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-08T00:58:46",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "9ad1527d0b5993e1e553f0f33d73821faa56595aaf4ca215bc36f6538ac4a5dc_big_gallery.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 72205,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 44952,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 16.1405,
+    "total_wall": 16.1866,
+    "total_process_cpu": 14.375
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 64,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 84.47,
+      "max_cpu_percent": 825.79,
+      "start_rss_mb": 1509.85,
+      "end_rss_mb": 1821.33,
+      "max_sampled_rss_mb": 1826.21,
+      "peak_rss_mb": 1829.9
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260607215846_ccedfadc",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.5989888310432434,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.07325746864080429,
+          "Forearm": 0.5989888310432434,
+          "Hand": 0.0019151633605360985,
+          "Hips and pelvis": 0.0010115152690559626,
+          "Leg": 0.004884772002696991,
+          "Shoulders": 0.00025186294806189835,
+          "Upper arm": 0.3161478042602539,
+          "Wrist": 0.003542632330209017
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9954178333282471
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6312636137008667
+          }
+        ]
+      }
+    ],
+    "detections_count": 2,
+    "rois_count": 2,
+    "fractures_count": 2,
+    "pdf_url": "/download/pdfs/fracture_20260607215846_ccedfadc_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260607215846_ccedfadc_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260607215846_ccedfadc_ar"
+  },
+  "finished_at": "2026-06-08T00:59:02"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-08T01:02:43",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "STK-20260607-WA0143.webp",
+    "content_type": "image/webp"
+  },
+  "inputs": {
+    "image_size_bytes": 190044,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 44952,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 6.0681,
+    "total_wall": 6.0687,
+    "total_process_cpu": 11.1562
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 25,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 175.09,
+      "max_cpu_percent": 800.85,
+      "start_rss_mb": 1822.56,
+      "end_rss_mb": 1868.65,
+      "max_sampled_rss_mb": 1877.49,
+      "peak_rss_mb": 1881.45
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260607220243_04c65c66",
+    "groups": [
+      {
+        "group": "hand",
+        "part": "Hand",
+        "confidence": 0.7170202732086182,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.10931171476840973,
+          "Forearm": 0.017490781843662262,
+          "Hand": 0.7170202732086182,
+          "Hips and pelvis": 0.01057991199195385,
+          "Leg": 0.09227161854505539,
+          "Shoulders": 0.00048377522034570575,
+          "Upper arm": 0.0015102210454642773,
+          "Wrist": 0.051331777125597
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Hand",
+            "confidence": 0.6994898319244385
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Hand",
+            "confidence": 0.7345506548881531
+          }
+        ]
+      }
+    ],
+    "detections_count": 0,
+    "rois_count": 0,
+    "fractures_count": 0,
+    "pdf_url": "/download/pdfs/fracture_20260607220243_04c65c66_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260607220243_04c65c66_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260607220243_04c65c66_ar"
+  },
+  "finished_at": "2026-06-08T01:02:49"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-08T01:10:20",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "6d91c93a6a565320a67ff78ad8b240_big_gallery.jpeg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 18463,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 44952,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 9.4296,
+    "total_wall": 9.4305,
+    "total_process_cpu": 9.8906
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 38,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 102.04,
+      "max_cpu_percent": 834.82,
+      "start_rss_mb": 1868.7,
+      "end_rss_mb": 1858.31,
+      "max_sampled_rss_mb": 1880.32,
+      "peak_rss_mb": 1883.63
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260607221020_049448e1",
+    "groups": [
+      {
+        "group": "arm_shoulder",
+        "part": "Upper arm",
+        "confidence": 0.5935032367706299,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.033881545066833496,
+          "Forearm": 0.002812598366290331,
+          "Hand": 7.052922592265531e-05,
+          "Hips and pelvis": 0.20983491837978363,
+          "Leg": 0.15351353585720062,
+          "Shoulders": 0.005932522937655449,
+          "Upper arm": 0.5935032367706299,
+          "Wrist": 0.00045117465197108686
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.5451052188873291
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6419011950492859
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260607221020_049448e1_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260607221020_049448e1_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260607221020_049448e1_ar"
+  },
+  "finished_at": "2026-06-08T01:10:30"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-08T01:13:25",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "6d91c93a6a565320a67ff78ad8b240_big_gallery.jpeg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 18463,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 44952,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 7.1608,
+    "total_wall": 7.1613,
+    "total_process_cpu": 9.8594
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 29,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 131.25,
+      "max_cpu_percent": 804.73,
+      "start_rss_mb": 1858.34,
+      "end_rss_mb": 1897.23,
+      "max_sampled_rss_mb": 1909.95,
+      "peak_rss_mb": 1912.3
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260607221325_fc944671",
+    "groups": [
+      {
+        "group": "arm_shoulder",
+        "part": "Upper arm",
+        "confidence": 0.5935032367706299,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.033881545066833496,
+          "Forearm": 0.002812598366290331,
+          "Hand": 7.052922592265531e-05,
+          "Hips and pelvis": 0.20983491837978363,
+          "Leg": 0.15351353585720062,
+          "Shoulders": 0.005932522937655449,
+          "Upper arm": 0.5935032367706299,
+          "Wrist": 0.00045117465197108686
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.5451052188873291
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6419011950492859
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260607221325_fc944671_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260607221325_fc944671_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260607221325_fc944671_ar"
+  },
+  "finished_at": "2026-06-08T01:13:32"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-08T01:18:23",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "6d91c93a6a565320a67ff78ad8b240_big_gallery.jpeg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 18463,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 44952,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 6.5029,
+    "total_wall": 6.5035,
+    "total_process_cpu": 9.5625
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 27,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 138.16,
+      "max_cpu_percent": 795.91,
+      "start_rss_mb": 1897.29,
+      "end_rss_mb": 1933.03,
+      "max_sampled_rss_mb": 1933.03,
+      "peak_rss_mb": 1938.14
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260607221823_22b09599",
+    "groups": [
+      {
+        "group": "arm_shoulder",
+        "part": "Upper arm",
+        "confidence": 0.5935032367706299,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.033881545066833496,
+          "Forearm": 0.002812598366290331,
+          "Hand": 7.052922592265531e-05,
+          "Hips and pelvis": 0.20983491837978363,
+          "Leg": 0.15351353585720062,
+          "Shoulders": 0.005932522937655449,
+          "Upper arm": 0.5935032367706299,
+          "Wrist": 0.00045117465197108686
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.5451052188873291
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6419011950492859
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260607221823_22b09599_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260607221823_22b09599_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260607221823_22b09599_ar"
+  },
+  "finished_at": "2026-06-08T01:18:29"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-08T01:19:48",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "6d91c93a6a565320a67ff78ad8b240_big_gallery.jpeg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 18463,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 44952,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 6.5907,
+    "total_wall": 6.5916,
+    "total_process_cpu": 9.3125
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 27,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 134.44,
+      "max_cpu_percent": 782.62,
+      "start_rss_mb": 1933.62,
+      "end_rss_mb": 1900.51,
+      "max_sampled_rss_mb": 1935.46,
+      "peak_rss_mb": 1939.44
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260607221948_f03ef64d",
+    "groups": [
+      {
+        "group": "arm_shoulder",
+        "part": "Upper arm",
+        "confidence": 0.5935032367706299,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.033881545066833496,
+          "Forearm": 0.002812598366290331,
+          "Hand": 7.052922592265531e-05,
+          "Hips and pelvis": 0.20983491837978363,
+          "Leg": 0.15351353585720062,
+          "Shoulders": 0.005932522937655449,
+          "Upper arm": 0.5935032367706299,
+          "Wrist": 0.00045117465197108686
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.5451052188873291
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6419011950492859
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260607221948_f03ef64d_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260607221948_f03ef64d_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260607221948_f03ef64d_ar"
+  },
+  "finished_at": "2026-06-08T01:19:54"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-08T01:34:01",
+  "status": "failed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "20260608_013230.heic",
+    "content_type": "image/heic"
+  },
+  "inputs": {
+    "image_size_bytes": 63293,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 44952,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "total_wall": 0.0114,
+    "total_process_cpu": 0.0
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 2,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 0.0,
+      "max_cpu_percent": 0.0,
+      "start_rss_mb": 1494.23,
+      "end_rss_mb": 1494.28,
+      "max_sampled_rss_mb": 1494.28,
+      "peak_rss_mb": 1939.44
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {},
+  "error": {
+    "type": "ValueError",
+    "message": "Invalid image input",
+    "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage.py\", line 391, in profile_call\n    result = call()\n  File \"C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage.py\", line 445, in run_pipeline\n    return pipeline.run(image_bytes, **kwargs)\n           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\pipeline\\main.py\", line 43, in run\n    prepared = self.preprocessor.process(image_bytes)\n  File \"C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\pipeline\\modules\\preprocessor.py\", line 27, in process\n    raise ValueError(\"Invalid image input\")\nValueError: Invalid image input\n"
+  },
+  "finished_at": "2026-06-08T01:34:01"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-08T01:34:42",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "Screenshot_20260608_013418_Gallery.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 125522,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 44952,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 9.1643,
+    "total_wall": 9.1648,
+    "total_process_cpu": 11.0312
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 37,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 117.61,
+      "max_cpu_percent": 784.19,
+      "start_rss_mb": 1494.28,
+      "end_rss_mb": 1548.02,
+      "max_sampled_rss_mb": 1549.13,
+      "peak_rss_mb": 1939.44
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260607223442_d00158b2",
+    "groups": [
+      {
+        "group": "arm_shoulder",
+        "part": "Shoulders",
+        "confidence": 0.4270392656326294,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.225333109498024,
+          "Forearm": 0.032628025859594345,
+          "Hand": 0.03817053511738777,
+          "Hips and pelvis": 0.0277349054813385,
+          "Leg": 0.022747689858078957,
+          "Shoulders": 0.4270392656326294,
+          "Upper arm": 0.21307019889354706,
+          "Wrist": 0.013276231475174427
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Shoulders",
+            "confidence": 0.8147540092468262
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Elbow",
+            "confidence": 0.3927777111530304
+          }
+        ]
+      }
+    ],
+    "detections_count": 0,
+    "rois_count": 0,
+    "fractures_count": 0,
+    "pdf_url": "/download/pdfs/fracture_20260607223442_d00158b2_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260607223442_d00158b2_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260607223442_d00158b2_ar"
+  },
+  "finished_at": "2026-06-08T01:34:52"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-08T02:03:36",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.37.164.51:0",
+    "filename": "a00503f03.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 20986,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 44952,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 9.5885,
+    "total_wall": 9.589,
+    "total_process_cpu": 8.7969
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 38,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 90.62,
+      "max_cpu_percent": 826.61,
+      "start_rss_mb": 1444.81,
+      "end_rss_mb": 1447.74,
+      "max_sampled_rss_mb": 1491.46,
+      "peak_rss_mb": 1939.44
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260607230336_a1d6eec3",
+    "groups": [
+      {
+        "group": "elbow",
+        "part": "Elbow",
+        "confidence": 0.9989813566207886,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.9989813566207886,
+          "Forearm": 0.0003299995150882751,
+          "Hand": 1.9432565750321373e-05,
+          "Hips and pelvis": 2.3826023607398383e-05,
+          "Leg": 0.00015988606901373714,
+          "Shoulders": 0.00012180116755189374,
+          "Upper arm": 0.0003216711920686066,
+          "Wrist": 4.21414224547334e-05
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Elbow",
+            "confidence": 0.9996089339256287
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Elbow",
+            "confidence": 0.9983537197113037
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260607230336_a1d6eec3_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260607230336_a1d6eec3_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260607230336_a1d6eec3_ar"
+  },
+  "finished_at": "2026-06-08T02:03:46"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-08T02:07:34",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.37.164.51:0",
+    "filename": "a00503f03.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 20986,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 44952,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 6.7741,
+    "total_wall": 6.7745,
+    "total_process_cpu": 8.3906
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 28,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 115.28,
+      "max_cpu_percent": 801.38,
+      "start_rss_mb": 1447.78,
+      "end_rss_mb": 1438.85,
+      "max_sampled_rss_mb": 1474.78,
+      "peak_rss_mb": 1939.44
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260607230734_519ba9d1",
+    "groups": [
+      {
+        "group": "elbow",
+        "part": "Elbow",
+        "confidence": 0.9989813566207886,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.9989813566207886,
+          "Forearm": 0.0003299995150882751,
+          "Hand": 1.9432565750321373e-05,
+          "Hips and pelvis": 2.3826023607398383e-05,
+          "Leg": 0.00015988606901373714,
+          "Shoulders": 0.00012180116755189374,
+          "Upper arm": 0.0003216711920686066,
+          "Wrist": 4.21414224547334e-05
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Elbow",
+            "confidence": 0.9996089339256287
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Elbow",
+            "confidence": 0.9983537197113037
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260607230734_519ba9d1_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260607230734_519ba9d1_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260607230734_519ba9d1_ar"
+  },
+  "finished_at": "2026-06-08T02:07:41"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-08T02:11:54",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.37.164.51:0",
+    "filename": "2.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 1445183,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 44952,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 7.4189,
+    "total_wall": 7.4198,
+    "total_process_cpu": 9.3125
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 30,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 118.71,
+      "max_cpu_percent": 794.84,
+      "start_rss_mb": 1440.34,
+      "end_rss_mb": 1442.64,
+      "max_sampled_rss_mb": 1460.66,
+      "peak_rss_mb": 1939.44
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260607231154_c50510df",
+    "groups": [
+      {
+        "group": "elbow",
+        "part": "Elbow",
+        "confidence": 0.9913858771324158,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.9913858771324158,
+          "Forearm": 0.0003964326751884073,
+          "Hand": 1.3071335160930175e-05,
+          "Hips and pelvis": 6.514069536933675e-05,
+          "Leg": 0.000598799146246165,
+          "Shoulders": 9.412982035428286e-05,
+          "Upper arm": 0.007419281173497438,
+          "Wrist": 2.7199903342989273e-05
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Elbow",
+            "confidence": 0.9999822378158569
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Elbow",
+            "confidence": 0.9827895164489746
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260607231154_c50510df_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260607231154_c50510df_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260607231154_c50510df_ar"
+  },
+  "finished_at": "2026-06-08T02:12:01"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-08T04:38:06",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "Screenshot_20260608_013418_Gallery.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 125522,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 44952,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 8.9653,
+    "total_wall": 8.9682,
+    "total_process_cpu": 12.5625
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 36,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 137.03,
+      "max_cpu_percent": 797.82,
+      "start_rss_mb": 71.11,
+      "end_rss_mb": 687.25,
+      "max_sampled_rss_mb": 687.25,
+      "peak_rss_mb": 1939.44
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260608013806_0ed46d37",
+    "groups": [
+      {
+        "group": "arm_shoulder",
+        "part": "Shoulders",
+        "confidence": 0.4270392656326294,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.225333109498024,
+          "Forearm": 0.032628025859594345,
+          "Hand": 0.03817053511738777,
+          "Hips and pelvis": 0.0277349054813385,
+          "Leg": 0.022747689858078957,
+          "Shoulders": 0.4270392656326294,
+          "Upper arm": 0.21307019889354706,
+          "Wrist": 0.013276231475174427
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Shoulders",
+            "confidence": 0.8147540092468262
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Elbow",
+            "confidence": 0.3927777111530304
+          }
+        ]
+      }
+    ],
+    "detections_count": 0,
+    "rois_count": 0,
+    "fractures_count": 0,
+    "pdf_url": "/download/pdfs/fracture_20260608013806_0ed46d37_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260608013806_0ed46d37_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260608013806_0ed46d37_ar"
+  },
+  "finished_at": "2026-06-08T04:38:15"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-08T11:36:57",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "9ad1527d0b5993e1e553f0f33d73821faa56595aaf4ca215bc36f6538ac4a5dc_big_gallery.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 72205,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 40508,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 12.499,
+    "total_wall": 12.5317,
+    "total_process_cpu": 13.0
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 49,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 100.13,
+      "max_cpu_percent": 799.87,
+      "start_rss_mb": 1510.55,
+      "end_rss_mb": 1826.83,
+      "max_sampled_rss_mb": 1831.15,
+      "peak_rss_mb": 1835.84
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260608083657_ff3a1380",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.5989888310432434,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.07325746864080429,
+          "Forearm": 0.5989888310432434,
+          "Hand": 0.0019151633605360985,
+          "Hips and pelvis": 0.0010115152690559626,
+          "Leg": 0.004884772002696991,
+          "Shoulders": 0.00025186294806189835,
+          "Upper arm": 0.3161478042602539,
+          "Wrist": 0.003542632330209017
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9954178333282471
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Upper arm",
+            "confidence": 0.6312636137008667
+          }
+        ]
+      }
+    ],
+    "detections_count": 2,
+    "rois_count": 2,
+    "fractures_count": 2,
+    "pdf_url": "/download/pdfs/fracture_20260608083657_ff3a1380_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260608083657_ff3a1380_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260608083657_ff3a1380_ar"
+  },
+  "finished_at": "2026-06-08T11:37:10"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-08T20:02:03",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "fracture.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 66415,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 53712,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 17.736,
+    "total_wall": 17.777,
+    "total_process_cpu": 13.4062
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 70,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 73.38,
+      "max_cpu_percent": 836.8,
+      "start_rss_mb": 1509.86,
+      "end_rss_mb": 1812.79,
+      "max_sampled_rss_mb": 1819.32,
+      "peak_rss_mb": 1825.59
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260608170204_38e78290",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.9997224807739258,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 1.5433404769282788e-05,
+          "Forearm": 8.569963392801583e-05,
+          "Hand": 2.7879821573151276e-05,
+          "Hips and pelvis": 5.691497790394351e-06,
+          "Leg": 0.9997224807739258,
+          "Shoulders": 3.699656735989265e-05,
+          "Upper arm": 1.06872776086675e-05,
+          "Wrist": 9.517124999547377e-05
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.999945878982544
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Leg",
+            "confidence": 0.9994990825653076
+          }
+        ]
+      }
+    ],
+    "detections_count": 2,
+    "rois_count": 2,
+    "fractures_count": 2,
+    "pdf_url": "/download/pdfs/fracture_20260608170204_38e78290_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260608170204_38e78290_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260608170204_38e78290_ar"
+  },
+  "finished_at": "2026-06-08T20:02:21"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-08T21:50:32",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "fracture.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 66415,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 53712,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 12.9858,
+    "total_wall": 12.9919,
+    "total_process_cpu": 14.1719
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 51,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 106.06,
+      "max_cpu_percent": 801.77,
+      "start_rss_mb": 244.24,
+      "end_rss_mb": 839.93,
+      "max_sampled_rss_mb": 839.99,
+      "peak_rss_mb": 1825.59
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260608185032_509dab61",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.9997224807739258,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 1.5433404769282788e-05,
+          "Forearm": 8.569956116843969e-05,
+          "Hand": 2.7879821573151276e-05,
+          "Hips and pelvis": 5.691494152415544e-06,
+          "Leg": 0.9997224807739258,
+          "Shoulders": 3.699656735989265e-05,
+          "Upper arm": 1.06872776086675e-05,
+          "Wrist": 9.517124999547377e-05
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.999945878982544
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Leg",
+            "confidence": 0.9994990825653076
+          }
+        ]
+      }
+    ],
+    "detections_count": 2,
+    "rois_count": 2,
+    "fractures_count": 2,
+    "pdf_url": "/download/pdfs/fracture_20260608185032_509dab61_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260608185032_509dab61_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260608185032_509dab61_ar"
+  },
+  "finished_at": "2026-06-08T21:50:45"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-08T21:53:38",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.60.59.118:0",
+    "filename": "fracture.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 66415,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 53712,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 7.4655,
+    "total_wall": 7.466,
+    "total_process_cpu": 7.9062
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 30,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 102.3,
+      "max_cpu_percent": 799.58,
+      "start_rss_mb": 844.52,
+      "end_rss_mb": 877.39,
+      "max_sampled_rss_mb": 879.2,
+      "peak_rss_mb": 1825.59
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260608185338_2db6bb18",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.9997224807739258,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 1.5433404769282788e-05,
+          "Forearm": 8.569956116843969e-05,
+          "Hand": 2.7879821573151276e-05,
+          "Hips and pelvis": 5.691494152415544e-06,
+          "Leg": 0.9997224807739258,
+          "Shoulders": 3.699656735989265e-05,
+          "Upper arm": 1.06872776086675e-05,
+          "Wrist": 9.517124999547377e-05
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.999945878982544
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Leg",
+            "confidence": 0.9994990825653076
+          }
+        ]
+      }
+    ],
+    "detections_count": 2,
+    "rois_count": 2,
+    "fractures_count": 2,
+    "pdf_url": "/download/pdfs/fracture_20260608185338_2db6bb18_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260608185338_2db6bb18_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260608185338_2db6bb18_ar"
+  },
+  "finished_at": "2026-06-08T21:53:45"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-09T00:35:03",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.37.245.117:0",
+    "filename": "broken-arm-x-ray-du-cane-medical-imaging-ltd.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 17533,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 59848,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 30.2101,
+    "total_wall": 30.3169,
+    "total_process_cpu": 20.9219
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 116,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 68.04,
+      "max_cpu_percent": 412.61,
+      "start_rss_mb": 135.41,
+      "end_rss_mb": 883.05,
+      "max_sampled_rss_mb": 896.87,
+      "peak_rss_mb": 1334.56
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260608213503_0f2fb621",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.872850775718689,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.0029426198452711105,
+          "Forearm": 0.013159520924091339,
+          "Hand": 0.042778436094522476,
+          "Hips and pelvis": 0.0014401618391275406,
+          "Leg": 0.872850775718689,
+          "Shoulders": 0.06491011381149292,
+          "Upper arm": 0.00038309150841087103,
+          "Wrist": 0.0015354027273133397
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9915738701820374
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Leg",
+            "confidence": 0.7541276216506958
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260608213503_0f2fb621_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260608213503_0f2fb621_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260608213503_0f2fb621_ar"
+  },
+  "finished_at": "2026-06-09T00:35:34"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-09T00:39:10",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.37.245.117:0",
+    "filename": "broken-arm-x-ray-du-cane-medical-imaging-ltd.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 17533,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 45584,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 14.6615,
+    "total_wall": 14.7089,
+    "total_process_cpu": 15.7031
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 58,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 102.92,
+      "max_cpu_percent": 549.86,
+      "start_rss_mb": 1508.77,
+      "end_rss_mb": 1782.42,
+      "max_sampled_rss_mb": 1783.53,
+      "peak_rss_mb": 1785.55
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260608213910_2838407a",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.872850775718689,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.0029426198452711105,
+          "Forearm": 0.013159520924091339,
+          "Hand": 0.042778436094522476,
+          "Hips and pelvis": 0.0014401618391275406,
+          "Leg": 0.872850775718689,
+          "Shoulders": 0.06491011381149292,
+          "Upper arm": 0.00038309150841087103,
+          "Wrist": 0.0015354027273133397
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9915738701820374
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Leg",
+            "confidence": 0.7541276216506958
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260608213910_2838407a_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260608213910_2838407a_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260608213910_2838407a_ar"
+  },
+  "finished_at": "2026-06-09T00:39:25"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-09T00:43:54",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.37.245.117:0",
+    "filename": "broken-arm-x-ray-du-cane-medical-imaging-ltd.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 17533,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 3264,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 9.1494,
+    "total_wall": 9.1686,
+    "total_process_cpu": 11.5781
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 37,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 120.24,
+      "max_cpu_percent": 803.32,
+      "start_rss_mb": 1510.23,
+      "end_rss_mb": 1817.45,
+      "max_sampled_rss_mb": 1819.6,
+      "peak_rss_mb": 1820.91
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260608214354_72d0fda9",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.872850775718689,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.0029426198452711105,
+          "Forearm": 0.013159520924091339,
+          "Hand": 0.042778436094522476,
+          "Hips and pelvis": 0.0014401618391275406,
+          "Leg": 0.872850775718689,
+          "Shoulders": 0.06491011381149292,
+          "Upper arm": 0.00038309150841087103,
+          "Wrist": 0.0015354027273133397
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9915738701820374
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Leg",
+            "confidence": 0.7541276216506958
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260608214354_72d0fda9_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260608214354_72d0fda9_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260608214354_72d0fda9_ar"
+  },
+  "finished_at": "2026-06-09T00:44:03"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-09T00:50:46",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.37.245.117:0",
+    "filename": "broken-arm-x-ray-du-cane-medical-imaging-ltd.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 17533,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 3264,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 9.1009,
+    "total_wall": 9.1015,
+    "total_process_cpu": 8.5469
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 36,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 90.98,
+      "max_cpu_percent": 801.97,
+      "start_rss_mb": 1817.28,
+      "end_rss_mb": 1811.28,
+      "max_sampled_rss_mb": 1817.28,
+      "peak_rss_mb": 1835.69
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260608215046_ed0ad267",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.8728506565093994,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.002942620776593685,
+          "Forearm": 0.013159515336155891,
+          "Hand": 0.042778436094522476,
+          "Hips and pelvis": 0.0014401617227122188,
+          "Leg": 0.8728506565093994,
+          "Shoulders": 0.06491010636091232,
+          "Upper arm": 0.0003830914502032101,
+          "Wrist": 0.001535403192974627
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9915738701820374
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Leg",
+            "confidence": 0.7541275024414062
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260608215046_ed0ad267_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260608215046_ed0ad267_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260608215046_ed0ad267_ar"
+  },
+  "finished_at": "2026-06-09T00:50:55"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-09T00:55:21",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.37.245.117:0",
+    "filename": "broken-arm-x-ray-du-cane-medical-imaging-ltd.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 17533,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 3264,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 7.8781,
+    "total_wall": 7.8786,
+    "total_process_cpu": 7.25
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 32,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 88.35,
+      "max_cpu_percent": 779.32,
+      "start_rss_mb": 1695.48,
+      "end_rss_mb": 1762.36,
+      "max_sampled_rss_mb": 1762.36,
+      "peak_rss_mb": 1835.69
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260608215521_d374eb37",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.8728506565093994,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.002942620776593685,
+          "Forearm": 0.013159515336155891,
+          "Hand": 0.042778436094522476,
+          "Hips and pelvis": 0.0014401617227122188,
+          "Leg": 0.8728506565093994,
+          "Shoulders": 0.06491010636091232,
+          "Upper arm": 0.0003830914502032101,
+          "Wrist": 0.001535403192974627
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9915738701820374
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Leg",
+            "confidence": 0.7541275024414062
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260608215521_d374eb37_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260608215521_d374eb37_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260608215521_d374eb37_ar"
+  },
+  "finished_at": "2026-06-09T00:55:29"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-09T00:56:29",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "https://api.aifdrpp.me/analyze",
+    "client": "197.37.245.117:0",
+    "filename": "broken-arm-x-ray-du-cane-medical-imaging-ltd.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 17533,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 3264,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 7.529,
+    "total_wall": 7.5311,
+    "total_process_cpu": 8.0312
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 30,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 101.07,
+      "max_cpu_percent": 801.51,
+      "start_rss_mb": 1762.71,
+      "end_rss_mb": 1770.18,
+      "max_sampled_rss_mb": 1786.88,
+      "peak_rss_mb": 1835.69
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260608215629_57303236",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.8728506565093994,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.002942620776593685,
+          "Forearm": 0.013159515336155891,
+          "Hand": 0.042778436094522476,
+          "Hips and pelvis": 0.0014401617227122188,
+          "Leg": 0.8728506565093994,
+          "Shoulders": 0.06491010636091232,
+          "Upper arm": 0.0003830914502032101,
+          "Wrist": 0.001535403192974627
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9915738701820374
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Leg",
+            "confidence": 0.7541275024414062
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260608215629_57303236_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260608215629_57303236_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260608215629_57303236_ar"
+  },
+  "finished_at": "2026-06-09T00:56:37"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-10T01:53:13",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "http://0.0.0.0:8000/analyze",
+    "client": "127.0.0.1:54896",
+    "filename": "fracture.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 66415,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle - Copy\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 24980,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 18.3832,
+    "total_wall": 18.4354,
+    "total_process_cpu": 19.3281
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 72,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 101.06,
+      "max_cpu_percent": 779.05,
+      "start_rss_mb": 1676.03,
+      "end_rss_mb": 2010.79,
+      "max_sampled_rss_mb": 2011.9,
+      "peak_rss_mb": 2017.39
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260609225315_e0d104ef",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.9997224807739258,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 1.5433404769282788e-05,
+          "Forearm": 8.569963392801583e-05,
+          "Hand": 2.7879821573151276e-05,
+          "Hips and pelvis": 5.691497790394351e-06,
+          "Leg": 0.9997224807739258,
+          "Shoulders": 3.699656735989265e-05,
+          "Upper arm": 1.06872776086675e-05,
+          "Wrist": 9.517124999547377e-05
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.999945878982544
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Leg",
+            "confidence": 0.9994990825653076
+          }
+        ]
+      }
+    ],
+    "detections_count": 2,
+    "rois_count": 2,
+    "fractures_count": 2,
+    "pdf_url": "/download/pdfs/fracture_20260609225315_e0d104ef_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260609225315_e0d104ef_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260609225315_e0d104ef_ar"
+  },
+  "finished_at": "2026-06-10T01:53:34"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-10T02:01:07",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "http://0.0.0.0:8000/analyze",
+    "client": "127.0.0.1:56880",
+    "filename": "Boxers_fracture-lateral_xray.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 1677987,
+    "log_file": "C:\\Users\\bo3ly\\Desktop\\AI Fracture Detection & Reporting Pipeline Project - Working Bundle - Copy\\AI FDRPP\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.14.2",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 151 Stepping 5, GenuineIntel",
+    "pid": 24980,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 11.0606,
+    "total_wall": 11.0612,
+    "total_process_cpu": 10.5
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 44,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 90.73,
+      "max_cpu_percent": 783.42,
+      "start_rss_mb": 2012.89,
+      "end_rss_mb": 2042.68,
+      "max_sampled_rss_mb": 2047.46,
+      "peak_rss_mb": 2066.58
+    }
+  },
+  "cuda": {
+    "available": false
+  },
+  "result_summary": {
+    "request_id": "fracture_20260609230107_94ea3385",
+    "groups": [
+      {
+        "group": "hand",
+        "part": "Hand",
+        "confidence": 0.9836094975471497,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 9.777917148312554e-05,
+          "Forearm": 0.0014146025059744716,
+          "Hand": 0.9836094975471497,
+          "Hips and pelvis": 0.0011611701920628548,
+          "Leg": 0.0009204853558912873,
+          "Shoulders": 0.0009559026220813394,
+          "Upper arm": 9.804030560189858e-05,
+          "Wrist": 0.011742644011974335
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Hand",
+            "confidence": 0.9990266561508179
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Hand",
+            "confidence": 0.9681923389434814
+          }
+        ]
+      }
+    ],
+    "detections_count": 2,
+    "rois_count": 2,
+    "fractures_count": 2,
+    "pdf_url": "/download/pdfs/fracture_20260609230107_94ea3385_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260609230107_94ea3385_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260609230107_94ea3385_ar"
+  },
+  "finished_at": "2026-06-10T02:01:18"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-14T03:22:11",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "http://127.0.0.1:8000/analyze",
+    "client": "127.0.0.1:52118",
+    "filename": "logo.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 37446,
+    "log_file": "G:\\1.College\\Graduation Project\\Project Code\\Versions\\v9.2\\AI FDRPP - v9\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "pid": 5084,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 28.8573,
+    "total_wall": 28.9795,
+    "total_process_cpu": 24.8438
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 111,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 83.47,
+      "max_cpu_percent": 568.51,
+      "start_rss_mb": 99.57,
+      "end_rss_mb": 1065.98,
+      "max_sampled_rss_mb": 1071.5,
+      "peak_rss_mb": 1769.48
+    }
+  },
+  "cuda": {
+    "available": true,
+    "devices": [
+      {
+        "index": 0,
+        "name": "NVIDIA GeForce GTX 1650",
+        "allocated_mb": 685.6,
+        "reserved_mb": 790.0,
+        "max_allocated_mb": 752.54,
+        "max_reserved_mb": 790.0
+      }
+    ]
+  },
+  "result_summary": {
+    "request_id": "fracture_20260614002211_bbac20bd",
+    "groups": [
+      {
+        "group": "hand",
+        "part": "Hand",
+        "confidence": 0.45826053619384766,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.04573310539126396,
+          "Forearm": 0.23332683742046356,
+          "Hand": 0.45826053619384766,
+          "Hips and pelvis": 0.007317967247217894,
+          "Leg": 0.04191119968891144,
+          "Shoulders": 7.004274084465578e-05,
+          "Upper arm": 0.0009595782612450421,
+          "Wrist": 0.21242071688175201
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.4625470042228699
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Hand",
+            "confidence": 0.9082176685333252
+          }
+        ]
+      }
+    ],
+    "detections_count": 2,
+    "rois_count": 2,
+    "fractures_count": 2,
+    "pdf_url": "/download/pdfs/fracture_20260614002211_bbac20bd_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260614002211_bbac20bd_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260614002211_bbac20bd_ar"
+  },
+  "finished_at": "2026-06-14T03:22:40"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-14T03:23:14",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "http://127.0.0.1:8000/analyze",
+    "client": "127.0.0.1:58710",
+    "filename": "logo.png",
+    "content_type": "image/png"
+  },
+  "inputs": {
+    "image_size_bytes": 37446,
+    "log_file": "G:\\1.College\\Graduation Project\\Project Code\\Versions\\v9.2\\AI FDRPP - v9\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "pid": 5084,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 8.67,
+    "total_wall": 8.6711,
+    "total_process_cpu": 3.5938
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 35,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 39.13,
+      "max_cpu_percent": 566.79,
+      "start_rss_mb": 1065.34,
+      "end_rss_mb": 1068.81,
+      "max_sampled_rss_mb": 1074.46,
+      "peak_rss_mb": 1769.48
+    }
+  },
+  "cuda": {
+    "available": true,
+    "devices": [
+      {
+        "index": 0,
+        "name": "NVIDIA GeForce GTX 1650",
+        "allocated_mb": 685.75,
+        "reserved_mb": 808.0,
+        "max_allocated_mb": 752.35,
+        "max_reserved_mb": 808.0
+      }
+    ]
+  },
+  "result_summary": {
+    "request_id": "fracture_20260614002314_18814fdc",
+    "groups": [
+      {
+        "group": "hand",
+        "part": "Hand",
+        "confidence": 0.45826053619384766,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.04573310539126396,
+          "Forearm": 0.23332683742046356,
+          "Hand": 0.45826053619384766,
+          "Hips and pelvis": 0.007317967247217894,
+          "Leg": 0.04191119968891144,
+          "Shoulders": 7.004274084465578e-05,
+          "Upper arm": 0.0009595782612450421,
+          "Wrist": 0.21242071688175201
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.4625470042228699
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Hand",
+            "confidence": 0.9082176685333252
+          }
+        ]
+      }
+    ],
+    "detections_count": 2,
+    "rois_count": 2,
+    "fractures_count": 2,
+    "pdf_url": "/download/pdfs/fracture_20260614002314_18814fdc_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260614002314_18814fdc_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260614002314_18814fdc_ar"
+  },
+  "finished_at": "2026-06-14T03:23:22"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-14T03:28:09",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "http://host.docker.internal:8000/analyze",
+    "client": "127.0.0.1:61066",
+    "filename": "a00010f04a_kozinf2a-b_kh-compressor.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 89271,
+    "log_file": "G:\\1.College\\Graduation Project\\Project Code\\Versions\\v9.2\\AI FDRPP - v9\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "pid": 5084,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 13.4649,
+    "total_wall": 13.4664,
+    "total_process_cpu": 5.375
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 51,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 37.73,
+      "max_cpu_percent": 465.65,
+      "start_rss_mb": 1053.07,
+      "end_rss_mb": 992.63,
+      "max_sampled_rss_mb": 1074.51,
+      "peak_rss_mb": 1769.48
+    }
+  },
+  "cuda": {
+    "available": true,
+    "devices": [
+      {
+        "index": 0,
+        "name": "NVIDIA GeForce GTX 1650",
+        "allocated_mb": 685.75,
+        "reserved_mb": 808.0,
+        "max_allocated_mb": 752.36,
+        "max_reserved_mb": 808.0
+      }
+    ]
+  },
+  "result_summary": {
+    "request_id": "fracture_20260614002809_4a063d54",
+    "groups": [
+      {
+        "group": "hand",
+        "part": "Hand",
+        "confidence": 0.8236596584320068,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 3.957746230298653e-05,
+          "Forearm": 0.0004947412526234984,
+          "Hand": 0.8236596584320068,
+          "Hips and pelvis": 0.1617129147052765,
+          "Leg": 0.005554343108087778,
+          "Shoulders": 0.00033743877429515123,
+          "Upper arm": 0.007140887901186943,
+          "Wrist": 0.00106044951826334
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Hand",
+            "confidence": 0.6653226613998413
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Hand",
+            "confidence": 0.9819966554641724
+          }
+        ]
+      }
+    ],
+    "detections_count": 7,
+    "rois_count": 7,
+    "fractures_count": 7,
+    "pdf_url": "/download/pdfs/fracture_20260614002809_4a063d54_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260614002809_4a063d54_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260614002809_4a063d54_ar"
+  },
+  "finished_at": "2026-06-14T03:28:23"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-14T03:31:48",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "http://host.docker.internal:8000/analyze",
+    "client": "127.0.0.1:49266",
+    "filename": "broken-arm-x-ray-du-cane-medical-imaging-ltd.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 17533,
+    "log_file": "G:\\1.College\\Graduation Project\\Project Code\\Versions\\v9.2\\AI FDRPP - v9\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "pid": 5084,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 8.4692,
+    "total_wall": 8.4705,
+    "total_process_cpu": 6.8125
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 34,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 75.79,
+      "max_cpu_percent": 540.02,
+      "start_rss_mb": 990.07,
+      "end_rss_mb": 1021.72,
+      "max_sampled_rss_mb": 1099.2,
+      "peak_rss_mb": 1769.48
+    }
+  },
+  "cuda": {
+    "available": true,
+    "devices": [
+      {
+        "index": 0,
+        "name": "NVIDIA GeForce GTX 1650",
+        "allocated_mb": 840.49,
+        "reserved_mb": 976.0,
+        "max_allocated_mb": 934.0,
+        "max_reserved_mb": 976.0
+      }
+    ]
+  },
+  "result_summary": {
+    "request_id": "fracture_20260614003148_6c061bb1",
+    "groups": [
+      {
+        "group": "leg",
+        "part": "Leg",
+        "confidence": 0.8728492259979248,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 0.002942669205367565,
+          "Forearm": 0.013159621506929398,
+          "Hand": 0.042778950184583664,
+          "Hips and pelvis": 0.0014401827938854694,
+          "Leg": 0.8728492259979248,
+          "Shoulders": 0.064910888671875,
+          "Upper arm": 0.0003830971254501492,
+          "Wrist": 0.0015354144852608442
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Leg",
+            "confidence": 0.9915737509727478
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Leg",
+            "confidence": 0.754124641418457
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260614003148_6c061bb1_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260614003148_6c061bb1_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260614003148_6c061bb1_ar"
+  },
+  "finished_at": "2026-06-14T03:31:57"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-14T03:35:04",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "http://host.docker.internal:8000/analyze",
+    "client": "127.0.0.1:55422",
+    "filename": "broken-arm-x-ray-du-cane-medical-imaging-ltd.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 20275,
+    "log_file": "G:\\1.College\\Graduation Project\\Project Code\\Versions\\v9.2\\AI FDRPP - v9\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "pid": 5084,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 9.1139,
+    "total_wall": 9.1163,
+    "total_process_cpu": 5.5312
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 36,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 53.96,
+      "max_cpu_percent": 527.4,
+      "start_rss_mb": 579.56,
+      "end_rss_mb": 581.39,
+      "max_sampled_rss_mb": 588.35,
+      "peak_rss_mb": 1769.48
+    }
+  },
+  "cuda": {
+    "available": true,
+    "devices": [
+      {
+        "index": 0,
+        "name": "NVIDIA GeForce GTX 1650",
+        "allocated_mb": 877.45,
+        "reserved_mb": 996.0,
+        "max_allocated_mb": 943.16,
+        "max_reserved_mb": 996.0
+      }
+    ]
+  },
+  "result_summary": {
+    "request_id": "fracture_20260614003504_897986e7",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.9775933027267456,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 2.049551039817743e-05,
+          "Forearm": 0.9775933027267456,
+          "Hand": 0.00013227674935478717,
+          "Hips and pelvis": 4.536348114925204e-06,
+          "Leg": 0.009654589928686619,
+          "Shoulders": 6.586216841242276e-06,
+          "Upper arm": 4.0481572796124965e-05,
+          "Wrist": 0.012547708116471767
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9964543581008911
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9587322473526001
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260614003504_897986e7_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260614003504_897986e7_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260614003504_897986e7_ar"
+  },
+  "finished_at": "2026-06-14T03:35:13"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-14T10:28:36",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "http://host.docker.internal:8000/analyze",
+    "client": "127.0.0.1:50629",
+    "filename": "broken-arm-x-ray-du-cane-medical-imaging-ltd.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 20275,
+    "log_file": "G:\\1.College\\Graduation Project\\Project Code\\Versions\\v9.2\\AI FDRPP - v9\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "pid": 21096,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 23.6893,
+    "total_wall": 23.7324,
+    "total_process_cpu": 15.3281
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 94,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 62.73,
+      "max_cpu_percent": 596.55,
+      "start_rss_mb": 1744.04,
+      "end_rss_mb": 2181.87,
+      "max_sampled_rss_mb": 2220.53,
+      "peak_rss_mb": 2224.46
+    }
+  },
+  "cuda": {
+    "available": true,
+    "devices": [
+      {
+        "index": 0,
+        "name": "NVIDIA GeForce GTX 1650",
+        "allocated_mb": 649.95,
+        "reserved_mb": 756.0,
+        "max_allocated_mb": 716.08,
+        "max_reserved_mb": 756.0
+      }
+    ]
+  },
+  "result_summary": {
+    "request_id": "fracture_20260614072836_87b6727a",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.9775933027267456,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 2.049551039817743e-05,
+          "Forearm": 0.9775933027267456,
+          "Hand": 0.00013227674935478717,
+          "Hips and pelvis": 4.536348114925204e-06,
+          "Leg": 0.009654589928686619,
+          "Shoulders": 6.586216841242276e-06,
+          "Upper arm": 4.0481572796124965e-05,
+          "Wrist": 0.012547708116471767
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9964543581008911
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9587322473526001
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260614072836_87b6727a_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260614072836_87b6727a_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260614072836_87b6727a_ar"
+  },
+  "finished_at": "2026-06-14T10:29:00"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-14T10:30:01",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "http://host.docker.internal:8000/analyze",
+    "client": "127.0.0.1:59986",
+    "filename": "broken-arm-x-ray-du-cane-medical-imaging-ltd.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 20275,
+    "log_file": "G:\\1.College\\Graduation Project\\Project Code\\Versions\\v9.2\\AI FDRPP - v9\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "pid": 21096,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 9.0015,
+    "total_wall": 9.0024,
+    "total_process_cpu": 3.2656
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 36,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 35.28,
+      "max_cpu_percent": 479.98,
+      "start_rss_mb": 2180.94,
+      "end_rss_mb": 2188.14,
+      "max_sampled_rss_mb": 2192.35,
+      "peak_rss_mb": 2224.46
+    }
+  },
+  "cuda": {
+    "available": true,
+    "devices": [
+      {
+        "index": 0,
+        "name": "NVIDIA GeForce GTX 1650",
+        "allocated_mb": 649.32,
+        "reserved_mb": 782.0,
+        "max_allocated_mb": 715.3,
+        "max_reserved_mb": 782.0
+      }
+    ]
+  },
+  "result_summary": {
+    "request_id": "fracture_20260614073001_bbe6cb04",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.9775933027267456,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 2.049551039817743e-05,
+          "Forearm": 0.9775933027267456,
+          "Hand": 0.00013227674935478717,
+          "Hips and pelvis": 4.536348114925204e-06,
+          "Leg": 0.009654589928686619,
+          "Shoulders": 6.586216841242276e-06,
+          "Upper arm": 4.0481572796124965e-05,
+          "Wrist": 0.012547708116471767
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9964543581008911
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9587322473526001
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260614073001_bbe6cb04_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260614073001_bbe6cb04_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260614073001_bbe6cb04_ar"
+  },
+  "finished_at": "2026-06-14T10:30:10"
+}
+
+==========================================================================================
+{
+  "started_at": "2026-06-14T10:38:04",
+  "status": "completed",
+  "source": "api_request",
+  "request": {
+    "method": "POST",
+    "url": "http://host.docker.internal:8000/analyze",
+    "client": "127.0.0.1:58098",
+    "filename": "broken-arm-x-ray-du-cane-medical-imaging-ltd.jpg",
+    "content_type": "image/jpeg"
+  },
+  "inputs": {
+    "image_size_bytes": 20275,
+    "log_file": "G:\\1.College\\Graduation Project\\Project Code\\Versions\\v9.2\\AI FDRPP - v9\\utils\\resource_usage_log.txt"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel",
+    "pid": 21096,
+    "cpu_count": 12
+  },
+  "timings_seconds": {
+    "pipeline_run": 9.4971,
+    "total_wall": 9.4979,
+    "total_process_cpu": 3.3281
+  },
+  "resources": {
+    "process_samples": {
+      "samples": 39,
+      "sample_interval_seconds": 0.25,
+      "average_cpu_percent": 33.88,
+      "max_cpu_percent": 511.21,
+      "start_rss_mb": 2187.2,
+      "end_rss_mb": 2192.79,
+      "max_sampled_rss_mb": 2193.86,
+      "peak_rss_mb": 2224.46
+    }
+  },
+  "cuda": {
+    "available": true,
+    "devices": [
+      {
+        "index": 0,
+        "name": "NVIDIA GeForce GTX 1650",
+        "allocated_mb": 649.32,
+        "reserved_mb": 782.0,
+        "max_allocated_mb": 715.3,
+        "max_reserved_mb": 782.0
+      }
+    ]
+  },
+  "result_summary": {
+    "request_id": "fracture_20260614073804_2b7d22f6",
+    "groups": [
+      {
+        "group": "forearm_wrist",
+        "part": "Forearm",
+        "confidence": 0.9775933027267456,
+        "source": "router_ensemble",
+        "scores": {
+          "Elbow": 2.049551039817743e-05,
+          "Forearm": 0.9775933027267456,
+          "Hand": 0.00013227674935478717,
+          "Hips and pelvis": 4.536348114925204e-06,
+          "Leg": 0.009654589928686619,
+          "Shoulders": 6.586216841242276e-06,
+          "Upper arm": 4.0481572796124965e-05,
+          "Wrist": 0.012547708116471767
+        },
+        "model_predictions": [
+          {
+            "name": "saadeldin_resnet50",
+            "path": "models/routers/saadeldin_resnet50_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9964543581008911
+          },
+          {
+            "name": "atwa_chexnet",
+            "path": "models/routers/atwa_chexnet_best.pth",
+            "label": "Forearm",
+            "confidence": 0.9587322473526001
+          }
+        ]
+      }
+    ],
+    "detections_count": 1,
+    "rois_count": 1,
+    "fractures_count": 1,
+    "pdf_url": "/download/pdfs/fracture_20260614073804_2b7d22f6_en",
+    "pdf_url_en": "/download/pdfs/fracture_20260614073804_2b7d22f6_en",
+    "pdf_url_ar": "/download/pdfs/fracture_20260614073804_2b7d22f6_ar"
+  },
+  "finished_at": "2026-06-14T10:38:13"
+}
+

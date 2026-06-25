@@ -1,0 +1,135 @@
+# ── Environment variables ────────────────────────────────────────
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+.env*.local
+# Also catch env files in any sub-package
+**/.env
+**/.env.local
+**/.env*.local
+# Keep generic example files (but not docker-specific ones which contain machine-local paths)
+!**/.env.example
+
+# ── Project planning / audit documents (local working docs, not for repo) ──────
+*_PLAN.md
+BUGS_AND_FIXES_PLAN.md
+
+# ── Dependencies ─────────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+.pnp.cjs
+
+# ── Build outputs ────────────────────────────────────────────────
+dist/
+build/
+out/
+
+# ── TypeScript build cache ───────────────────────────────────────
+*.tsbuildinfo
+next-env.d.ts
+
+# ── Test & coverage artifacts ────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ── Logs ─────────────────────────────────────────────────────────
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ── Local debug/scratch artifacts (never commit) ────────────────
+backend_logs.txt
+logs.txt
+testProfile.js
+test_update.ts
+fix_syntax.js
+backend/backend_current.txt
+backend/backend_logs2.txt
+backend/backend_logs_docker.txt
+backend/full_backend_logs.txt
+backend/patch.cjs
+backend/patch.ts
+backend/src/debug*.ts
+backend/src/readDB2.ts
+backend/src/test-db.ts
+backend/src/testUpdate*.ts
+backend/test-script2.ts
+backend/web/
+backend/patch.js
+backend/temp_landing.js
+backend/tmp_res.tsx
+backend/jest-summary.json
+
+# ── OS generated files ───────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# ── IDE & editor ─────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*.suo
+*~
+*.orig
+*.code-workspace
+
+# ── Prisma generated client (regenerated via prisma generate) ────
+backend/src/generated/
+
+# ── Certificates & keys ──────────────────────────────────────────
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+
+# ── Docker local data volumes ────────────────────────────────────
+.docker/
+docker-data/
+pgdata/
+redisdata/
+
+# ── Generated documentation (local build artifacts) ──────────────
+documentation/
+V5 DOC/
+
+# ── Cloudflare tunnel credentials (local only) ───────────────────
+cloudflared/credentials/*.json
+!cloudflared/credentials/.gitkeep
+
+chat.md
+
+# ── Playwright end-to-end testing artifacts ──────────────────────
+playwright-report/
+test-results/
+
+# ── Backend Data & Temp Files ────────────────────────────────────
+backend/tmp/
+backend/medicines-data/
+backend/scans-data/
+
+# ── AI Model Outputs & Caches ────────────────────────────────────
+AI\ FDRPP\ -\ v9/outputs/
+AI\ FDRPP\ -\ v9/resp.json
+AI\ FDRPP\ -\ v9/__pycache__/
+*.pyc
+*.pt
+*.pth
+venv/
+.venv/

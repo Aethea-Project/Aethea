@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+requests
+streamlit
+Pillow
+PyYAML
+opencv-python
+numpy
+torch
+torchvision
+timm
+ultralytics
+google-generativeai
+python-dotenv
+jinja2
+playwright
+qrcode[pil]

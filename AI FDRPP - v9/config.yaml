@@ -1,0 +1,141 @@
+# [Mohmed Safwat (Bo3ly) - aifdrpp-v9 - @06/06/2026]
+
+image:
+  size: 512
+
+router:
+  input_size: 224
+  classifier_models:
+    saadeldin_resnet50:
+      path: "models/routers/saadeldin_resnet50_best.pth"
+      architecture: resnet50
+    atwa_chexnet:
+      path: "models/routers/atwa_chexnet_best.pth"
+      architecture: densenet121
+  labels:
+    - Elbow
+    - Forearm
+    - Hand
+    - Hips and pelvis
+    - Leg
+    - Shoulders
+    - Upper arm
+    - Wrist
+  top_k: 1
+  confidence_threshold: 0.32
+  group_mapping:
+    Elbow: elbow
+    Forearm: forearm_wrist
+    Hand: hand
+    Hips and pelvis: hips_pelvis
+    Leg: leg
+    Shoulders: arm_shoulder
+    Upper arm: arm_shoulder
+    Wrist: forearm_wrist
+
+detectors:
+  confidence_threshold: 0.32
+  iou_threshold: 0.45
+  fallback_min_detections: 1
+  ensemble:
+    - "models/detectors/ensemble/ensemble-0.pt"
+    - "models/detectors/ensemble/ensemble-1.pt"
+    - "models/detectors/ensemble/ensemble-2.pt"
+    - "models/detectors/ensemble/ensemble-3.pt"
+    - "models/detectors/ensemble/ensemble-add.pt"
+  groups:
+    hand:
+      anatomy:
+        body_part: hand
+        bone: metacarpal
+      main: "models/detectors/hand.pt"
+      companions:
+        - "models/detectors/wrist_forearm.pt"
+    forearm_wrist:
+      anatomy:
+        body_part: wrist/forearm
+        bone: radius
+      main: "models/detectors/wrist_forearm.pt"
+    elbow:
+      anatomy:
+        body_part: elbow
+        bone: elbow
+      main: "models/detectors/elbow.pt"
+    arm_shoulder:
+      anatomy:
+        body_part: arm/shoulder
+        bone: humerus
+      main: "models/detectors/arm_shoulder.pt"
+
+# [Mohmed Safwat (Bo3ly) - aifdrpp-v9 - @06/06/2026]
+
+    hips_pelvis:
+      anatomy:
+        body_part: hips/pelvis
+        bone: pelvis
+      main: "models/detectors/hips_pelvis.pt"
+    leg:
+      anatomy:
+        body_part: leg
+        bone: lower limb
+      main: "models/detectors/leg_live.pt"
+
+features:
+  confidence_threshold: 0.32
+  local_patch_size: 64
+  local_patch_overlap: 0.5
+  enhanced_module: "models/features_ext_enhanced.py"
+  classifier_input_size: 224
+  classifier_models:
+    convnext_tiny:
+      path: "models/features classifiers/convnext_tiny.pth"
+      architecture: convnext_tiny
+    effnet_b1:
+      path: "models/features classifiers/effnet_b1.pth"
+      architecture: efficientnet_b1
+  fracture_type_labels:
+    - avulsion
+    - comminuted
+    - fracture_dislocation
+    - greenstick
+    - hairline
+    - impacted
+    - longitudinal
+    - oblique
+    - pathological
+    - spiral
+    - transverse
+  gradcam_enabled: true
+
+report_generation:
+  enabled: true
+  provider: gemini
+  model: gemini-2.5-pro
+
+cleanup:
+  enabled: true
+  retention_days: 30
+  interval_minutes: 1440
+  min_age_seconds: 600
+  dry_run: false
+  max_disk_usage_mb: 10240
+  paths:
+    - outputs/pdfs
+    - outputs/pdfs/htmls
+    - outputs/roi
+    - outputs/gradcam
+    - outputs/bbox
+    - outputs/temp
+  per_path_retention:
+    outputs/pdfs: 365
+    outputs/pdfs/htmls: 30
+    outputs/roi: 30
+    outputs/gradcam: 30
+    outputs/bbox: 30
+    outputs/temp: 1
+  singleton: true
+  move_to_trash: true
+  trash_path: outputs/trash
+
+
+# [Mohmed Safwat (Bo3ly) - aifdrpp-v9 - @06/06/2026]

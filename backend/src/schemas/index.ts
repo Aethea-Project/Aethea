@@ -1,0 +1,431 @@
+/**
+ * Zod Request Schemas
+ *
+ * Source: OWASP REST Security — Input Validation
+ *   "Validate input: length / range / format and type."
+ *   "Define an appropriate request size limit and reject requests exceeding the limit."
+ * Source: OWASP API3:2023 — Broken Object Property Level Authorization
+ *   Explicit schemas prevent mass-assignment by only accepting declared fields.
+ */
+
+import { z } from 'zod';
+import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
+
+extendZodWithOpenApi(z);
+
+
+/**
+ * POST /api/auth/verify — no body needed, token comes from Authorization header.
+ * We define an empty schema to reject any unexpected body payload.
+ */
+export const verifyTokenSchema = z.object({}).strict();
+
+/**
+ * POST /api/auth/step-up/verify
+ */
+export const stepUpVerifySchema = z.object({
+  code: z.string().trim().regex(/^\d{6}$/, 'Code must be 6 digits'),
+}).strict();
+
+/**
+ * PATCH /api/users/profile — update user profile
+ * Only allows explicitly declared fields (prevents mass-assignment).
+ */
+const emptyToUndefined = (value: unknown): unknown => (value === '' || value === null ? undefined : value);
+
+export const updateProfileSchema = z.object({
+  firstName: z.string().trim().min(2).max(50).optional(),
+  lastName: z.string().trim().min(2).max(50).optional(),
+  gender: z.enum(['male', 'female']).optional(),
+  phone: z.string().trim().max(20).optional(),
+  dateOfBirth: z.string().date().optional(),
+  avatarUrl: z.string().url().optional(),
+}).strict();
+
+export const requestProfileUpdateSchema = z.object({
+  password: z.string().min(6),
+}).strict();
+
+export const verifyProfileUpdateSchema = z.object({
+  code: z.string().length(6),
+  updates: updateProfileSchema,
+}).strict();
+
+export const requestPasswordChangeSchema = z.object({
+  currentPassword: z.string().min(1).optional(),
+  captchaToken: z.string().trim().min(1).optional(),
+}).strict();
+
+export const verifyPasswordChangeSchema = z.object({
+  code: z.string().trim().regex(/^\d{6}$/, 'Code must be 6 digits'),
+}).strict();
+
+/**
+ * Pagination query params (reusable)
+ */
+export const paginationSchema = z.object({
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20).optional(),
+}).strict();
+
+/**
+ * Lab tests
+ */
+const labStatusEnum = z.enum(['normal', 'borderline', 'abnormal', 'critical']);
+
+export const createLabTestSchema = z.object({
+  testName: z.string().min(2).max(120),
+  category: z.string().min(2).max(80),
+  value: z.union([z.string(), z.number()]).transform((v) => v.toString()),
+  unit: z.string().min(1).max(40),
+  refMin: z.number().min(0).max(1_000_000).optional(),
+  refMax: z.number().min(0).max(1_000_000).optional(),
+  refText: z.string().max(120).optional(),
+  status: labStatusEnum.default('normal').optional(),
+  orderedBy: z.string().min(2).max(120),
+  notes: z.string().max(500).optional(),
+  measuredAt: z.string().datetime(),
+}).strict();
+
+export const updateLabTestSchema = createLabTestSchema.partial();
+
+/**
+ * Scans
+ */
+const scanPriorityEnum = z.enum(['routine', 'urgent', 'emergency']);
+const scanStatusEnum = z.enum(['pending', 'in_progress', 'completed', 'reviewed']);
+
+export const createScanSchema = z.object({
+  type: z.string().min(2).max(80),
+  bodyPart: z.string().min(2).max(80),
+  description: z.string().min(2),
+  findings: z.string().optional(),
+  radiologist: z.string().min(2).max(120),
+  priority: scanPriorityEnum.default('routine').optional(),
+  status: scanStatusEnum.default('pending').optional(),
+  reportUrl: z.string().url().optional(),
+  scanDate: z.string().datetime(),
+  fileBase64: z.string().optional(),
+  fileName: z.string().optional(),
+}).strict();
+
+export const updateScanSchema = createScanSchema.partial();
+
+/**
+ * Reservations / Appointments
+ */
+const reservationStatusEnum = z.enum(['scheduled', 'confirmed', 'in_progress', 'completed', 'cancelled', 'no_show']);
+
+export const createReservationSchema = z.object({
+  doctorScheduleId: z.string().uuid(),
+  slotIndex: z.number().int().min(0),
+  reason: z.string().min(2).max(500),
+  notes: z.string().max(500).optional(),
+  shareHealthData: z.boolean().default(false),
+  notifyOnCancel: z.boolean().default(false),
+  patientLat: z.number().min(-90).max(90).optional(),
+  patientLng: z.number().min(-180).max(180).optional(),
+}).strict();
+
+export const updateReservationStatusSchema = z.object({
+  status: reservationStatusEnum,
+  notes: z.string().max(500).optional(),
+}).strict();
+
+export const reservationAvailabilityAlertSchema = z.object({
+  doctorScheduleId: z.string().uuid(),
+}).strict();
+
+/**
+ * Doctor discovery query
+ */
+export const doctorListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20).optional(),
+  specialty: z.string().trim().min(1).max(120).optional(),
+  city: z.string().trim().min(1).max(100).optional(),
+  search: z.string().trim().min(1).max(120).optional(),
+}).strict();
+
+/**
+ * Doctor schedule query (list open slots for a doctor)
+ */
+export const scheduleQuerySchema = z.object({
+  from: z.string().datetime({ offset: true }).optional(),
+  to: z.string().datetime({ offset: true }).optional(),
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20).optional(),
+}).strict();
+
+/**
+ * Doctor: marketplace schedules query
+ */
+export const marketplaceScheduleQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20).optional(),
+  specialty: z.string().trim().min(1).max(120).optional(),
+  city: z.string().trim().min(1).max(100).optional(),
+  search: z.string().trim().min(1).max(120).optional(),
+  date: z.string().date().optional(),
+}).strict();
+
+/**
+ * Maps proxy query validation
+ */
+export const mapsNearbyQuerySchema = z.object({
+  lat: z.coerce.number().min(-90).max(90),
+  lng: z.coerce.number().min(-180).max(180),
+  type: z.enum(['doctor', 'hospital', 'pharmacy']),
+  radius: z.coerce.number().int().min(200).max(10000).default(4000).optional(),
+  limit: z.coerce.number().int().min(1).max(20).default(10).optional(),
+  search: z.string().trim().min(1).max(120).optional(),
+  specialty: z.string().trim().min(1).max(120).optional(),
+  language: z.string().trim().min(2).max(10).optional(),
+}).strict();
+
+export const mapsGeocodeQuerySchema = z.object({
+  query: z.string().trim().min(3).max(200),
+  limit: z.coerce.number().int().min(1).max(10).default(5).optional(),
+  language: z.string().trim().min(2).max(10).optional(),
+}).strict();
+
+export const mapsReverseGeocodeQuerySchema = z.object({
+  lat: z.coerce.number().min(-90).max(90),
+  lng: z.coerce.number().min(-180).max(180),
+  language: z.string().trim().min(2).max(10).optional(),
+}).strict();
+
+export const mapsFastestRouteQuerySchema = z.object({
+  originLat: z.coerce.number().min(-90).max(90),
+  originLng: z.coerce.number().min(-180).max(180),
+  destinationLat: z.coerce.number().min(-90).max(90),
+  destinationLng: z.coerce.number().min(-180).max(180),
+  mode: z.enum(['driving', 'walking']).default('driving').optional(),
+  language: z.string().trim().min(2).max(10).optional(),
+}).strict();
+
+/**
+ * Doctor profile — create / update (doctor-side)
+ */
+export const upsertDoctorProfileSchema = z.object({
+  firstName: z.string().trim().min(2).max(50),
+  lastName: z.string().trim().min(2).max(50),
+  specialty: z.string().trim().min(2).max(120),
+  bio: z.string().trim().max(1000).optional(),
+  clinicName: z.string().trim().max(200).optional(),
+  address: z.string().trim().max(300).optional(),
+  locationUrl: z.string().trim().max(1000).optional(),
+  city: z.string().trim().max(100).optional(),
+  consultFee: z.number().int().min(0).max(100_000).optional(),
+  languages: z.array(z.string().trim().min(1).max(40)).max(10).optional(),
+  savedClinics: z.array(
+    z.object({
+      id: z.string(),
+      clinicName: z.string().trim().min(1).max(200),
+      city: z.string().trim().min(1).max(100),
+      consultFee: z.number().int().min(0).max(100_000),
+      address: z.string().trim().min(1).max(300),
+      locationUrl: z.string().trim().max(1000).optional().nullable(),
+    })
+  ).max(20).optional().nullable(),
+}).strict();
+
+/**
+ * Doctor schedule — create
+ */
+export const createDoctorScheduleSchema = z.object({
+  scheduleDate: z.string().date(),  // 'YYYY-MM-DD'
+  startAt: z.string().datetime({ offset: true }),
+  endAt: z.string().datetime({ offset: true }),
+  slotDurationMins: z.number().int().min(10).max(120),
+  maxPatients: z.number().int().min(1).max(50),
+  isPublished: z.boolean().default(false).optional(),
+  bookingMode: z.enum(['slot', 'token']).default('slot').optional(),
+}).strict();
+
+/**
+ * Notifications — mark as read
+ */
+export const markNotificationsReadSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(100),
+}).strict();
+
+/**
+ * Admin user management
+ */
+const accountTypeEnum = z.enum(['patient', 'doctor', 'pharmacist', 'admin']);
+const staffAccountTypeEnum = z.enum(['doctor', 'pharmacist']);
+const accountStatusEnum = z.enum(['pending', 'active', 'suspended', 'rejected']);
+
+export const adminListUsersQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20).optional(),
+  accountType: accountTypeEnum.optional(),
+  accountStatus: accountStatusEnum.optional(),
+  search: z.string().trim().min(1).max(120).optional(),
+}).strict();
+
+export const adminCreateUserSchema = z.object({
+  email: z.string().trim().email().max(254),
+  accountType: staffAccountTypeEnum,
+  firstName: z.string().trim().min(2).max(50),
+  lastName: z.string().trim().min(2).max(50),
+}).strict();
+
+export const adminUpdateUserStatusSchema = z.object({
+  accountStatus: accountStatusEnum,
+  reason: z.string().trim().min(3).max(500).optional(),
+}).strict().superRefine((value, ctx) => {
+  const reasonRequired = value.accountStatus === 'rejected' || value.accountStatus === 'suspended';
+  if (reasonRequired && !value.reason) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['reason'],
+      message: 'reason is required when status is rejected or suspended',
+    });
+  }
+});
+
+export const adminUpdateUserAccountTypeSchema = z.object({
+  accountType: accountTypeEnum,
+}).strict();
+
+export const adminUpdateUserProfileSchema = z.preprocess(
+  (obj: unknown) => {
+    if (!obj || typeof obj !== 'object') return obj;
+    const cleaned = { ...(obj as Record<string, unknown>) };
+    for (const key of Object.keys(cleaned)) {
+      cleaned[key] = emptyToUndefined(cleaned[key]);
+    }
+    return cleaned;
+  },
+  z.object({
+    firstName: z.string().trim().min(2).max(50).optional(),
+    lastName: z.string().trim().min(2).max(50).optional(),
+    phone: z.string().trim().max(20).optional(),
+  }).strict()
+);
+
+export const adminSendPasswordResetLinkSchema = z.object({}).strict();
+
+export const auditActionEnum = z.enum([
+  'user.view',
+  'user.approve',
+  'user.suspend',
+  'user.reject',
+  'user.delete',
+  'user.create',
+  'user.profile_update',
+  'user.account_type_change',
+  'user.force_password_reset',
+  'staff.review_approve',
+  'staff.review_reject',
+]);
+
+export const adminAuditLogQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20).optional(),
+  actorId: z.string().uuid().optional(),
+  action: auditActionEnum.optional(),
+  targetId: z.string().uuid().optional(),
+  from: z.string().datetime({ offset: true }).optional(),
+  to: z.string().datetime({ offset: true }).optional(),
+}).strict();
+
+/**
+ * Staff verification flow
+ */
+const storageBucketEnum = z.enum(['staff-documents', 'staff-selfies']);
+const verificationStatusEnum = z.enum(['unverified', 'under_review', 'verified', 'rejected']);
+
+export const staffVerificationUploadUrlSchema = z.object({
+  bucket: storageBucketEnum,
+  fileName: z.string().trim().min(3).max(140),
+}).strict();
+
+export const staffVerificationSubmitSchema = z.object({
+  governmentIdPath: z.string().trim().min(3).max(255),
+  certificateFilePath: z.string().trim().min(3).max(255),
+  selfieFilePath: z.string().trim().min(3).max(255),
+  specialty: z.string().trim().min(2).max(120),
+  affiliationName: z.string().trim().min(2).max(180),
+  affiliationType: z.enum(['hospital', 'clinic', 'pharmacy', 'other']),
+  nationalId: z.string().trim().regex(/^\d{14}$/, 'National ID must be exactly 14 digits'),
+  syndicateId: z.string().trim().min(2),
+  ministryLicense: z.string().trim().min(2),
+}).strict();
+
+export const adminVerificationQueueQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20).optional(),
+  status: verificationStatusEnum.default('under_review').optional(),
+}).strict();
+
+export const adminReviewVerificationSchema = z.object({
+  verificationStatus: z.enum(['verified', 'rejected']),
+  notes: z.string().trim().min(3).max(500).optional(),
+}).strict().superRefine((value, ctx) => {
+  if (value.verificationStatus === 'rejected' && !value.notes) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['notes'],
+      message: 'notes is required when rejecting verification',
+    });
+  }
+});
+
+/**
+ * Doctor weekly template — save
+ */
+export const saveWeeklyTemplateSchema = z.object({
+  templates: z.array(z.object({
+    dayOfWeek: z.number().int().min(0).max(6),
+    startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Must be HH:mm format'),
+    endTime: z.string().regex(/^\d{2}:\d{2}$/, 'Must be HH:mm format'),
+    slotDurationMins: z.number().int().min(10).max(120),
+    maxCases: z.number().int().min(1).max(100).default(30),
+    bookingMode: z.enum(['slot', 'token']).default('slot'),
+    isActive: z.boolean().default(true),
+    clinicInfo: z.object({
+      id: z.string(),
+      clinicName: z.string(),
+      city: z.string(),
+      consultFee: z.number(),
+      address: z.string(),
+      locationUrl: z.string().optional().nullable(),
+    }).optional().nullable(),
+  })).min(0).max(7),
+}).strict();
+
+/**
+ * Doctor schedule exception — create
+ */
+export const createScheduleExceptionSchema = z.object({
+  exceptionDate: z.string().date(),
+  type: z.enum(['unavailable', 'modified_hours']),
+  reason: z.string().trim().max(200).optional(),
+  startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Must be HH:mm format').optional(),
+  endTime: z.string().regex(/^\d{2}:\d{2}$/, 'Must be HH:mm format').optional(),
+}).strict().superRefine((val, ctx) => {
+  if (val.type === 'modified_hours' && (!val.startTime || !val.endTime)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'startTime and endTime are required for modified_hours type',
+    });
+  }
+});
+
+/**
+ * Doctor generate schedules from template
+ */
+export const generateSchedulesSchema = z.object({
+  weeksAhead: z.number().int().min(1).max(12),
+  timezoneOffset: z.number().int().optional(),
+}).strict();
+
+/**
+ * Doctor publish schedules
+ */
+export const publishSchedulesSchema = z.object({
+  scheduleIds: z.array(z.string().uuid()).min(1).max(100),
+}).strict();

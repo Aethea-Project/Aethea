@@ -1,0 +1,282 @@
+<!-- [Mohmed Safwat (Bo3ly) - aifdrpp-v9 - @06/06/2026] -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AETHEA Verification</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{
+  --cream:#f5f2ec;--warm:#faf8f4;--sage:#6b7c5e;--sage-dark:#4a5940;
+  --terra:#b5763a;--border:#d8d3c8;--text:#2c2c28;--muted:#7a7a6e;
+  --red:#c0392b;--red-light:#fdf0ee;--red-border:#e8b4af;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#ece9e3;font-family:'DM Sans',sans-serif;color:var(--text)}
+.container{max-width:1400px;margin:auto;padding:14px}
+.panel{background:#fff;border:1px solid var(--border);margin-bottom:18px}
+.header{position:relative;background:var(--warm);padding:28px 34px;display:flex;justify-content:space-between;align-items:center;overflow:hidden}
+.header:before{content:'';position:absolute;left:0;top:0;width:8px;height:100%;background:var(--terra)}
+.logo{height:82px}
+.leaf{position:absolute;right:-40px;top:50%;transform:translateY(-50%);width:320px;height:auto;opacity:.4;object-fit:contain;pointer-events:none;z-index:0}
+.footer .leaf{position:absolute;right:auto!important;left:-40px!important;top:auto!important;bottom:-70px!important;width:320px;transform:scaleX(-1);opacity:.5;z-index:0}
+
+/* ── BANNER: verified ── */
+.banner{display:flex;align-items:center;gap:24px;padding:24px}
+.banner.verified{background:#eef5ea;border-left:8px solid var(--sage)}
+.banner.verified i{color:var(--sage-dark)}
+.banner.verified h1{color:var(--sage-dark)}
+/* ── BANNER: not verified ── */
+.banner.not-verified{background:var(--red-light);border-left:8px solid var(--red)}
+.banner.not-verified i{color:var(--red)}
+.banner.not-verified h1{color:var(--red)}
+.banner i{font-size:64px}
+.banner h1{font-family:'Cormorant Garamond',serif;font-size:34px;margin:0}
+
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.card{background:#fff;border:1px solid var(--border);padding:22px}
+.card-head{display:flex;gap:16px;align-items:center}
+.icon{width:64px;height:64px;min-width:64px;min-height:64px;aspect-ratio:1/1;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px}
+.label{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:1px}
+.value{font-size:20px;font-weight:800;overflow-wrap:anywhere}
+
+.section-title{padding:16px 24px;background:linear-gradient(90deg,var(--sage-dark),#5f7b4e);color:#fff;font-family:'Cormorant Garamond',serif;font-size:22px}
+/* red section title for integrity when not verified */
+.section-title.danger{background:linear-gradient(90deg,var(--red),#c0392b)}
+.section-body{padding:24px}
+
+/* ── Integrity ── */
+.integrity{display:grid;grid-template-columns:1fr 320px;gap:20px}
+.verifybox{border:1px solid var(--border);background:#f6f8f4;padding:22px;display:flex;align-items:center;gap:18px}
+.verifybox i{font-size:42px;color:var(--sage)}
+.verifybox.danger{background:var(--red-light);border-color:var(--red-border)}
+.verifybox.danger i{color:var(--red)}
+
+/* ── Contributors collapsible ── */
+.collapsible-header{
+  padding:16px 24px;
+  background:linear-gradient(90deg,var(--sage-dark),#5f7b4e);
+  color:#fff;
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  cursor:pointer;
+  user-select:none;
+}
+.collapsible-header:hover{filter:brightness(1.08)}
+.collapse-arrow{
+  font-size:16px;
+  transition:transform .3s ease;
+  flex-shrink:0;
+}
+.collapse-arrow.open{transform:rotate(0deg)}
+.collapse-arrow.closed{transform:rotate(-90deg)}
+.collapsible-body{
+  overflow:hidden;
+  transition:max-height .4s ease, opacity .3s ease;
+  max-height:600px;
+  opacity:1;
+}
+.collapsible-body.collapsed{max-height:0;opacity:0}
+
+.contribs{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.contrib{border:1px solid var(--border);padding:18px;background:var(--warm)}
+.person{display:flex;gap:14px}
+.person i{font-size:30px;color:var(--sage)}
+.role{color:var(--terra)}
+
+.footer{position:relative;text-align:center;padding:40px;background:var(--warm);overflow:hidden}
+.footer h2,.footer p{position:relative;z-index:1}
+
+@media(max-width:1000px){.cards,.contribs,.integrity{grid-template-columns:1fr}}
+
+/* ── Mobile ── */
+@media(max-width:600px){
+  .container{padding:8px}
+
+  /* Header */
+  .header{padding:16px 20px}
+  .logo{height:48px}
+  #timestamp-display{font-size:18px!important}
+  .header .leaf{width:140px;right:-20px}
+
+  /* Banner */
+  .banner{gap:14px;padding:16px}
+  .banner i{font-size:40px}
+  .banner h1{font-size:22px}
+
+  /* Cards: single column on mobile */
+  .cards{grid-template-columns:1fr;gap:10px}
+  .card{padding:14px}
+  .icon{width:48px;height:48px;min-width:48px;min-height:48px;font-size:17px}
+  .value{font-size:16px}
+
+  /* Integrity hash — prevent overflow */
+  #integrity-hash{
+    font-size:11px;
+    word-break:break-all;
+    overflow-wrap:break-word;
+    white-space:normal;
+  }
+  .verifybox{flex-direction:column;text-align:center}
+
+  /* Contributors */
+  .contribs{grid-template-columns:1fr}
+  .collapsible-body{max-height:1200px}
+  .collapsible-header{font-size:17px;padding:12px 16px}
+
+  /* Footer leaf behind text */
+  .footer{padding:28px 20px}
+  .footer .leaf{width:140px;bottom:-40px!important;left:-20px!important;z-index:0}
+  .footer h2,.footer p{position:relative;z-index:1}
+}
+</style>
+</head>
+
+<!-- [Mohmed Safwat (Bo3ly) - aifdrpp-v9 - @06/06/2026] -->
+
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="panel header">
+    <img src="leaf.png" class="leaf" alt="">
+    <img src="{{ logo_src }}" class="logo" id="logo-img" style="position:relative;z-index:2">
+    <div id="timestamp-display" style="font-size:34px;position:relative;z-index:2"></div>
+  </div>
+
+  <!-- BANNER -->
+  <div class="panel banner" id="banner">
+    <i id="banner-icon"></i>
+    <div>
+      <h1 id="banner-title"></h1>
+      <div id="banner-msg"></div>
+    </div>
+  </div>
+
+  <!-- CARDS -->
+  <div class="cards">
+    <div class="card"><div class="card-head"><div class="icon" style="background:#4a5940"><i class="fa-solid fa-file-lines"></i></div><div><div class="label">REPORT ID</div><div class="value" id="card-id">—</div></div></div></div>
+    <div class="card"><div class="card-head"><div class="icon" style="background:#55704b"><i class="fa-solid fa-person"></i></div><div><div class="label">BODY PART</div><div class="value" id="card-body-part">—</div></div></div></div>
+    <div class="card"><div class="card-head"><div class="icon" style="background:#b5763a"><i class="fa-solid fa-kit-medical"></i></div><div><div class="label">FRACTURE TYPE</div><div class="value" id="card-fracture-type">—</div></div></div></div>
+    <div class="card"><div class="card-head"><div class="icon" style="background:#d19a43"><i class="fa-solid fa-chart-line"></i></div><div><div class="label">CONFIDENCE</div><div class="value" id="card-confidence">—</div></div></div></div>
+  </div>
+
+  <!-- INTEGRITY -->
+  <div class="panel" style="margin-top:18px">
+    <div class="section-title" id="integrity-title"><i class="fa-solid fa-shield-halved"></i> Document Integrity</div>
+    <div class="section-body integrity">
+      <div>
+        <p><b>Status:</b> <span id="integrity-status">—</span></p><hr>
+        <p><b>SHA256 Hash</b></p>
+        <div style="font-family:monospace" id="integrity-hash">—</div>
+      </div>
+      <div class="verifybox" id="verifybox">
+        <i class="fa-solid fa-lock" id="verify-icon"></i>
+        <div id="verify-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTRIBUTORS (collapsible, static) -->
+  <div class="panel">
+    <div class="collapsible-header" id="contrib-toggle" onclick="toggleContribs()">
+      <i class="fa-solid fa-chevron-down collapse-arrow open" id="contrib-arrow"></i>
+      <i class="fa-solid fa-users"></i>
+      Project Contributors
+    </div>
+    <div class="collapsible-body" id="contrib-body">
+      <div class="section-body contribs">
+        <div class="contrib"><div class="person"><div><h2>Mohamed Safwat</h2><div class="role">Pipeline Building</div></div></div><hr><ul><li>Detection & Classification Models Training</li><li>AIFDRPP Pipeline</li><li>Classification Algorithm</li><li>API Optimization & Integration</li></ul></div>
+        <div class="contrib"><div class="person"><div><h2>Andrew Wageh, Sherif Diaa, Ahmed Galal</h2><div class="role">Detection Models</div></div></div><hr><ul><li>Model Training & Evaluation</li></ul></div>
+        <div class="contrib"><div class="person"><div><h2>Mohamed SaadEldin, Omar Mahmoud</h2><div class="role">Classification Models</div></div></div><hr><ul><li>Model Training & Evaluation</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="panel footer">
+    <img src="leaf.png" class="leaf" alt="">
+    <h2 style="font-family:'Cormorant Garamond',serif;color:var(--sage-dark)">AETHEA AI Fracture Detection System</h2>
+    <p><i>Ensuring accuracy. Enhancing care.</i></p>
+  </div>
+
+</div>
+
+<script>
+// ── Collapsible contributors ──────────────────────────────────────
+function toggleContribs() {
+  const body  = document.getElementById('contrib-body');
+  const arrow = document.getElementById('contrib-arrow');
+  const open  = !body.classList.contains('collapsed');
+  body.classList.toggle('collapsed', open);
+  arrow.classList.toggle('open',   !open);
+  arrow.classList.toggle('closed',  open);
+}
+
+// ── Populate page from JSON ───────────────────────────────────────
+function renderPage(data) {
+  const isVerified = data.verification?.status?.toUpperCase() === 'VERIFIED';
+
+  // Timestamp
+  document.getElementById('timestamp-display').textContent = data.timestamp ?? '';
+
+  // Banner
+  const banner = document.getElementById('banner');
+  banner.className = 'panel banner ' + (isVerified ? 'verified' : 'not-verified');
+  document.getElementById('banner-icon').className =
+    isVerified ? 'fa-regular fa-circle-check' : 'fa-regular fa-circle-xmark';
+  document.getElementById('banner-title').textContent =
+    isVerified ? 'VERIFIED REPORT' : 'UNVERIFIED REPORT';
+  document.getElementById('banner-msg').textContent =
+    isVerified
+      ? 'This report exists in the AETHEA verification system.'
+      : 'This report could not be verified in the AETHEA verification system.';
+
+  // Cards
+  const r = data.report ?? {};
+  document.getElementById('card-id').textContent           = r.id            ?? '—';
+  document.getElementById('card-body-part').textContent    = r.body_part     ?? '—';
+  document.getElementById('card-fracture-type').textContent= r.fracture_type ?? '—';
+  document.getElementById('card-confidence').textContent   =
+    r.confidence != null ? r.confidence + '%' : '—';
+
+  // Integrity
+  const integ = data.integrity ?? {};
+  document.getElementById('integrity-status').textContent = integ.status ?? '—';
+  document.getElementById('integrity-hash').textContent   = integ.sha256 ?? '—';
+
+  const titleEl   = document.getElementById('integrity-title');
+  const verifybox = document.getElementById('verifybox');
+  const verifyIcon= document.getElementById('verify-icon');
+  const verifyMsg = document.getElementById('verify-msg');
+
+  if (isVerified) {
+    titleEl.classList.remove('danger');
+    verifybox.classList.remove('danger');
+    verifyIcon.className = 'fa-solid fa-lock';
+    verifyMsg.textContent = 'The integrity of this document has been verified.';
+  } else {
+    titleEl.classList.add('danger');
+    verifybox.classList.add('danger');
+    verifyIcon.className = 'fa-solid fa-lock-open';
+    verifyMsg.textContent = 'This document failed integrity verification. It may have been altered.';
+  }
+}
+
+document.getElementById('contrib-body').classList.add('collapsed');
+document.getElementById('contrib-arrow').classList.replace('open', 'closed');
+
+// ── Call renderPage() with your API response, e.g.: ──────────────
+// fetch('/api/verify/<id>').then(r => r.json()).then(renderPage);
+</script>
+</body>
+</html>
+
+
+<!-- [Mohmed Safwat (Bo3ly) - aifdrpp-v9 - @06/06/2026] -->
